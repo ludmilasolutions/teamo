@@ -1,0 +1,47 @@
+{
+  "name": "Finanzas Familiares",
+  "short_name": "FinanzasFam",
+  "description": "Aplicación para orden financiero familiar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%224f46e5%22>💰</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/icons/svg?seed=finanzas&backgroundColor=4f46e5&icon=wallet",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/icons/svg?seed=finanzas&backgroundColor=4f46e5&icon=wallet",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Agregar Gasto",
+      "short_name": "Gasto",
+      "description": "Registrar un gasto rápido",
+      "url": "/?action=add-expense",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💸</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Ver Saldos",
+      "short_name": "Saldos",
+      "description": "Consultar saldos disponibles",
+      "url": "/?action=balances",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>", "sizes": "96x96" }]
+    }
+  ]
+}
