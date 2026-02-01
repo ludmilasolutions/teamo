@@ -1,41 +1,24 @@
 {
-  "name": "Finanzas Familiares",
-  "short_name": "FinanzasFam",
-  "description": "Aplicación para orden financiero familiar",
+  "name": "Familia Finanzas",
+  "short_name": "Finanzas",
+  "description": "Gestión financiera familiar completa",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4361ee",
-  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%234f46e5%22>💰</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
     },
     {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "https://cdn.jsdelivr.net/npm/twemoji@latest/assets/svg/1f4b0.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
     }
   ],
   "categories": ["finance", "productivity"],
-  "shortcuts": [
-    {
-      "name": "Nuevo gasto",
-      "short_name": "Gasto",
-      "description": "Agregar nuevo gasto",
-      "url": "/?action=new&type=expense",
-      "icons": [{ "src": "icon-expense.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Ver resumen",
-      "short_name": "Resumen",
-      "description": "Ver resumen mensual",
-      "url": "/?tab=summary",
-      "icons": [{ "src": "icon-summary.png", "sizes": "96x96" }]
-    }
-  ]
+  "orientation": "portrait",
+  "scope": "/"
 }
