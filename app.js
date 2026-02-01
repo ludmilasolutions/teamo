@@ -8,8 +8,8 @@ if (!window.supabase) {
 }
 
 // Configuración (REEMPLAZAR CON TUS DATOS)
-const SUPABASE_URL = 'https://tusuario.supabase.co'; // Tu URL de Supabase
-const SUPABASE_ANON_KEY = 'tu-anon-key-publico-aqui'; // Tu Anon Key público
+const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Tu URL de Supabase
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Tu Anon Key público
 
 // Crear cliente Supabase solo si no existe
 let supabaseClient;
