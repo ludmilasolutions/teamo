@@ -660,6 +660,137 @@ textarea {
 }
 
 /* ============================================
+   ESTILOS PARA HISTORIAL Y CONFIGURACIÓN
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-md);
+    color: var(--color-text-light);
+    font-style: italic;
+}
+
+.person-sebastian {
+    color: var(--color-sebastian);
+    font-weight: 500;
+}
+
+.person-ludmila {
+    color: var(--color-ludmila);
+    font-weight: 500;
+}
+
+.history-note {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    margin-top: var(--spacing-xs);
+    font-style: italic;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-bg);
+    border-radius: var(--border-radius-sm);
+}
+
+.family-member {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--color-bg);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.member-name {
+    font-weight: 500;
+}
+
+.member-status {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+/* Estilos para el gráfico de categorías */
+.category-bar {
+    margin-bottom: var(--spacing-md);
+}
+
+.bar-label {
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text);
+}
+
+.bar-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.bar-fill {
+    height: 20px;
+    background: var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    min-width: 4px;
+    transition: width 0.5s ease;
+}
+
+.bar-amount {
+    font-size: 0.875rem;
+    color: var(--color-text);
+    min-width: 80px;
+    text-align: right;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.category-rank {
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    margin-right: var(--spacing-md);
+}
+
+.category-name {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.category-amount {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* ============================================
    RESPONSIVE DESIGN
    ============================================ */
 @media (max-width: 768px) {
