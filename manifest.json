@@ -1,19 +1,67 @@
 {
-  "name": "Familia Finanzas",
+  "name": "Finanzas Familiares",
   "short_name": "Finanzas",
-  "description": "Gestión financiera familiar completa",
+  "description": "Gestión de finanzas familiares para Sebastián y Ludmila",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#4f46e5",
+  "background_color": "#4361ee",
+  "theme_color": "#4361ee",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%234f46e5%22>💰</text></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "categories": ["finance", "productivity"],
-  "orientation": "portrait",
-  "scope": "/"
+  "shortcuts": [
+    {
+      "name": "Nuevo Gasto",
+      "short_name": "Gasto",
+      "description": "Agregar nuevo gasto",
+      "url": "/?action=new-expense"
+    },
+    {
+      "name": "Nuevo Ingreso",
+      "short_name": "Ingreso",
+      "description": "Agregar nuevo ingreso",
+      "url": "/?action=new-income"
+    }
+  ]
 }
