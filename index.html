@@ -3,131 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanzas Familiares</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABhSURBVHgB7dKxDYAwDETRk5GYYQRGQDIKI7BCWoQEBnAgEn8qpMvtOck5nudtZmafkVJKKaWUUkoppZRSSimllFJKKaWUUkpd1gN+6AEXhMEHeMAPlDEGyhgDZYzB/9oBNsYBW8OQamcAAAAASUVORK5CYII=">
+    <title>Familia Finanzas</title>
+    <meta name="description" content="Gestión financiera familiar completa">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    
     <style>
-        /* RESET Y VARIABLES */
-        :root {
-            --primary: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary: #7209b7;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --gray-light: #e9ecef;
-            --border-radius: 12px;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --transition: all 0.3s ease;
-        }
-
+        /* Reset y variables CSS */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            max-width: 100vw;
+            overflow-x: hidden;
             padding-bottom: 80px;
         }
 
-        /* TYPOGRAPHY */
-        h1, h2, h3, h4 {
-            font-weight: 600;
-            margin-bottom: 1rem;
+        /* Pantalla de carga */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            z-index: 1000;
         }
 
-        h1 { font-size: 1.8rem; }
-        h2 { font-size: 1.5rem; }
-        h3 { font-size: 1.2rem; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-        /* LAYOUT */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Navegación */
+        #auth-nav, #main-nav {
+            background: var(--surface);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Contenedor principal */
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 1rem;
         }
 
-        /* CARD SYSTEM */
+        /* Tarjetas */
         .card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
             box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            margin-bottom: 1rem;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--gray-light);
+            margin-bottom: 1.5rem;
         }
 
-        /* NAVIGATION */
-        .nav-tabs {
-            display: flex;
-            overflow-x: auto;
-            background: white;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow);
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
         }
 
-        .nav-tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--gray);
-            border-bottom: 3px solid transparent;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-
-        .nav-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .nav-tab i {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 1.2rem;
-        }
-
-        /* BUTTONS */
+        /* Botones */
         .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            gap: 8px;
+            gap: 0.5rem;
         }
 
         .btn-primary {
@@ -144,11 +151,6 @@
             color: white;
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
         .btn-danger {
             background: var(--danger);
             color: white;
@@ -156,1605 +158,1482 @@
 
         .btn-outline {
             background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
+            border: 2px solid var(--border);
+            color: var(--text);
         }
 
-        .btn-full {
-            width: 100%;
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
         }
 
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        /* FORMS */
+        /* Formularios */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-weight: 500;
-            color: var(--dark);
         }
 
         .form-control {
             width: 100%;
-            padding: 12px;
-            border: 2px solid var(--gray-light);
-            border-radius: var(--border-radius);
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
             font-size: 1rem;
-            transition: var(--transition);
+            transition: border-color 0.2s;
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
 
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
         }
 
-        /* STATS AND METRICS */
-        .stats-grid {
+        /* Grid y flex */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 1rem;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            border-radius: var(--border-radius);
-            padding: 15px;
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        /* Estados */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
             text-align: center;
         }
 
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 10px 0;
+        .text-right {
+            text-align: right;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
+        .text-success {
+            color: var(--secondary);
         }
 
-        /* PROGRESS BARS */
-        .progress-container {
-            margin: 20px 0;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .progress-bar {
-            height: 12px;
-            background: var(--gray-light);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), #4cc9f0);
-            border-radius: 6px;
-            transition: width 1s ease-in-out;
-        }
-
-        /* TRANSACTION LIST */
-        .transaction-list {
-            list-style: none;
-        }
-
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid var(--gray-light);
-            transition: var(--transition);
-        }
-
-        .transaction-item:last-child {
-            border-bottom: none;
-        }
-
-        .transaction-item:hover {
-            background: var(--gray-light);
-        }
-
-        .transaction-info {
-            flex: 1;
-        }
-
-        .transaction-amount {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .transaction-positive {
-            color: var(--success);
-        }
-
-        .transaction-negative {
+        .text-danger {
             color: var(--danger);
         }
 
-        /* MODAL */
+        .text-warning {
+            color: var(--warning);
+        }
+
+        .text-muted {
+            color: var(--text-light);
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .text-xl {
+            font-size: 1.5rem;
+        }
+
+        .text-2xl {
+            font-size: 2rem;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        /* Navegación inferior */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 0.5rem;
+            z-index: 90;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: none;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            border-radius: var(--radius-sm);
+        }
+
+        .nav-tab:hover {
+            background: var(--background);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            background: var(--background);
+        }
+
+        .nav-tab i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-tab span {
+            display: block;
+            font-size: 0.75rem;
+        }
+
+        /* Listas */
+        .list {
+            list-style: none;
+        }
+
+        .list-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Progress bars */
+        .progress {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* Modal */
         .modal {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            padding: 1rem;
         }
 
         .modal-content {
-            background: white;
-            border-radius: var(--border-radius);
+            background: var(--surface);
+            border-radius: var(--radius);
             width: 100%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
         }
 
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--gray-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-        }
-
-        /* AUTH SCREENS */
-        .auth-container {
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
-        .auth-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 40px;
-            text-align: center;
-            box-shadow: var(--shadow);
-        }
-
-        .auth-logo {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-
-        /* UTILITY CLASSES */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .text-warning { color: var(--warning); }
-        .text-muted { color: var(--gray); }
-        .mb-1 { margin-bottom: 0.5rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .mb-3 { margin-bottom: 1.5rem; }
-        .mb-4 { margin-bottom: 2rem; }
-        .mt-2 { margin-top: 1rem; }
-        .mt-3 { margin-top: 1.5rem; }
-        .d-none { display: none; }
-        .d-flex { display: flex; }
-        .align-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 0.5rem; }
-
-        /* LOADING STATES */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--gray-light);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* PWA INSTALL PROMPT */
-        .pwa-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            display: none;
-            z-index: 1001;
-        }
-
-        .pwa-prompt.active {
-            display: block;
-        }
-
-        /* RESPONSIVE */
+        /* Responsive */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-                padding-bottom: 70px;
-            }
-            
-            .card {
-                padding: 15px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .btn {
-                padding: 10px 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
+            .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
             
-            .nav-tab span {
-                display: none;
+            .container {
+                padding: 0.5rem;
             }
             
-            .nav-tab i {
-                margin-bottom: 0;
-                font-size: 1.5rem;
+            .card {
+                padding: 1rem;
             }
         }
 
-        /* PRINT STYLES */
-        @media print {
-            .nav-tabs,
-            .btn,
-            .modal {
-                display: none !important;
-            }
+        /* Iconos */
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Tabs de contenido */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Estilos específicos para gráficos */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+
+        /* Estados de saldo */
+        .balance-positive {
+            color: var(--secondary);
+        }
+
+        .balance-negative {
+            color: var(--danger);
+        }
+
+        /* Tarjetas de resumen */
+        .summary-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .summary-label {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Animaciones */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- AUTH SCREEN -->
-        <div id="authScreen" class="auth-container">
-            <div class="auth-card">
-                <div class="auth-logo">💰</div>
-                <h1>Finanzas Familiares</h1>
-                <p class="text-muted mb-4">Control financiero para la familia</p>
-                
-                <div id="loginSection">
-                    <div class="form-group">
-                        <input type="email" id="loginEmail" class="form-control" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="loginPassword" class="form-control" placeholder="Contraseña" required>
-                    </div>
-                    <button onclick="login()" class="btn btn-primary btn-full mb-2">Iniciar Sesión</button>
-                    <button onclick="showRegister()" class="btn btn-outline btn-full">Crear Cuenta</button>
-                </div>
-                
-                <div id="registerSection" class="d-none">
-                    <div class="form-group">
-                        <input type="text" id="registerName" class="form-control" placeholder="Nombre completo" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="registerEmail" class="form-control" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="registerPassword" class="form-control" placeholder="Contraseña" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirmar contraseña" required>
-                    </div>
-                    <button onclick="register()" class="btn btn-primary btn-full mb-2">Crear Cuenta</button>
-                    <button onclick="showLogin()" class="btn btn-outline btn-full">Volver al Login</button>
-                </div>
-                
-                <div id="authError" class="text-danger mt-3 d-none"></div>
+    <!-- Pantalla de carga -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>Cargando aplicación...</p>
+    </div>
+
+    <!-- Navegación de autenticación -->
+    <nav id="auth-nav" class="hidden">
+        <div class="nav-container">
+            <div class="logo">💰 Familia Finanzas</div>
+            <div id="user-menu"></div>
+        </div>
+    </nav>
+
+    <!-- Navegación principal -->
+    <nav id="main-nav" class="hidden">
+        <div class="nav-container">
+            <div class="logo">💰 Familia Finanzas</div>
+            <div class="flex items-center gap-2">
+                <span id="current-month" class="text-muted"></span>
+                <button id="add-movement-btn" class="btn btn-primary btn-sm">
+                    <span class="material-icons">add</span>
+                </button>
             </div>
         </div>
+    </nav>
 
-        <!-- MAIN APP (Hidden until auth) -->
-        <div id="appScreen" class="d-none">
-            <!-- HEADER -->
-            <div class="card mb-3">
-                <div class="d-flex justify-between align-center">
-                    <div>
-                        <h1 id="currentMonth">Cargando...</h1>
-                        <p id="greeting" class="text-muted"></p>
+    <!-- Contenido de autenticación -->
+    <div id="auth-content" class="hidden">
+        <div class="container">
+            <div class="card" style="max-width: 400px; margin: 2rem auto;">
+                <div class="card-header">
+                    <h2 class="card-title">Bienvenido</h2>
+                </div>
+                <div id="auth-tabs">
+                    <div class="flex mb-4">
+                        <button class="btn btn-outline flex-1" data-tab="login">Iniciar Sesión</button>
+                        <button class="btn btn-outline flex-1" data-tab="register">Registrarse</button>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button onclick="refreshData()" class="btn btn-outline btn-small">⟳</button>
-                        <button onclick="logout()" class="btn btn-outline btn-small">Salir</button>
+                    
+                    <div id="login-tab" class="tab-content active">
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="login-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                        </form>
+                    </div>
+                    
+                    <div id="register-tab" class="tab-content">
+                        <form id="register-form">
+                            <div class="form-group">
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="register-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="register-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="register-password" minlength="6" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Crear Cuenta</button>
+                        </form>
                     </div>
                 </div>
-            </div>
-
-            <!-- NAVIGATION -->
-            <nav class="nav-tabs">
-                <a href="#" class="nav-tab active" data-tab="summary">
-                    <i>📊</i>
-                    <span>Resumen</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="balance">
-                    <i>💰</i>
-                    <span>Saldo</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="expenses">
-                    <i>📈</i>
-                    <span>Gastos</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="business">
-                    <i>🍰</i>
-                    <span>Postres</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="funds">
-                    <i>🎯</i>
-                    <span>Fondos</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="savings">
-                    <i>🏦</i>
-                    <span>Ahorros</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="history">
-                    <i>📋</i>
-                    <span>Historial</span>
-                </a>
-                <a href="#" class="nav-tab" data-tab="add">
-                    <i>➕</i>
-                    <span>Nuevo</span>
-                </a>
-            </nav>
-
-            <!-- CONTENT AREA -->
-            <div id="contentArea">
-                <!-- Content loaded dynamically -->
             </div>
         </div>
     </div>
 
-    <!-- PWA INSTALL PROMPT -->
-    <div id="pwaPrompt" class="pwa-prompt">
-        <p class="mb-2">📱 Instala esta app para un mejor acceso</p>
-        <div class="d-flex gap-2">
-            <button onclick="installPWA()" class="btn btn-primary">Instalar</button>
-            <button onclick="hidePWA()" class="btn btn-outline">Ahora no</button>
+    <!-- Contenido principal -->
+    <div id="main-content" class="hidden">
+        <div class="container">
+            <!-- Resumen Mensual -->
+            <div id="summary-tab" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Resumen Mensual</h2>
+                        <select id="month-selector" class="form-select" style="width: auto;">
+                            <!-- Meses se cargan dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-3">
+                        <div class="summary-card">
+                            <div class="summary-label">Ingresos Totales</div>
+                            <div id="total-income" class="summary-value text-success">$0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Gastos Totales</div>
+                            <div id="total-expenses" class="summary-value text-danger">$0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Balance</div>
+                            <div id="month-balance" class="summary-value">$0</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h3 class="mb-2">Estado Actual</h3>
+                        <div class="grid grid-2">
+                            <div class="card">
+                                <h4 class="mb-2">Saldo Disponible</h4>
+                                <div id="available-balance" class="text-2xl font-bold">$0</div>
+                                <div class="text-muted mt-1" id="balance-breakdown"></div>
+                            </div>
+                            <div class="card">
+                                <h4 class="mb-2">Ahorro General</h4>
+                                <div id="savings-amount" class="text-2xl font-bold">$0</div>
+                                <div class="progress">
+                                    <div id="savings-progress" class="progress-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="text-muted mt-1" id="savings-target"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="mb-4">Movimientos Recientes</h3>
+                    <div id="recent-movements" class="list">
+                        <!-- Movimientos se cargan dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saldo Disponible -->
+            <div id="balance-tab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title mb-4">Saldo Disponible</h2>
+                    
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="material-icons">money</span>
+                                <h3>Efectivo</h3>
+                            </div>
+                            <div id="cash-balance" class="text-2xl font-bold balance-positive">$0</div>
+                            <div class="text-muted">Disponible para gastos</div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="material-icons">credit_card</span>
+                                <h3>Mercado Pago</h3>
+                            </div>
+                            <div id="mp-balance" class="text-2xl font-bold balance-positive">$0</div>
+                            <div class="text-muted">Saldo digital</div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <h3 class="mb-2">Total Disponible</h3>
+                        <div id="total-available" class="text-2xl font-bold">$0</div>
+                        <div class="text-muted">Excluye ahorros y fondos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gastos por Categoría -->
+            <div id="expenses-tab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Gastos por Categoría</h2>
+                        <select id="expense-month-selector" class="form-select" style="width: auto;">
+                            <!-- Meses se cargan dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div id="expenses-chart" class="chart-container">
+                        <!-- Gráfico se renderiza dinámicamente -->
+                    </div>
+                    
+                    <div id="expenses-ranking" class="list">
+                        <!-- Ranking se carga dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Postres -->
+            <div id="desserts-tab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title mb-4">Emprendimiento Postres</h2>
+                    
+                    <div class="grid grid-3">
+                        <div class="summary-card">
+                            <div class="summary-label">Ventas Totales</div>
+                            <div id="dessert-sales" class="summary-value text-success">$0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Insumos Totales</div>
+                            <div id="dessert-costs" class="summary-value text-danger">$0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Ganancia</div>
+                            <div id="dessert-profit" class="summary-value">$0</div>
+                            <div id="dessert-profitability" class="text-muted"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h3 class="mb-2">Estado de Rentabilidad</h3>
+                        <div id="profitability-status" class="alert alert-success">
+                            <span class="material-icons">check_circle</span>
+                            El negocio es rentable
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fondos -->
+            <div id="funds-tab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title mb-4">Fondos</h2>
+                    
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <h3 class="mb-2">Fondo Hogar</h3>
+                            <div id="home-fund-amount" class="text-2xl font-bold">$0</div>
+                            <div class="progress">
+                                <div id="home-fund-progress" class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-muted mt-1" id="home-fund-target"></div>
+                            <button onclick="editFund('hogar')" class="btn btn-outline btn-sm mt-2">Editar Objetivo</button>
+                        </div>
+                        
+                        <div class="card">
+                            <h3 class="mb-2">Fondo Postres</h3>
+                            <div id="dessert-fund-amount" class="text-2xl font-bold">$0</div>
+                            <div class="progress">
+                                <div id="dessert-fund-progress" class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-muted mt-1" id="dessert-fund-target"></div>
+                            <button onclick="editFund('postres')" class="btn btn-outline btn-sm mt-2">Editar Objetivo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ahorros -->
+            <div id="savings-tab" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title mb-4">Ahorro General</h2>
+                    
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <div id="savings-current" class="text-2xl font-bold">$0</div>
+                                <div class="text-muted">Actual</div>
+                            </div>
+                            <div class="text-right">
+                                <div id="savings-target-display" class="text-2xl font-bold">$0</div>
+                                <div class="text-muted">Objetivo</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress">
+                            <div id="savings-overall-progress" class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button onclick="editSavings()" class="btn btn-primary">Editar Objetivo de Ahorro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial -->
+            <div id="history-tab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Historial Completo</h2>
+                        <div class="flex gap-2">
+                            <select id="history-type-filter" class="form-select" style="width: auto;">
+                                <option value="all">Todos los tipos</option>
+                                <option value="gasto_hogar">Gastos Hogar</option>
+                                <option value="ingreso_diario">Ingresos</option>
+                                <option value="insumos_postres">Insumos</option>
+                                <option value="ventas_postres">Ventas</option>
+                                <option value="fondo">Fondos</option>
+                                <option value="ahorro">Ahorros</option>
+                            </select>
+                            <input type="date" id="history-date-filter" class="form-control" style="width: auto;">
+                        </div>
+                    </div>
+                    
+                    <div id="history-list" class="list">
+                        <!-- Historial se carga dinámicamente -->
+                    </div>
+                    
+                    <div id="history-pagination" class="flex justify-center gap-2 mt-4">
+                        <!-- Paginación dinámica -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MODALS -->
-    <div id="transactionModal" class="modal">
+    <!-- Navegación inferior -->
+    <div class="bottom-nav hidden" id="bottom-nav">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="summary">
+                <span class="material-icons">dashboard</span>
+                <span>Resumen</span>
+            </button>
+            <button class="nav-tab" data-tab="balance">
+                <span class="material-icons">account_balance_wallet</span>
+                <span>Saldo</span>
+            </button>
+            <button class="nav-tab" data-tab="expenses">
+                <span class="material-icons">pie_chart</span>
+                <span>Gastos</span>
+            </button>
+            <button class="nav-tab" data-tab="desserts">
+                <span class="material-icons">cake</span>
+                <span>Postres</span>
+            </button>
+            <button class="nav-tab" data-tab="funds">
+                <span class="material-icons">savings</span>
+                <span>Fondos</span>
+            </button>
+            <button class="nav-tab" data-tab="savings">
+                <span class="material-icons">star</span>
+                <span>Ahorro</span>
+            </button>
+            <button class="nav-tab" data-tab="history">
+                <span class="material-icons">history</span>
+                <span>Historial</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para nuevo movimiento -->
+    <div id="movement-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Nuevo Movimiento</h3>
-                <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="card-header">
+                <h2 class="card-title">Nuevo Movimiento</h2>
+                <button onclick="closeModal()" class="btn btn-outline btn-sm">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
-            <div class="modal-body">
-                <form id="transactionForm">
+            
+            <form id="movement-form">
+                <div class="p-4">
                     <div class="form-group">
-                        <label class="form-label">Tipo</label>
-                        <select id="transactionType" class="form-control" onchange="updateFormFields()" required>
+                        <label class="form-label">Tipo de Movimiento</label>
+                        <select id="movement-type" class="form-select" required>
                             <option value="">Seleccionar tipo</option>
-                            <option value="household_expense">Gasto del hogar</option>
-                            <option value="household_income">Ingreso diario</option>
-                            <option value="business_expense">Insumos postres</option>
-                            <option value="business_sale">Venta postres</option>
-                            <option value="fund">Fondo</option>
-                            <option value="saving">Ahorro</option>
+                            <option value="gasto_hogar">Gasto del Hogar</option>
+                            <option value="ingreso_diario">Ingreso Diario</option>
+                            <option value="insumos_postres">Insumos Postres</option>
+                            <option value="ventas_postres">Ventas Postres</option>
+                            <option value="fondo">Fondo</option>
+                            <option value="ahorro">Ahorro</option>
                         </select>
                     </div>
-
+                    
                     <div class="form-group">
-                        <label class="form-label">Fecha</label>
-                        <input type="date" id="transactionDate" class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Monto</label>
-                        <input type="number" id="transactionAmount" class="form-control" min="0.01" step="0.01" required>
-                    </div>
-
-                    <div id="categoryField" class="form-group d-none">
                         <label class="form-label">Categoría</label>
-                        <select id="transactionCategory" class="form-control">
-                            <!-- Loaded dynamically -->
+                        <select id="movement-category" class="form-select" required>
+                            <!-- Categorías se cargan dinámicamente según el tipo -->
                         </select>
                     </div>
-
-                    <div id="personField" class="form-group d-none">
+                    
+                    <div id="person-field" class="form-group hidden">
                         <label class="form-label">Persona</label>
-                        <select id="transactionPerson" class="form-control">
+                        <select id="movement-person" class="form-select">
                             <option value="Sebastián">Sebastián</option>
                             <option value="Ludmila">Ludmila</option>
                         </select>
                     </div>
-
-                    <div id="paymentMethodField" class="form-group d-none">
-                        <label class="form-label">Medio</label>
-                        <select id="transactionPaymentMethod" class="form-control" required>
-                            <option value="Efectivo">Efectivo</option>
-                            <option value="Mercado Pago">Mercado Pago</option>
+                    
+                    <div id="fund-type-field" class="form-group hidden">
+                        <label class="form-label">Tipo de Fondo</label>
+                        <select id="movement-fund-type" class="form-select">
+                            <option value="hogar">Fondo Hogar</option>
+                            <option value="postres">Fondo Postres</option>
                         </select>
                     </div>
-
-                    <div id="fundField" class="form-group d-none">
-                        <label class="form-label">Fondo</label>
-                        <select id="transactionFund" class="form-control">
-                            <option value="Fondo fijo hogar">Fondo fijo hogar</option>
-                            <option value="Fondo fijo postres">Fondo fijo postres</option>
-                        </select>
-                    </div>
-
-                    <div id="savingField" class="form-group d-none">
-                        <label class="form-label">Ahorro</label>
-                        <select id="transactionSaving" class="form-control">
-                            <option value="Ahorro general">Ahorro general</option>
-                        </select>
-                    </div>
-
+                    
                     <div class="form-group">
-                        <label class="form-label">Nota (opcional)</label>
-                        <textarea id="transactionNote" class="form-control" rows="3"></textarea>
+                        <label class="form-label">Monto ($)</label>
+                        <input type="number" id="movement-amount" class="form-control" min="1" step="0.01" required>
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Medio de Pago</label>
+                        <select id="movement-payment" class="form-select" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercado_pago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Descripción (opcional)</label>
+                        <input type="text" id="movement-description" class="form-control" maxlength="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" id="movement-date" class="form-control" required>
+                    </div>
+                    
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" onclick="closeModal()" class="btn btn-outline flex-1">Cancelar</button>
+                        <button type="submit" class="btn btn-primary flex-1">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                    <button type="submit" class="btn btn-primary btn-full">Guardar</button>
-                </form>
+    <!-- Modal para editar objetivos -->
+    <div id="goal-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="card-header">
+                <h2 id="goal-title" class="card-title"></h2>
+                <button onclick="closeGoalModal()" class="btn btn-outline btn-sm">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <form id="goal-form">
+                <div class="p-4">
+                    <div class="form-group">
+                        <label class="form-label">Objetivo ($)</label>
+                        <input type="number" id="goal-target" class="form-control" min="1" step="0.01" required>
+                    </div>
+                    
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" onclick="closeGoalModal()" class="btn btn-outline flex-1">Cancelar</button>
+                        <button type="submit" class="btn btn-primary flex-1">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="p-4">
+                <h3 id="confirm-title" class="card-title mb-4"></h3>
+                <p id="confirm-message"></p>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="closeConfirmModal(false)" class="btn btn-outline flex-1">Cancelar</button>
+                    <button onclick="closeConfirmModal(true)" id="confirm-action" class="btn btn-danger flex-1">Confirmar</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Alertas flotantes -->
+    <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 400px;"></div>
+
     <script>
-        // ============================================
+        // =============================================
         // CONFIGURACIÓN SUPABASE
-        // ============================================
-        const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Reemplazar con tu URL
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Reemplazar con tu anon key
+        // =============================================
+        const SUPABASE_URL = 'https://your-project.supabase.co'; // REEMPLAZAR
+        const SUPABASE_ANON_KEY = 'your-anon-key'; // REEMPLAZAR
         
         let supabase;
         let currentUser = null;
-        let deferredPrompt = null;
+        let currentMonth = new Date().toISOString().slice(0, 7);
+        
+        // =============================================
+        // CATEGORÍAS DEFINITIVAS
+        // =============================================
+        const CATEGORIES = {
+            gasto_hogar: [
+                'Alquiler', 'Servicios', 'Comida hogar', 'Transporte',
+                'Bebé', 'Mascotas', 'Salud', 'Ropa', 'Imprevistos'
+            ],
+            ingreso_diario: ['Ingreso diario Sebastián', 'Ingreso diario Ludmila'],
+            insumos_postres: ['Insumos postres'],
+            ventas_postres: ['Ventas postres'],
+            fondo: ['Fondo fijo hogar', 'Fondo fijo postres'],
+            ahorro: ['Ahorro general']
+        };
 
-        // ============================================
+        // =============================================
         // INICIALIZACIÓN
-        // ============================================
+        // =============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            // Cargar Supabase desde CDN
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-            script.onload = initializeApp;
-            document.head.appendChild(script);
-            
-            // Service Worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js');
-            }
-            
-            // PWA Install Prompt
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                setTimeout(() => {
-                    document.getElementById('pwaPrompt').classList.add('active');
-                }, 3000);
-            });
+            await initializeApp();
+            setupEventListeners();
+            updateCurrentMonth();
         });
 
         async function initializeApp() {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            // Cargar Supabase desde CDN
+            await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+            
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
             // Verificar sesión existente
             const { data: { session } } = await supabase.auth.getSession();
+            
             if (session) {
                 currentUser = session.user;
-                showApp();
+                await loadUserData();
+                showMainApp();
             } else {
-                showAuth();
+                showAuthScreen();
             }
             
-            // Configurar listener de auth
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' && session) {
-                    currentUser = session.user;
-                    showApp();
-                } else if (event === 'SIGNED_OUT') {
-                    currentUser = null;
-                    showAuth();
-                }
-            });
-            
-            // Navegación por tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    loadTab(tab.dataset.tab);
+            hideLoading();
+        }
+
+        // =============================================
+        // FUNCIONES DE AUTENTICACIÓN
+        // =============================================
+        async function handleLogin(email, password) {
+            try {
+                showLoading();
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
-            });
-            
-            // Formulario de transacción
-            document.getElementById('transactionForm').addEventListener('submit', saveTransaction);
-            
-            // Fecha por defecto
-            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-        }
 
-        // ============================================
-        // AUTENTICACIÓN
-        // ============================================
-        function showAuth() {
-            document.getElementById('authScreen').classList.remove('d-none');
-            document.getElementById('appScreen').classList.add('d-none');
-        }
+                if (error) throw error;
 
-        function showApp() {
-            document.getElementById('authScreen').classList.add('d-none');
-            document.getElementById('appScreen').classList.remove('d-none');
-            updateGreeting();
-            loadTab('summary');
-        }
-
-        function showLogin() {
-            document.getElementById('loginSection').classList.remove('d-none');
-            document.getElementById('registerSection').classList.add('d-none');
-            document.getElementById('authError').classList.add('d-none');
-        }
-
-        function showRegister() {
-            document.getElementById('loginSection').classList.add('d-none');
-            document.getElementById('registerSection').classList.remove('d-none');
-            document.getElementById('authError').classList.add('d-none');
-        }
-
-        async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
-            
-            if (error) {
-                document.getElementById('authError').textContent = error.message;
-                document.getElementById('authError').classList.remove('d-none');
+                currentUser = data.user;
+                await loadUserData();
+                showMainApp();
+                showAlert('¡Bienvenido de nuevo!', 'success');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                hideLoading();
             }
         }
 
-        async function register() {
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                document.getElementById('authError').textContent = 'Las contraseñas no coinciden';
-                document.getElementById('authError').classList.remove('d-none');
-                return;
-            }
-            
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: name
+        async function handleRegister(name, email, password) {
+            try {
+                showLoading();
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: name }
                     }
+                });
+
+                if (error) throw error;
+
+                showAlert('¡Cuenta creada! Revisa tu email para confirmar.', 'success');
+                showAuthTab('login');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                showLoading();
+                await supabase.auth.signOut();
+                currentUser = null;
+                showAuthScreen();
+                showAlert('Sesión cerrada correctamente', 'success');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // =============================================
+        // FUNCIONES DE DATOS
+        // =============================================
+        async function loadUserData() {
+            if (!currentUser) return;
+
+            try {
+                // Cargar balances
+                await loadBalances();
+                
+                // Cargar fondos
+                await loadFunds();
+                
+                // Cargar ahorros
+                await loadSavings();
+                
+                // Cargar movimientos del mes actual
+                await loadMonthlyMovements();
+                
+                // Actualizar UI
+                updateSummary();
+                updateExpensesChart();
+                updateDessertsSummary();
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showAlert('Error al cargar datos', 'error');
+            }
+        }
+
+        async function loadBalances() {
+            const { data, error } = await supabase
+                .from('balances')
+                .select('*')
+                .eq('user_id', currentUser.id);
+
+            if (error) throw error;
+
+            // Si no hay balances, crear iniciales
+            if (!data || data.length === 0) {
+                await initializeUserBalances();
+                return await loadBalances();
+            }
+
+            return data;
+        }
+
+        async function initializeUserBalances() {
+            const { error } = await supabase
+                .from('balances')
+                .insert([
+                    { user_id: currentUser.id, payment_method: 'efectivo', balance: 0 },
+                    { user_id: currentUser.id, payment_method: 'mercado_pago', balance: 0 }
+                ]);
+
+            if (error) throw error;
+        }
+
+        async function loadFunds() {
+            const { data, error } = await supabase
+                .from('funds')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('is_active', true);
+
+            if (error) throw error;
+
+            return data;
+        }
+
+        async function loadSavings() {
+            const { data, error } = await supabase
+                .from('savings')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('is_active', true);
+
+            if (error) throw error;
+
+            return data;
+        }
+
+        async function loadMonthlyMovements(month = currentMonth) {
+            const startDate = `${month}-01`;
+            const endDate = `${month}-31`;
+
+            const { data, error } = await supabase
+                .from('movements')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .gte('movement_date', startDate)
+                .lte('movement_date', endDate)
+                .order('movement_date', { ascending: false });
+
+            if (error) throw error;
+
+            return data || [];
+        }
+
+        // =============================================
+        // FUNCIONES DE MOVIMIENTOS
+        // =============================================
+        async function createMovement(movementData) {
+            try {
+                showLoading();
+                
+                const { error } = await supabase
+                    .from('movements')
+                    .insert([{
+                        ...movementData,
+                        user_id: currentUser.id,
+                        created_at: new Date().toISOString()
+                    }]);
+
+                if (error) throw error;
+
+                // Recargar datos
+                await loadUserData();
+                
+                closeModal();
+                showAlert('Movimiento registrado correctamente', 'success');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function deleteMovement(movementId) {
+            try {
+                showLoading();
+                
+                const { error } = await supabase
+                    .from('movements')
+                    .delete()
+                    .eq('id', movementId)
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                // Recargar datos
+                await loadUserData();
+                
+                showAlert('Movimiento eliminado correctamente', 'success');
+            } catch (error) {
+                showAlert(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // =============================================
+        // FUNCIONES DE CÁLCULO
+        // =============================================
+        function calculateMonthlySummary(movements) {
+            const summary = {
+                income: 0,
+                expenses: 0,
+                sales: 0,
+                costs: 0,
+                funds: 0,
+                savings: 0
+            };
+
+            movements.forEach(movement => {
+                const amount = parseFloat(movement.amount);
+                
+                switch (movement.type) {
+                    case 'ingreso_diario':
+                    case 'ventas_postres':
+                        summary.income += amount;
+                        if (movement.type === 'ventas_postres') summary.sales += amount;
+                        break;
+                    case 'gasto_hogar':
+                    case 'insumos_postres':
+                        summary.expenses += amount;
+                        if (movement.type === 'insumos_postres') summary.costs += amount;
+                        break;
+                    case 'fondo':
+                        summary.funds += amount;
+                        break;
+                    case 'ahorro':
+                        summary.savings += amount;
+                        break;
                 }
             });
-            
-            if (error) {
-                document.getElementById('authError').textContent = error.message;
-                document.getElementById('authError').classList.remove('d-none');
-            } else {
-                document.getElementById('authError').textContent = '¡Cuenta creada! Revisa tu email para confirmar.';
-                document.getElementById('authError').classList.remove('d-none');
-                document.getElementById('authError').classList.remove('text-danger');
-                document.getElementById('authError').classList.add('text-success');
-            }
+
+            return summary;
         }
 
-        async function logout() {
-            await supabase.auth.signOut();
+        function calculateAvailableBalance(balances, savings) {
+            const cash = balances.find(b => b.payment_method === 'efectivo')?.balance || 0;
+            const mp = balances.find(b => b.payment_method === 'mercado_pago')?.balance || 0;
+            const totalSavings = savings.reduce((sum, s) => sum + parseFloat(s.current_amount), 0);
+            
+            return {
+                cash: cash,
+                mp: mp,
+                total: cash + mp,
+                withoutSavings: cash + mp - totalSavings
+            };
         }
 
-        // ============================================
-        // NAVEGACIÓN Y CARGA DE CONTENIDO
-        // ============================================
-        async function loadTab(tabName) {
-            const content = document.getElementById('contentArea');
-            content.innerHTML = '<div class="text-center"><div class="loading"></div></div>';
+        // =============================================
+        // FUNCIONES DE UI
+        // =============================================
+        function showMainApp() {
+            document.getElementById('auth-nav').classList.add('hidden');
+            document.getElementById('auth-content').classList.add('hidden');
+            document.getElementById('main-nav').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+        }
+
+        function showAuthScreen() {
+            document.getElementById('auth-nav').classList.remove('hidden');
+            document.getElementById('auth-content').classList.remove('hidden');
+            document.getElementById('main-nav').classList.add('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.add('hidden');
+            showAuthTab('login');
+        }
+
+        function showAuthTab(tabName) {
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabName) btn.classList.add('active');
+            });
             
-            switch(tabName) {
-                case 'summary':
-                    await loadSummary();
-                    break;
-                case 'balance':
-                    await loadBalance();
-                    break;
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${tabName}-tab`) content.classList.add('active');
+            });
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabName) btn.classList.add('active');
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${tabName}-tab`) content.classList.add('active');
+            });
+            
+            // Recargar datos específicos de la pestaña
+            switch (tabName) {
                 case 'expenses':
-                    await loadExpenses();
+                    updateExpensesChart();
                     break;
-                case 'business':
-                    await loadBusiness();
-                    break;
-                case 'funds':
-                    await loadFunds();
-                    break;
-                case 'savings':
-                    await loadSavings();
+                case 'desserts':
+                    updateDessertsSummary();
                     break;
                 case 'history':
-                    await loadHistory();
-                    break;
-                case 'add':
-                    showTransactionModal();
+                    loadHistory();
                     break;
             }
         }
 
-        // ============================================
-        // FUNCIONES DE DATOS
-        // ============================================
-        async function refreshData() {
-            const activeTab = document.querySelector('.nav-tab.active').dataset.tab;
-            loadTab(activeTab);
+        function updateSummary() {
+            // Esta función se implementaría para actualizar los números en el resumen
+            // usando los datos cargados de movimientos, balances, etc.
         }
 
-        function updateGreeting() {
-            const now = new Date();
-            const hour = now.getHours();
-            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            
-            document.getElementById('currentMonth').textContent = 
-                `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-            
-            let greeting = '';
-            if (hour < 12) greeting = 'Buenos días';
-            else if (hour < 19) greeting = 'Buenas tardes';
-            else greeting = 'Buenas noches';
-            
-            document.getElementById('greeting').textContent = greeting;
+        function updateExpensesChart() {
+            // Implementar gráfico de gastos por categoría
         }
 
-        // ============================================
-        // RESUMEN MENSUAL
-        // ============================================
-        async function loadSummary() {
-            const now = new Date();
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            
-            // Obtener transacciones del mes
-            const { data: transactions, error } = await supabase
-                .from('transactions')
-                .select(`
-                    *,
-                    categories(name, type),
-                    persons(name),
-                    payment_methods(name)
-                `)
-                .eq('user_id', currentUser.id)
-                .gte('date', monthStart.toISOString().split('T')[0])
-                .lte('date', monthEnd.toISOString().split('T')[0])
-                .order('date', { ascending: false });
-            
-            if (error) {
-                showError(error.message);
-                return;
-            }
-            
-            // Calcular totales
-            let totalIncome = 0;
-            let totalHouseholdExpenses = 0;
-            let totalBusinessIncome = 0;
-            let totalBusinessExpenses = 0;
-            
-            transactions.forEach(t => {
-                if (t.transaction_type === 'household_income') totalIncome += parseFloat(t.amount);
-                if (t.transaction_type === 'household_expense') totalHouseholdExpenses += parseFloat(t.amount);
-                if (t.transaction_type === 'business_sale') totalBusinessIncome += parseFloat(t.amount);
-                if (t.transaction_type === 'business_expense') totalBusinessExpenses += parseFloat(t.amount);
-            });
-            
-            const businessProfit = totalBusinessIncome - totalBusinessExpenses;
-            const finalBalance = totalIncome + businessProfit - totalHouseholdExpenses;
-            
-            // Renderizar
-            const content = `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Ingresos totales</div>
-                        <div class="stat-value">$${totalIncome.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Gastos hogar</div>
-                        <div class="stat-value">$${totalHouseholdExpenses.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Resultado postres</div>
-                        <div class="stat-value ${businessProfit >= 0 ? 'text-success' : 'text-danger'}">
-                            $${businessProfit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Balance final</div>
-                        <div class="stat-value ${finalBalance >= 0 ? 'text-success' : 'text-danger'}">
-                            $${finalBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Indicadores</h3>
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Ahorro mensual objetivo</span>
-                            <span>${Math.round((totalIncome > 0 ? (finalBalance / totalIncome) * 100 : 0))}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${Math.min(Math.round((totalIncome > 0 ? (finalBalance / totalIncome) * 100 : 0)), 100)}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span>Gastos vs Ingresos</span>
-                            <span>${Math.round((totalIncome > 0 ? (totalHouseholdExpenses / totalIncome) * 100 : 0))}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${Math.min(Math.round((totalIncome > 0 ? (totalHouseholdExpenses / totalIncome) * 100 : 0)), 100)}%; background: ${totalHouseholdExpenses > totalIncome ? 'var(--danger)' : 'var(--warning)'}"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Últimos movimientos</h3>
-                        <button onclick="showTransactionModal()" class="btn btn-primary btn-small">Nuevo</button>
-                    </div>
-                    <ul class="transaction-list">
-                        ${transactions.slice(0, 10).map(t => `
-                            <li class="transaction-item">
-                                <div class="transaction-info">
-                                    <div class="d-flex justify-between">
-                                        <strong>${t.categories?.name || t.transaction_type}</strong>
-                                        <span class="transaction-amount ${getAmountClass(t)}">
-                                            ${getAmountPrefix(t)}$${parseFloat(t.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                                        </span>
-                                    </div>
-                                    <small class="text-muted">
-                                        ${new Date(t.date).toLocaleDateString('es-AR')} • 
-                                        ${t.persons?.name || ''} • 
-                                        ${t.payment_methods?.name || ''}
-                                        ${t.note ? '• ' + t.note : ''}
-                                    </small>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
+        function updateDessertsSummary() {
+            // Implementar cálculo de ganancias de postres
         }
 
-        // ============================================
-        // SALDO DISPONIBLE
-        // ============================================
-        async function loadBalance() {
-            // Obtener todas las transacciones del usuario
-            const { data: transactions, error } = await supabase
-                .from('transactions')
-                .select('amount, transaction_type, payment_methods(name)')
-                .eq('user_id', currentUser.id);
-            
-            if (error) {
-                showError(error.message);
-                return;
-            }
-            
-            // Calcular saldos por medio de pago
-            const balances = {
-                'Efectivo': 0,
-                'Mercado Pago': 0
-            };
-            
-            transactions.forEach(t => {
-                const amount = parseFloat(t.amount);
-                const method = t.payment_methods?.name;
-                
-                if (!method) return;
-                
-                if (t.transaction_type === 'saving') {
-                    // Ahorros no se cuentan como disponible
-                    return;
-                }
-                
-                if (t.transaction_type === 'fund') {
-                    // Fondos sí se cuentan como disponible (son dinero reservado)
-                    balances[method] -= amount;
-                } else if (t.transaction_type === 'business_sale' || t.transaction_type === 'household_income') {
-                    balances[method] += amount;
-                } else {
-                    balances[method] -= amount;
-                }
-            });
-            
-            const total = balances['Efectivo'] + balances['Mercado Pago'];
-            
-            // Renderizar
-            const content = `
-                <div class="card mb-3">
-                    <h2 class="text-center">Saldo Total Disponible</h2>
-                    <h1 class="text-center ${total >= 0 ? 'text-success' : 'text-danger'}" style="font-size: 3rem;">
-                        $${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                    </h1>
-                    <p class="text-center text-muted">Excluye ahorros</p>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Efectivo</div>
-                        <div class="stat-value ${balances['Efectivo'] >= 0 ? 'text-success' : 'text-danger'}">
-                            $${balances['Efectivo'].toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Mercado Pago</div>
-                        <div class="stat-value ${balances['Mercado Pago'] >= 0 ? 'text-success' : 'text-danger'}">
-                            $${balances['Mercado Pago'].toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Recomendaciones</h3>
-                    <ul style="padding-left: 20px;">
-                        <li class="mb-2">${total < 0 ? '⚠️ El saldo total es negativo. Revisar gastos.' : '✅ Saldo positivo. Buen trabajo!'}</li>
-                        <li class="mb-2">${balances['Efectivo'] < 0 ? '⚠️ Efectivo negativo. Considerar transferencia.' : '✅ Efectivo en orden.'}</li>
-                        <li>${balances['Mercado Pago'] < 0 ? '⚠️ Mercado Pago negativo. Revisar pagos.' : '✅ Mercado Pago en orden.'}</li>
-                    </ul>
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // ============================================
-        // GASTOS POR CATEGORÍA
-        // ============================================
-        async function loadExpenses() {
-            const now = new Date();
-            const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-            
-            // Obtener gastos del mes actual
-            const { data: currentMonthExpenses, error: error1 } = await supabase
-                .from('transactions')
-                .select('amount, categories(name)')
-                .eq('user_id', currentUser.id)
-                .eq('transaction_type', 'household_expense')
-                .gte('date', currentMonthStart.toISOString().split('T')[0])
-                .lte('date', currentMonthEnd.toISOString().split('T')[0]);
-            
-            // Obtener gastos del mes anterior
-            const { data: lastMonthExpenses, error: error2 } = await supabase
-                .from('transactions')
-                .select('amount, categories(name)')
-                .eq('user_id', currentUser.id)
-                .eq('transaction_type', 'household_expense')
-                .gte('date', lastMonthStart.toISOString().split('T')[0])
-                .lte('date', lastMonthEnd.toISOString().split('T')[0]);
-            
-            if (error1 || error2) {
-                showError(error1?.message || error2?.message);
-                return;
-            }
-            
-            // Agrupar por categoría
-            const currentMonthTotals = {};
-            const lastMonthTotals = {};
-            
-            currentMonthExpenses?.forEach(e => {
-                const cat = e.categories?.name || 'Sin categoría';
-                currentMonthTotals[cat] = (currentMonthTotals[cat] || 0) + parseFloat(e.amount);
-            });
-            
-            lastMonthExpenses?.forEach(e => {
-                const cat = e.categories?.name || 'Sin categoría';
-                lastMonthTotals[cat] = (lastMonthTotals[cat] || 0) + parseFloat(e.amount);
-            });
-            
-            // Ordenar por monto descendente
-            const sortedCategories = Object.entries(currentMonthTotals)
-                .sort((a, b) => b[1] - a[1])
-                .map(([category, amount]) => {
-                    const lastMonthAmount = lastMonthTotals[category] || 0;
-                    const change = lastMonthAmount > 0 ? ((amount - lastMonthAmount) / lastMonthAmount) * 100 : 0;
-                    
-                    return {
-                        category,
-                        amount,
-                        lastMonthAmount,
-                        change
-                    };
-                });
-            
-            // Calcular totales
-            const currentMonthTotal = Object.values(currentMonthTotals).reduce((a, b) => a + b, 0);
-            const lastMonthTotal = Object.values(lastMonthTotals).reduce((a, b) => a + b, 0);
-            const totalChange = lastMonthTotal > 0 ? ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100 : 0;
-            
-            // Renderizar
-            const content = `
-                <div class="card mb-3">
-                    <h3>Resumen de gastos</h3>
-                    <div class="d-flex justify-between align-center">
-                        <div>
-                            <h2>$${currentMonthTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</h2>
-                            <p class="text-muted">Gastos este mes</p>
-                        </div>
-                        <div class="text-right">
-                            <h3 class="${totalChange <= 0 ? 'text-success' : 'text-danger'}">
-                                ${totalChange > 0 ? '+' : ''}${totalChange.toFixed(1)}%
-                            </h3>
-                            <p class="text-muted">vs mes anterior</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Ranking por categoría</h3>
-                    ${sortedCategories.map(item => {
-                        const percentage = (item.amount / currentMonthTotal) * 100;
-                        return `
-                            <div class="mb-3">
-                                <div class="d-flex justify-between mb-1">
-                                    <span>${item.category}</span>
-                                    <span>
-                                        <strong>$${item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong>
-                                        <small class="${item.change <= 0 ? 'text-success' : 'text-danger'}">
-                                            ${item.change > 0 ? '+' : ''}${item.change.toFixed(1)}%
-                                        </small>
-                                    </span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${percentage}%"></div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // ============================================
-        // POSTRES (NEGOCIO)
-        // ============================================
-        async function loadBusiness() {
-            const now = new Date();
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            
-            // Obtener datos del mes
-            const { data: transactions, error } = await supabase
-                .from('transactions')
-                .select('amount, transaction_type, date')
-                .eq('user_id', currentUser.id)
-                .in('transaction_type', ['business_expense', 'business_sale', 'fund'])
-                .gte('date', monthStart.toISOString().split('T')[0])
-                .lte('date', monthEnd.toISOString().split('T')[0]);
-            
-            if (error) {
-                showError(error.message);
-                return;
-            }
-            
-            // Calcular totales
-            let totalSales = 0;
-            let totalSupplies = 0;
-            let totalFund = 0;
-            
-            transactions?.forEach(t => {
-                const amount = parseFloat(t.amount);
-                if (t.transaction_type === 'business_sale') totalSales += amount;
-                if (t.transaction_type === 'business_expense') totalSupplies += amount;
-                if (t.transaction_type === 'fund' && t.note?.includes('postres')) totalFund += amount;
-            });
-            
-            const profit = totalSales - totalSupplies;
-            const profitMargin = totalSales > 0 ? (profit / totalSales) * 100 : 0;
-            
-            // Obtener estado del fondo postres
-            const { data: fundData, error: fundError } = await supabase
-                .from('funds')
-                .select('target_amount')
-                .eq('name', 'Fondo fijo postres')
-                .single();
-            
-            const fundTarget = fundData?.target_amount || 0;
-            const fundProgress = fundTarget > 0 ? (totalFund / fundTarget) * 100 : 0;
-            
-            // Renderizar
-            const content = `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Ventas postres</div>
-                        <div class="stat-value">$${totalSales.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Insumos postres</div>
-                        <div class="stat-value">$${totalSupplies.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Ganancia</div>
-                        <div class="stat-value ${profit >= 0 ? 'text-success' : 'text-danger'}">
-                            $${profit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Margen</div>
-                        <div class="stat-value ${profitMargin >= 20 ? 'text-success' : profitMargin >= 0 ? 'text-warning' : 'text-danger'}">
-                            ${profitMargin.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Estado fondo postres</h3>
-                    <div class="progress-container mb-3">
-                        <div class="progress-label">
-                            <span>Recaudado: $${totalFund.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-                            <span>${fundProgress.toFixed(1)}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${fundProgress}%"></div>
-                        </div>
-                    </div>
-                    <p class="text-muted">
-                        Objetivo: $${fundTarget.toLocaleString('es-AR', { minimumFractionDigits: 2 })} | 
-                        Faltante: $${Math.max(0, fundTarget - totalFund).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                    </p>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Análisis de rentabilidad</h3>
-                    </div>
-                    <ul style="padding-left: 20px;">
-                        <li class="mb-2">${profitMargin >= 30 ? '✅ Excelente rentabilidad' : profitMargin >= 15 ? '⚠️ Rentabilidad aceptable' : '❌ Rentabilidad baja'}</li>
-                        <li class="mb-2">${totalSales > totalSupplies * 3 ? '✅ Ventas saludables' : '⚠️ Ventas podrían mejorar'}</li>
-                        <li>${fundProgress >= 100 ? '✅ Fondo completo' : `⏳ Fondo al ${fundProgress.toFixed(1)}%`}</li>
-                    </ul>
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // ============================================
-        // FONDOS
-        // ============================================
-        async function loadFunds() {
-            // Obtener fondos y sus transacciones
-            const { data: funds, error: fundsError } = await supabase
-                .from('funds')
-                .select('*');
-            
-            const { data: transactions, error: transError } = await supabase
-                .from('transactions')
-                .select('amount, fund_id')
-                .eq('user_id', currentUser.id)
-                .eq('transaction_type', 'fund');
-            
-            if (fundsError || transError) {
-                showError(fundsError?.message || transError?.message);
-                return;
-            }
-            
-            // Calcular totales por fondo
-            const fundTotals = {};
-            transactions?.forEach(t => {
-                const fundId = t.fund_id;
-                if (fundId) {
-                    fundTotals[fundId] = (fundTotals[fundId] || 0) + parseFloat(t.amount);
-                }
-            });
-            
-            // Renderizar cada fondo
-            const fundsContent = funds.map(fund => {
-                const current = fundTotals[fund.id] || 0;
-                const target = parseFloat(fund.target_amount) || 0;
-                const remaining = Math.max(0, target - current);
-                const progress = target > 0 ? (current / target) * 100 : 0;
-                
-                return `
-                    <div class="card mb-3">
-                        <h3>${fund.name}</h3>
-                        <div class="progress-container mb-3">
-                            <div class="progress-label">
-                                <span>Actual: $${current.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-                                <span>${progress.toFixed(1)}%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progress}%"></div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-between">
-                            <div>
-                                <p class="text-muted">Objetivo</p>
-                                <p><strong>$${target.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-muted">Faltante</p>
-                                <p><strong>$${remaining.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            const content = `
-                <div class="card mb-3">
-                    <h2>Fondos de la familia</h2>
-                    <p class="text-muted">Dinero reservado para objetivos específicos</p>
-                </div>
-                ${fundsContent}
-                <div class="card">
-                    <button onclick="showFundConfig()" class="btn btn-outline btn-full">
-                        Configurar objetivos de fondos
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // ============================================
-        // AHORROS
-        // ============================================
-        async function loadSavings() {
-            // Obtener ahorros y transacciones
-            const { data: savings, error: savingsError } = await supabase
-                .from('savings')
-                .select('*');
-            
-            const { data: transactions, error: transError } = await supabase
-                .from('transactions')
-                .select('amount, saving_id, date, note')
-                .eq('user_id', currentUser.id)
-                .eq('transaction_type', 'saving')
-                .order('date', { ascending: false });
-            
-            if (savingsError || transError) {
-                showError(savingsError?.message || transError?.message);
-                return;
-            }
-            
-            // Calcular total ahorrado
-            const savingTotals = {};
-            transactions?.forEach(t => {
-                const savingId = t.saving_id;
-                if (savingId) {
-                    savingTotals[savingId] = (savingTotals[savingId] || 0) + parseFloat(t.amount);
-                }
-            });
-            
-            // Renderizar
-            const savingsContent = savings.map(saving => {
-                const current = savingTotals[saving.id] || 0;
-                const target = parseFloat(saving.target_amount) || 0;
-                const remaining = Math.max(0, target - current);
-                const progress = target > 0 ? (current / target) * 100 : 0;
-                
-                return `
-                    <div class="card mb-3">
-                        <h3>${saving.name}</h3>
-                        <div class="progress-container mb-3">
-                            <div class="progress-label">
-                                <span>Ahorrado: $${current.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-                                <span>${progress.toFixed(1)}%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progress}%"></div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-between mb-3">
-                            <div>
-                                <p class="text-muted">Objetivo</p>
-                                <p><strong>$${target.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-muted">Faltante</p>
-                                <p><strong>$${remaining.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Historial de ahorros
-            const historyContent = transactions?.slice(0, 10).map(t => `
-                <li class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="d-flex justify-between">
-                            <strong>Ahorro</strong>
-                            <span class="transaction-amount text-success">
-                                +$${parseFloat(t.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                            </span>
-                        </div>
-                        <small class="text-muted">
-                            ${new Date(t.date).toLocaleDateString('es-AR')}
-                            ${t.note ? '• ' + t.note : ''}
-                        </small>
-                    </div>
-                </li>
-            `).join('') || '<li class="text-center text-muted">No hay historial de ahorros</li>';
-            
-            const content = `
-                <div class="card mb-3">
-                    <h2>Ahorros familiares</h2>
-                    <p class="text-muted">Dinero reservado para el futuro (no disponible)</p>
-                </div>
-                ${savingsContent}
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Historial de ahorros</h3>
-                    </div>
-                    <ul class="transaction-list">
-                        ${historyContent}
-                    </ul>
-                </div>
-                <div class="card">
-                    <button onclick="showSavingConfig()" class="btn btn-outline btn-full">
-                        Configurar objetivos de ahorro
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // ============================================
-        // HISTORIAL GENERAL
-        // ============================================
-        async function loadHistory() {
-            // Obtener todas las transacciones con filtros
-            const { data: transactions, error } = await supabase
-                .from('transactions')
-                .select(`
-                    *,
-                    categories(name),
-                    persons(name),
-                    payment_methods(name),
-                    funds(name),
-                    savings(name)
-                `)
-                .eq('user_id', currentUser.id)
-                .order('date', { ascending: false })
-                .limit(50);
-            
-            if (error) {
-                showError(error.message);
-                return;
-            }
-            
-            // Renderizar
-            const content = `
-                <div class="card mb-3">
-                    <h3>Historial completo</h3>
-                    <div class="d-flex gap-2">
-                        <select id="filterPerson" class="form-control" onchange="filterHistory()">
-                            <option value="">Todas las personas</option>
-                            <option value="Sebastián">Sebastián</option>
-                            <option value="Ludmila">Ludmila</option>
-                        </select>
-                        <select id="filterCategory" class="form-control" onchange="filterHistory()">
-                            <option value="">Todas las categorías</option>
-                            <!-- Categorías se cargan dinámicamente -->
-                        </select>
-                        <select id="filterType" class="form-control" onchange="filterHistory()">
-                            <option value="">Todos los tipos</option>
-                            <option value="household_expense">Gasto hogar</option>
-                            <option value="household_income">Ingreso diario</option>
-                            <option value="business_expense">Insumos postres</option>
-                            <option value="business_sale">Venta postres</option>
-                            <option value="fund">Fondo</option>
-                            <option value="saving">Ahorro</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Últimos 50 movimientos</h3>
-                        <button onclick="exportHistory()" class="btn btn-outline btn-small">Exportar</button>
-                    </div>
-                    <ul class="transaction-list" id="historyList">
-                        ${transactions.map(t => `
-                            <li class="transaction-item">
-                                <div class="transaction-info">
-                                    <div class="d-flex justify-between">
-                                        <strong>${getTransactionLabel(t)}</strong>
-                                        <span class="transaction-amount ${getAmountClass(t)}">
-                                            ${getAmountPrefix(t)}$${parseFloat(t.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                                        </span>
-                                    </div>
-                                    <small class="text-muted">
-                                        ${new Date(t.date).toLocaleDateString('es-AR')} • 
-                                        ${t.persons?.name || ''} • 
-                                        ${t.payment_methods?.name || ''} •
-                                        ${t.transaction_type}
-                                        ${t.note ? '• ' + t.note : ''}
-                                    </small>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-            
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // ============================================
-        // GESTIÓN DE TRANSACCIONES
-        // ============================================
-        function showTransactionModal(type = null) {
-            if (type) {
-                document.getElementById('transactionType').value = type;
-                updateFormFields();
-            }
-            
-            document.getElementById('transactionModal').classList.add('active');
-            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('transactionAmount').value = '';
-            document.getElementById('transactionNote').value = '';
-            document.getElementById('modalTitle').textContent = 'Nuevo Movimiento';
+        function showModal() {
+            document.getElementById('movement-modal').classList.remove('hidden');
+            document.getElementById('movement-date').value = new Date().toISOString().split('T')[0];
         }
 
         function closeModal() {
-            document.getElementById('transactionModal').classList.remove('active');
+            document.getElementById('movement-modal').classList.add('hidden');
+            document.getElementById('movement-form').reset();
         }
 
-        async function updateFormFields() {
-            const type = document.getElementById('transactionType').value;
-            
-            // Mostrar/ocultar campos según tipo
-            document.getElementById('categoryField').classList.toggle('d-none', 
-                !['household_expense', 'household_income', 'business_expense', 'business_sale'].includes(type));
-            document.getElementById('personField').classList.toggle('d-none',
-                type === 'business_sale');
-            document.getElementById('paymentMethodField').classList.toggle('d-none', false);
-            document.getElementById('fundField').classList.toggle('d-none', type !== 'fund');
-            document.getElementById('savingField').classList.toggle('d-none', type !== 'saving');
-            
-            // Cargar categorías si es necesario
-            if (['household_expense', 'household_income', 'business_expense', 'business_sale'].includes(type)) {
-                await loadCategories(type);
-            }
+        function showGoalModal(type, title) {
+            document.getElementById('goal-title').textContent = title;
+            document.getElementById('goal-type').value = type;
+            document.getElementById('goal-modal').classList.remove('hidden');
         }
 
-        async function loadCategories(type) {
-            let categoryType = '';
-            if (type === 'household_expense') categoryType = 'household_expense';
-            else if (type === 'household_income') categoryType = 'household_income';
-            else if (type === 'business_expense') categoryType = 'business_expense';
-            else if (type === 'business_sale') categoryType = 'business_sale';
-            
-            const { data: categories, error } = await supabase
-                .from('categories')
-                .select('name')
-                .eq('type', categoryType);
-            
-            if (!error) {
-                const select = document.getElementById('transactionCategory');
-                select.innerHTML = '<option value="">Seleccionar categoría</option>' +
-                    categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
-            }
+        function closeGoalModal() {
+            document.getElementById('goal-modal').classList.add('hidden');
+            document.getElementById('goal-form').reset();
         }
 
-        async function saveTransaction(e) {
-            e.preventDefault();
-            
-            const type = document.getElementById('transactionType').value;
-            const date = document.getElementById('transactionDate').value;
-            const amount = parseFloat(document.getElementById('transactionAmount').value);
-            const note = document.getElementById('transactionNote').value;
-            
-            // Validaciones básicas
-            if (!type || !date || !amount || amount <= 0) {
-                showError('Complete todos los campos obligatorios');
-                return;
-            }
-            
-            // Construir objeto de transacción
-            const transaction = {
-                date,
-                amount,
-                note,
-                transaction_type: type,
-                user_id: currentUser.id
+        function showConfirmModal(title, message, callback) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-action').onclick = () => {
+                closeConfirmModal(true);
+                if (callback) callback();
             };
-            
-            // Obtener IDs de las entidades relacionadas
-            if (type !== 'fund' && type !== 'saving') {
-                const categoryName = document.getElementById('transactionCategory').value;
-                if (categoryName) {
-                    const { data: category } = await supabase
-                        .from('categories')
-                        .select('id')
-                        .eq('name', categoryName)
-                        .single();
-                    if (category) transaction.category_id = category.id;
-                }
-            }
-            
-            if (type !== 'business_sale') {
-                const personName = document.getElementById('transactionPerson').value;
-                if (personName) {
-                    const { data: person } = await supabase
-                        .from('persons')
-                        .select('id')
-                        .eq('name', personName)
-                        .single();
-                    if (person) transaction.person_id = person.id;
-                }
-            }
-            
-            const paymentMethodName = document.getElementById('transactionPaymentMethod').value;
-            if (paymentMethodName) {
-                const { data: paymentMethod } = await supabase
-                    .from('payment_methods')
-                    .select('id')
-                    .eq('name', paymentMethodName)
-                    .single();
-                if (paymentMethod) transaction.payment_method_id = paymentMethod.id;
-            }
-            
-            if (type === 'fund') {
-                const fundName = document.getElementById('transactionFund').value;
-                if (fundName) {
-                    const { data: fund } = await supabase
-                        .from('funds')
-                        .select('id')
-                        .eq('name', fundName)
-                        .single();
-                    if (fund) transaction.fund_id = fund.id;
-                }
-            }
-            
-            if (type === 'saving') {
-                const savingName = document.getElementById('transactionSaving').value;
-                if (savingName) {
-                    const { data: saving } = await supabase
-                        .from('savings')
-                        .select('id')
-                        .eq('name', savingName)
-                        .single();
-                    if (saving) transaction.saving_id = saving.id;
-                }
-            }
-            
-            // Insertar transacción
-            const { error } = await supabase
-                .from('transactions')
-                .insert([transaction]);
-            
-            if (error) {
-                showError(error.message);
-            } else {
-                closeModal();
-                refreshData();
-                showSuccess('Movimiento guardado exitosamente');
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal(confirmed) {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (confirmed && typeof window.confirmCallback === 'function') {
+                window.confirmCallback();
             }
         }
 
-        // ============================================
-        // FUNCIONES AUXILIARES
-        // ============================================
-        function getAmountClass(transaction) {
-            if (['household_income', 'business_sale'].includes(transaction.transaction_type)) {
-                return 'transaction-positive';
-            }
-            return 'transaction-negative';
+        function showAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="material-icons">
+                        ${type === 'success' ? 'check_circle' : 'error'}
+                    </span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.getElementById('alert-container').appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
         }
 
-        function getAmountPrefix(transaction) {
-            if (['household_income', 'business_sale'].includes(transaction.transaction_type)) {
-                return '+';
-            }
-            return '-';
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
         }
 
-        function getTransactionLabel(transaction) {
-            if (transaction.categories) return transaction.categories.name;
-            if (transaction.funds) return transaction.funds.name;
-            if (transaction.savings) return transaction.savings.name;
-            return transaction.transaction_type;
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
         }
 
-        function showError(message) {
-            alert('Error: ' + message);
+        function updateCurrentMonth() {
+            const now = new Date();
+            const monthNames = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            document.getElementById('current-month').textContent = 
+                `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
         }
 
-        function showSuccess(message) {
-            // Podría implementarse un toast notification
-            console.log('Éxito: ' + message);
-        }
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
+        function setupEventListeners() {
+            // Autenticación
+            document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                await handleLogin(email, password);
+            });
 
-        // ============================================
-        // PWA FUNCTIONS
-        // ============================================
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó la instalación');
-                    }
-                    deferredPrompt = null;
-                    hidePWA();
+            document.getElementById('register-form')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                await handleRegister(name, email, password);
+            });
+
+            // Tabs de autenticación
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showAuthTab(btn.dataset.tab);
                 });
+            });
+
+            // Navegación inferior
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showTab(btn.dataset.tab);
+                });
+            });
+
+            // Botón para nuevo movimiento
+            document.getElementById('add-movement-btn')?.addEventListener('click', showModal);
+
+            // Formulario de movimiento
+            document.getElementById('movement-form')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const type = document.getElementById('movement-type').value;
+                const category = document.getElementById('movement-category').value;
+                const amount = parseFloat(document.getElementById('movement-amount').value);
+                const payment = document.getElementById('movement-payment').value;
+                const description = document.getElementById('movement-description').value;
+                const date = document.getElementById('movement-date').value;
+                
+                let movementData = {
+                    type,
+                    category,
+                    amount,
+                    payment_method: payment,
+                    description,
+                    movement_date: date
+                };
+                
+                // Campos adicionales según tipo
+                if (type === 'ingreso_diario') {
+                    movementData.person = document.getElementById('movement-person').value;
+                } else if (type === 'fondo') {
+                    movementData.fund_type = document.getElementById('movement-fund-type').value;
+                }
+                
+                await createMovement(movementData);
+            });
+
+            // Cambiar categorías según tipo
+            document.getElementById('movement-type')?.addEventListener('change', function() {
+                const type = this.value;
+                const categorySelect = document.getElementById('movement-category');
+                const personField = document.getElementById('person-field');
+                const fundField = document.getElementById('fund-type-field');
+                
+                // Mostrar/ocultar campos adicionales
+                personField.classList.toggle('hidden', type !== 'ingreso_diario');
+                fundField.classList.toggle('hidden', type !== 'fondo');
+                
+                // Actualizar categorías
+                categorySelect.innerHTML = '';
+                if (type && CATEGORIES[type]) {
+                    CATEGORIES[type].forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        categorySelect.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        // =============================================
+        // PWA FUNCTIONS
+        // =============================================
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('Service Worker registrado'))
+                    .catch(err => console.error('Error SW:', err));
             }
         }
 
-        function hidePWA() {
-            document.getElementById('pwaPrompt').classList.remove('active');
+        function showInstallPrompt() {
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Mostrar botón de instalación
+                const installBtn = document.createElement('button');
+                installBtn.className = 'btn btn-primary';
+                installBtn.innerHTML = '<span class="material-icons">download</span> Instalar App';
+                installBtn.onclick = () => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('Usuario aceptó instalación');
+                        }
+                        deferredPrompt = null;
+                    });
+                };
+                
+                document.getElementById('user-menu')?.appendChild(installBtn);
+            });
         }
+
+        // =============================================
+        // FUNCIONES AUXILIARES
+        // =============================================
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-AR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Inicializar PWA
+        registerServiceWorker();
+        showInstallPrompt();
     </script>
 </body>
 </html>
