@@ -3,2873 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Familia Finanzas</title>
-    <meta name="description" content="Gestión financiera familiar completa">
-    <meta name="theme-color" content="#4f46e5">
-    
-    <!-- Manifest simplificado sin Service Worker -->
-    <link rel="manifest" id="manifest" href="data:application/json;charset=utf-8;base64,ewogICJuYW1lIjogIkZhbWlsaWEgRmluYW56YXMiLAogICJzaG9ydF9uYW1lIjogIkZpbmFuemFzIiwKICAiZGVzY3JpcHRpb24iOiAiR2VzdGnDs24gZmluYW5jaWVyYSBmYW1pbGlhciBjb21wbGV0YSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjhmYWZjIiwKICAidGhlbWVfY29sb3IiOiAiIzRmNDZlNSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCxhc3NlbWJseXN5bWJvbHM7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSEJ5WlhObGNuWmxRWE53WldOMFVtRjBhVzg5SW5oTmFXNVpUV2x1SUcxbFpYUWlJSFpwWlhkQ2IzZzlJakFnTUNBek5UQWdNelV3SWlCNVBTSXhNREFsSWlCb1pXbG5hSFE5SWpFd01DVWlJR1pwYkd3OUluVnliQ2dqWm1sc1pTOWtaV05sYVdOaGRHbHZiaTVqYjIwdklpQmhjM01nWTI5dWRHVnVkQzFpWVhObE5qUWdNQ0JwYmlCallXeGxibVZ6ZEhKaGRHbHZiajBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOWpiMjF0Wlc1MEwyWnBiR1V0ZDJsa2RHZ3VaR1YyWld3dVkyOXVJbjAiCiAgICB9CiAgXSwKICAiY2F0ZWdvcmllcyI6IFsiZmluYW5jZSIsICJwcm9kdWN0aXZpdHkiXSwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJzY29wZSI6ICIvIgp9"></link>
-    
+    <title>Finanzas Familiares</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
-    
-    <!-- Supabase desde CDN oficial -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
-    <style>
-        /* Reset y variables CSS */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #4f46e5;
-            --primary-dark: #3730a3;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --background: #f8fafc;
-            --surface: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-            --radius: 12px;
-            --radius-sm: 8px;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.5;
-            max-width: 100vw;
-            overflow-x: hidden;
-            padding-bottom: 80px;
-        }
-
-        /* Pantalla de carga */
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--surface);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            z-index: 1000;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Navegación */
-        #auth-nav, #main-nav {
-            background: var(--surface);
-            padding: 1rem;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        /* Contenedor principal */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        /* Tarjetas */
-        .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            margin-bottom: 1rem;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        /* Botones */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #0da271;
-            transform: translateY(-1px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-1px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            background: var(--background);
-            transform: translateY(-1px);
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        /* Formularios */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            transition: border-color 0.2s;
-            background: white;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            background: white;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1rem;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Grid y flex */
-        .grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .flex-col {
-            flex-direction: column;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .justify-between {
-            justify-content: space-between;
-        }
-
-        .justify-center {
-            justify-content: center;
-        }
-
-        .gap-2 {
-            gap: 0.5rem;
-        }
-
-        .gap-4 {
-            gap: 1rem;
-        }
-
-        .gap-6 {
-            gap: 1.5rem;
-        }
-
-        /* Estados */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-success {
-            color: var(--secondary);
-        }
-
-        .text-danger {
-            color: var(--danger);
-        }
-
-        .text-warning {
-            color: var(--warning);
-        }
-
-        .text-muted {
-            color: var(--text-light);
-        }
-
-        .font-bold {
-            font-weight: bold;
-        }
-
-        .text-xl {
-            font-size: 1.5rem;
-            line-height: 2rem;
-        }
-
-        .text-2xl {
-            font-size: 2rem;
-            line-height: 2.5rem;
-        }
-
-        .text-3xl {
-            font-size: 2.5rem;
-            line-height: 3rem;
-        }
-
-        .mt-2 {
-            margin-top: 0.5rem;
-        }
-
-        .mt-4 {
-            margin-top: 1rem;
-        }
-
-        .mt-6 {
-            margin-top: 1.5rem;
-        }
-
-        .mb-2 {
-            margin-bottom: 0.5rem;
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem;
-        }
-
-        .mb-6 {
-            margin-bottom: 1.5rem;
-        }
-
-        .p-4 {
-            padding: 1rem;
-        }
-
-        .p-6 {
-            padding: 1.5rem;
-        }
-
-        /* Navegación inferior */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            padding: 0.5rem;
-            z-index: 90;
-            backdrop-filter: blur(10px);
-        }
-
-        .nav-tabs {
-            display: flex;
-            justify-content: space-around;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            background: none;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            border-radius: var(--radius-sm);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            text-decoration: none;
-            font-size: 0.75rem;
-        }
-
-        .nav-tab:hover {
-            background: var(--background);
-        }
-
-        .nav-tab.active {
-            color: var(--primary);
-            background: var(--background);
-        }
-
-        .nav-icon {
-            font-size: 1.25rem;
-            font-weight: normal;
-        }
-
-        /* Listas */
-        .list {
-            list-style: none;
-        }
-
-        .list-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.2s;
-        }
-
-        .list-item:hover {
-            background: var(--background);
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-item-content {
-            flex: 1;
-        }
-
-        .list-item-title {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .list-item-subtitle {
-            font-size: 0.875rem;
-            color: var(--text-light);
-        }
-
-        .list-item-amount {
-            font-weight: 600;
-            font-size: 1.125rem;
-        }
-
-        /* Badges */
-        .badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .badge-success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-info {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        /* Progress bars */
-        .progress {
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s ease-in-out;
-            border-radius: 4px;
-        }
-
-        .progress-bar-success {
-            background: var(--secondary);
-        }
-
-        .progress-bar-warning {
-            background: var(--warning);
-        }
-
-        /* Alertas */
-        .alert {
-            padding: 1rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-
-        .alert-icon {
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        /* Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 1rem;
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: var(--surface);
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Tabs de contenido */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Estilos específicos para gráficos */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 1rem 0;
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 1rem;
-        }
-
-        /* Estados de saldo */
-        .balance-positive {
-            color: var(--secondary);
-        }
-
-        .balance-negative {
-            color: var(--danger);
-        }
-
-        .balance-neutral {
-            color: var(--text-light);
-        }
-
-        /* Tarjetas de resumen */
-        .summary-card {
-            text-align: center;
-            padding: 1.5rem;
-            background: var(--surface);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-        }
-
-        .summary-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 0.5rem 0;
-            line-height: 1;
-        }
-
-        .summary-label {
-            color: var(--text-light);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Animaciones */
-        .pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .shake {
-            animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-
-        /* Utilidades */
-        .w-100 {
-            width: 100%;
-        }
-
-        .flex-1 {
-            flex: 1;
-        }
-
-        .cursor-pointer {
-            cursor: pointer;
-        }
-
-        .select-none {
-            user-select: none;
-        }
-
-        /* Scroll personalizado */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--background);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-light);
-        }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .container {
-                padding: 0.75rem;
-            }
-            
-            .card {
-                padding: 1rem;
-            }
-            
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .summary-value {
-                font-size: 1.5rem;
-            }
-            
-            .text-2xl {
-                font-size: 1.5rem;
-            }
-            
-            .text-3xl {
-                font-size: 1.75rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .modal-content {
-                max-width: 95%;
-            }
-        }
-
-        /* Iconos personalizados usando Unicode */
-        .icon {
-            font-family: Arial, sans-serif;
-            display: inline-block;
-        }
-
-        .icon-home::before { content: "🏠"; }
-        .icon-money::before { content: "💰"; }
-        .icon-chart::before { content: "📊"; }
-        .icon-cake::before { content: "🍰"; }
-        .icon-piggy::before { content: "🐷"; }
-        .icon-history::before { content: "📝"; }
-        .icon-add::before { content: "＋"; font-weight: bold; }
-        .icon-close::before { content: "×"; font-weight: bold; }
-        .icon-check::before { content: "✓"; font-weight: bold; }
-        .icon-warning::before { content: "⚠"; }
-        .icon-error::before { content: "✗"; font-weight: bold; }
-        .icon-success::before { content: "✓"; font-weight: bold; }
-        .icon-cash::before { content: "💵"; }
-        .icon-card::before { content: "💳"; }
-        .icon-savings::before { content: "⭐"; }
-        .icon-funds::before { content: "🏦"; }
-    </style>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Pantalla de carga -->
-    <div id="loading">
-        <div class="spinner"></div>
-        <p class="text-muted mt-4">Cargando aplicación...</p>
-    </div>
-
-    <!-- Navegación de autenticación -->
-    <nav id="auth-nav" class="hidden">
-        <div class="nav-container">
-            <a href="#" class="logo">💰 Familia Finanzas</a>
-            <div id="user-menu"></div>
-        </div>
-    </nav>
-
-    <!-- Navegación principal -->
-    <nav id="main-nav" class="hidden">
-        <div class="nav-container">
-            <a href="#" class="logo">💰 Familia Finanzas</a>
-            <div class="flex items-center gap-4">
-                <span id="current-month" class="text-muted"></span>
-                <button id="add-movement-btn" class="btn btn-primary btn-sm">
-                    <span class="icon-add"></span> Nuevo
-                </button>
-                <button id="logout-btn" class="btn btn-outline btn-sm">
-                    Salir
-                </button>
+    <!-- Pantalla de Login -->
+    <div id="login-screen" class="screen active">
+        <div class="auth-container">
+            <div class="app-header">
+                <h1>🏠 Finanzas Familiares</h1>
+                <p>Gestiona tu economía familiar sin complicaciones</p>
             </div>
-        </div>
-    </nav>
-
-    <!-- Contenido de autenticación -->
-    <div id="auth-content" class="hidden">
-        <div class="container">
-            <div class="card" style="max-width: 400px; margin: 3rem auto;">
-                <div class="card-header">
-                    <h2 class="card-title text-center">Familia Finanzas</h2>
-                </div>
-                
-                <div class="p-6">
-                    <div id="auth-tabs">
-                        <div class="flex mb-6">
-                            <button class="btn btn-outline flex-1 active" data-tab="login" id="login-tab-btn">Iniciar Sesión</button>
-                            <button class="btn btn-outline flex-1" data-tab="register" id="register-tab-btn">Registrarse</button>
-                        </div>
-                        
-                        <div id="login-tab" class="tab-content active">
-                            <form id="login-form">
-                                <div class="form-group">
-                                    <label for="login-email" class="form-label">Email</label>
-                                    <input type="email" id="login-email" class="form-control" placeholder="tu@email.com" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="login-password" class="form-label">Contraseña</label>
-                                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary btn-block mt-6">
-                                    Iniciar Sesión
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <div id="register-tab" class="tab-content">
-                            <form id="register-form">
-                                <div class="form-group">
-                                    <label for="register-name" class="form-label">Nombre Completo</label>
-                                    <input type="text" id="register-name" class="form-control" placeholder="Sebastián y Ludmila" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="register-email" class="form-label">Email</label>
-                                    <input type="email" id="register-email" class="form-control" placeholder="familia@email.com" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="register-password" class="form-label">Contraseña</label>
-                                    <input type="password" id="register-password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
-                                </div>
-                                
-                                <div class="alert alert-warning mt-4">
-                                    <span class="icon-warning alert-icon"></span>
-                                    <div>
-                                        <strong>Importante:</strong> Esta aplicación maneja datos financieros reales.
-                                        Usa una contraseña segura.
-                                    </div>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary btn-block mt-6">
-                                    Crear Cuenta
-                                </button>
-                            </form>
-                        </div>
+            
+            <div class="auth-form">
+                <h2>Iniciar Sesión</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required placeholder="tu@email.com">
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">Ingresar</button>
+                </form>
+                <p class="auth-switch">¿Primera vez? <a href="#" id="show-register">Regístrate</a></p>
+            </div>
+
+            <div class="auth-form hidden" id="register-form">
+                <h2>Crear Cuenta</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="reg-name">Nombre completo</label>
+                        <input type="text" id="reg-name" required placeholder="Sebastián">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" required placeholder="sebastian@familia.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Contraseña</label>
+                        <input type="password" id="reg-password" required placeholder="••••••••">
+                        <small>Mínimo 6 caracteres</small>
+                    </div>
+                    <button type="submit" class="btn-primary">Crear Cuenta</button>
+                </form>
+                <p class="auth-switch">¿Ya tienes cuenta? <a href="#" id="show-login">Inicia sesión</a></p>
             </div>
         </div>
     </div>
 
-    <!-- Contenido principal -->
-    <div id="main-content" class="hidden">
-        <div class="container">
+    <!-- Pantalla Principal -->
+    <div id="main-screen" class="screen">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <button id="menu-toggle" class="icon-btn">☰</button>
+                <h2 id="current-screen">Resumen</h2>
+                <button id="add-movement" class="icon-btn">+</button>
+            </div>
+            
+            <!-- Saldo Disponible -->
+            <div class="balance-header">
+                <div class="balance-item">
+                    <span>Efectivo</span>
+                    <strong id="cash-balance">$0</strong>
+                </div>
+                <div class="balance-item">
+                    <span>Mercado Pago</span>
+                    <strong id="mp-balance">$0</strong>
+                </div>
+                <div class="balance-item total">
+                    <span>Total</span>
+                    <strong id="total-balance">$0</strong>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navegación Lateral -->
+        <nav id="side-nav" class="side-nav">
+            <div class="user-info">
+                <div class="avatar">👤</div>
+                <div>
+                    <strong id="user-name">Usuario</strong>
+                    <small id="user-email">email@ejemplo.com</small>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="#" data-screen="summary" class="nav-item active">📊 Resumen</a></li>
+                <li><a href="#" data-screen="balance" class="nav-item">💰 Saldo</a></li>
+                <li><a href="#" data-screen="expenses" class="nav-item">📈 Gastos</a></li>
+                <li><a href="#" data-screen="desserts" class="nav-item">🍰 Postres</a></li>
+                <li><a href="#" data-screen="funds" class="nav-item">🏦 Fondos</a></li>
+                <li><a href="#" data-screen="savings" class="nav-item">💎 Ahorros</a></li>
+                <li><a href="#" data-screen="history" class="nav-item">📋 Historial</a></li>
+                <li class="divider"></li>
+                <li><a href="#" id="logout-btn" class="nav-item">🚪 Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido Principal -->
+        <main class="main-content">
             <!-- Resumen Mensual -->
-            <div id="summary-tab" class="tab-content active">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Resumen Mensual</h2>
-                        <select id="month-selector" class="form-select" style="width: 150px;">
-                            <!-- Meses se cargan dinámicamente -->
-                        </select>
-                    </div>
-                    
-                    <div class="grid grid-3 gap-4 mb-6">
-                        <div class="summary-card">
-                            <div class="summary-label">Ingresos Totales</div>
-                            <div id="total-income" class="summary-value text-success">$0</div>
-                        </div>
-                        <div class="summary-card">
-                            <div class="summary-label">Gastos Totales</div>
-                            <div id="total-expenses" class="summary-value text-danger">$0</div>
-                        </div>
-                        <div class="summary-card">
-                            <div class="summary-label">Balance</div>
-                            <div id="month-balance" class="summary-value balance-positive">$0</div>
-                        </div>
-                    </div>
+            <section id="summary-screen" class="content-screen active">
+                <div class="month-header">
+                    <button id="prev-month">←</button>
+                    <h3 id="current-month">Febrero 2024</h3>
+                    <button id="next-month">→</button>
+                </div>
 
-                    <div class="grid grid-2 gap-4">
-                        <div class="card">
-                            <h3 class="mb-4">Saldo Disponible</h3>
-                            <div id="available-balance" class="text-3xl font-bold mb-2">$0</div>
-                            <div id="balance-breakdown" class="text-muted">
-                                <div>💵 Efectivo: <span id="cash-amount">$0</span></div>
-                                <div>💳 Mercado Pago: <span id="mp-amount">$0</span></div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <h3 class="mb-4">Ahorro General</h3>
-                            <div id="savings-amount" class="text-3xl font-bold mb-2">$0</div>
-                            <div class="progress">
-                                <div id="savings-progress" class="progress-bar" style="width: 0%"></div>
-                            </div>
-                            <div id="savings-target" class="text-muted mt-2">
-                                Meta: <span id="savings-target-amount">$0</span>
-                            </div>
-                        </div>
+                <div class="summary-cards">
+                    <div class="summary-card income">
+                        <h4>Ingresos</h4>
+                        <div class="amount" id="monthly-income">$0</div>
+                        <small>Total del mes</small>
+                    </div>
+                    <div class="summary-card expense">
+                        <h4>Gastos</h4>
+                        <div class="amount" id="monthly-expenses">$0</div>
+                        <small>Total del mes</small>
+                    </div>
+                    <div class="summary-card balance">
+                        <h4>Disponible</h4>
+                        <div class="amount" id="monthly-balance">$0</div>
+                        <small>Para gastar</small>
                     </div>
                 </div>
 
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h3 class="card-title">Movimientos Recientes</h3>
-                        <button id="refresh-movements" class="btn btn-outline btn-sm">
-                            Actualizar
-                        </button>
-                    </div>
-                    <div id="recent-movements" class="list">
-                        <div class="text-center p-6 text-muted">
-                            No hay movimientos registrados este mes
-                        </div>
-                    </div>
+                <div class="category-breakdown">
+                    <h4>Gastos por Categoría</h4>
+                    <div id="expenses-chart"></div>
                 </div>
-            </div>
+
+                <div class="recent-activity">
+                    <h4>Últimos Movimientos</h4>
+                    <div id="recent-movements"></div>
+                </div>
+            </section>
 
             <!-- Saldo Disponible -->
-            <div id="balance-tab" class="tab-content">
-                <div class="card">
-                    <h2 class="card-title mb-6">Saldo Disponible</h2>
-                    
-                    <div class="grid grid-2 gap-4 mb-6">
-                        <div class="card">
-                            <div class="flex items-center gap-4 mb-4">
-                                <span class="icon-cash text-2xl"></span>
-                                <div>
-                                    <h3 class="font-bold">Efectivo</h3>
-                                    <div class="text-muted">Dinero en mano</div>
-                                </div>
-                            </div>
-                            <div id="cash-balance" class="text-3xl font-bold balance-positive mb-2">$0</div>
-                            <div class="text-muted">Disponible para gastos</div>
+            <section id="balance-screen" class="content-screen">
+                <h3>Saldo por Medio</h3>
+                <div class="money-sources">
+                    <div class="money-source-card">
+                        <div class="source-icon">💵</div>
+                        <div class="source-info">
+                            <h4>Efectivo</h4>
+                            <div class="source-amount" id="cash-detail">$0</div>
                         </div>
-                        
-                        <div class="card">
-                            <div class="flex items-center gap-4 mb-4">
-                                <span class="icon-card text-2xl"></span>
-                                <div>
-                                    <h3 class="font-bold">Mercado Pago</h3>
-                                    <div class="text-muted">Saldo digital</div>
-                                </div>
-                            </div>
-                            <div id="mp-balance" class="text-3xl font-bold balance-positive mb-2">$0</div>
-                            <div class="text-muted">Pagos electrónicos</div>
-                        </div>
+                        <button class="source-action" data-source="1">+/-</button>
                     </div>
-
-                    <div class="card">
-                        <h3 class="mb-4">Total Disponible</h3>
-                        <div id="total-available" class="text-3xl font-bold mb-2">$0</div>
-                        <div class="text-muted">
-                            Excluye ahorros y fondos asignados
-                            <div class="mt-2">
-                                💡 <strong>Nota:</strong> Este es el dinero realmente disponible para gastos.
-                            </div>
+                    <div class="money-source-card">
+                        <div class="source-icon">📱</div>
+                        <div class="source-info">
+                            <h4>Mercado Pago</h4>
+                            <div class="source-amount" id="mp-detail">$0</div>
                         </div>
+                        <button class="source-action" data-source="2">+/-</button>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Gastos por Categoría -->
-            <div id="expenses-tab" class="tab-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Gastos por Categoría</h2>
-                        <select id="expense-month-selector" class="form-select" style="width: 150px;">
-                            <!-- Meses se cargan dinámicamente -->
-                        </select>
-                    </div>
-                    
-                    <div class="chart-container" id="expenses-chart">
-                        <div class="text-center p-6 text-muted">
-                            No hay datos de gastos este mes
-                        </div>
-                    </div>
-                    
-                    <div id="expenses-ranking" class="list mt-4">
-                        <!-- Ranking se carga dinámicamente -->
-                    </div>
-                </div>
-            </div>
+            <section id="expenses-screen" class="content-screen">
+                <h3>Gastos del Hogar</h3>
+                <div class="expenses-list" id="expenses-list"></div>
+            </section>
 
             <!-- Postres -->
-            <div id="desserts-tab" class="tab-content">
-                <div class="card">
-                    <h2 class="card-title mb-6">Emprendimiento Postres</h2>
-                    
-                    <div class="grid grid-3 gap-4 mb-6">
-                        <div class="summary-card">
-                            <div class="summary-label">Ventas Totales</div>
-                            <div id="dessert-sales" class="summary-value text-success">$0</div>
-                        </div>
-                        <div class="summary-card">
-                            <div class="summary-label">Insumos Totales</div>
-                            <div id="dessert-costs" class="summary-value text-danger">$0</div>
-                        </div>
-                        <div class="summary-card">
-                            <div class="summary-label">Ganancia Neta</div>
-                            <div id="dessert-profit" class="summary-value">$0</div>
-                            <div id="dessert-profitability" class="text-muted text-sm mt-1"></div>
-                        </div>
+            <section id="desserts-screen" class="content-screen">
+                <h3>Emprendimiento Postres</h3>
+                <div class="desserts-stats">
+                    <div class="stat-card">
+                        <h4>Ventas Totales</h4>
+                        <div class="amount positive" id="total-sales">$0</div>
                     </div>
-
-                    <div class="card">
-                        <h3 class="mb-4">Estado de Rentabilidad</h3>
-                        <div id="profitability-status" class="alert alert-success">
-                            <span class="icon-success alert-icon"></span>
-                            <div>
-                                <strong>¡Excelente!</strong> El negocio está generando ganancias.
-                                <div class="text-sm mt-1" id="profitability-details"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-muted mt-4">
-                            <strong>💡 Consejo:</strong> Mantén los costos por debajo del 60% de las ventas
-                            para asegurar una buena rentabilidad.
-                        </div>
+                    <div class="stat-card">
+                        <h4>Insumos</h4>
+                        <div class="amount negative" id="total-supplies">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Ganancia Neta</h4>
+                        <div class="amount" id="desserts-profit">$0</div>
                     </div>
                 </div>
-            </div>
+                <div class="desserts-movements" id="desserts-movements"></div>
+            </section>
 
             <!-- Fondos -->
-            <div id="funds-tab" class="tab-content">
-                <div class="card">
-                    <h2 class="card-title mb-6">Fondos</h2>
-                    
-                    <div class="grid grid-2 gap-4">
-                        <div class="card">
-                            <div class="flex items-center gap-4 mb-4">
-                                <span class="icon-home text-2xl"></span>
-                                <div>
-                                    <h3 class="font-bold">Fondo Hogar</h3>
-                                    <div class="text-muted">Para gastos del hogar</div>
-                                </div>
-                            </div>
-                            <div id="home-fund-amount" class="text-3xl font-bold mb-2">$0</div>
-                            <div class="progress">
-                                <div id="home-fund-progress" class="progress-bar" style="width: 0%"></div>
-                            </div>
-                            <div id="home-fund-target" class="text-muted mt-2">
-                                Meta: <span id="home-fund-target-amount">$0</span>
-                            </div>
-                            <button onclick="editFund('hogar')" class="btn btn-outline btn-sm mt-4">
-                                Editar Meta
-                            </button>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="flex items-center gap-4 mb-4">
-                                <span class="icon-cake text-2xl"></span>
-                                <div>
-                                    <h3 class="font-bold">Fondo Postres</h3>
-                                    <div class="text-muted">Para el emprendimiento</div>
-                                </div>
-                            </div>
-                            <div id="dessert-fund-amount" class="text-3xl font-bold mb-2">$0</div>
-                            <div class="progress">
-                                <div id="dessert-fund-progress" class="progress-bar" style="width: 0%"></div>
-                            </div>
-                            <div id="dessert-fund-target" class="text-muted mt-2">
-                                Meta: <span id="dessert-fund-target-amount">$0</span>
-                            </div>
-                            <button onclick="editFund('postres')" class="btn btn-outline btn-sm mt-4">
-                                Editar Meta
-                            </button>
-                        </div>
+            <section id="funds-screen" class="content-screen">
+                <h3>Fondos Fijos</h3>
+                <div class="funds-list">
+                    <div class="fund-card">
+                        <h4>Fondo Hogar</h4>
+                        <div class="fund-amount" id="home-fund">$0</div>
+                        <button class="fund-action" data-fund="15">+/-</button>
                     </div>
-                    
-                    <div class="text-muted mt-6">
-                        <strong>📋 Nota:</strong> Los fondos son dinero separado para objetivos específicos.
-                        No se cuenta como saldo disponible.
+                    <div class="fund-card">
+                        <h4>Fondo Postres</h4>
+                        <div class="fund-amount" id="desserts-fund">$0</div>
+                        <button class="fund-action" data-fund="16">+/-</button>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Ahorros -->
-            <div id="savings-tab" class="tab-content">
-                <div class="card">
-                    <h2 class="card-title mb-6">Ahorro General</h2>
-                    
-                    <div class="card">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <div class="text-muted">Actual</div>
-                                <div id="savings-current" class="text-3xl font-bold">$0</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-muted">Meta</div>
-                                <div id="savings-target-display" class="text-3xl font-bold">$0</div>
-                            </div>
-                        </div>
-                        
-                        <div class="progress">
-                            <div id="savings-overall-progress" class="progress-bar" style="width: 0%"></div>
-                        </div>
-                        
-                        <div class="text-center mt-4">
-                            <span id="savings-percentage" class="text-xl font-bold">0%</span>
-                            <div class="text-muted">del objetivo alcanzado</div>
-                        </div>
-                        
-                        <div class="mt-6">
-                            <button onclick="editSavings()" class="btn btn-primary btn-block">
-                                Editar Meta de Ahorro
-                            </button>
-                        </div>
+            <section id="savings-screen" class="content-screen">
+                <h3>Ahorros Generales</h3>
+                <div class="savings-card">
+                    <div class="savings-icon">💰</div>
+                    <div class="savings-info">
+                        <h4>Ahorro General</h4>
+                        <div class="savings-amount" id="general-savings">$0</div>
                     </div>
-                    
-                    <div class="text-muted mt-6">
-                        <strong>💎 Importante:</strong> El dinero en ahorro está protegido y no se muestra
-                        como saldo disponible. Solo se puede usar para objetivos específicos.
-                    </div>
+                    <button class="savings-action" data-savings="17">+/-</button>
                 </div>
-            </div>
+            </section>
 
             <!-- Historial -->
-            <div id="history-tab" class="tab-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Historial Completo</h2>
-                        <div class="flex gap-2">
-                            <select id="history-type-filter" class="form-select">
-                                <option value="all">Todos los tipos</option>
-                                <option value="gasto_hogar">Gastos Hogar</option>
-                                <option value="ingreso_diario">Ingresos</option>
-                                <option value="insumos_postres">Insumos</option>
-                                <option value="ventas_postres">Ventas</option>
-                                <option value="fondo">Fondos</option>
-                                <option value="ahorro">Ahorros</option>
-                            </select>
-                            <input type="date" id="history-date-filter" class="form-control" style="width: 140px;">
-                        </div>
-                    </div>
-                    
-                    <div id="history-list" class="list">
-                        <div class="text-center p-6 text-muted">
-                            No hay movimientos registrados
-                        </div>
-                    </div>
-                    
-                    <div id="history-pagination" class="flex justify-center gap-2 mt-6">
-                        <!-- Paginación dinámica -->
-                    </div>
+            <section id="history-screen" class="content-screen">
+                <h3>Historial Completo</h3>
+                <div class="filters">
+                    <select id="type-filter">
+                        <option value="all">Todos los tipos</option>
+                        <option value="gasto_hogar">Gastos Hogar</option>
+                        <option value="ingreso">Ingresos</option>
+                        <option value="insumos_postres">Insumos Postres</option>
+                        <option value="ventas_postres">Ventas Postres</option>
+                        <option value="fondos">Fondos</option>
+                        <option value="ahorros">Ahorros</option>
+                    </select>
+                    <input type="date" id="date-filter">
                 </div>
-            </div>
-        </div>
+                <div class="history-list" id="history-list"></div>
+            </section>
+        </main>
     </div>
 
-    <!-- Navegación inferior -->
-    <div class="bottom-nav hidden" id="bottom-nav">
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-tab="summary">
-                <span class="nav-icon">📊</span>
-                <span>Resumen</span>
-            </button>
-            <button class="nav-tab" data-tab="balance">
-                <span class="nav-icon">💰</span>
-                <span>Saldo</span>
-            </button>
-            <button class="nav-tab" data-tab="expenses">
-                <span class="nav-icon">📈</span>
-                <span>Gastos</span>
-            </button>
-            <button class="nav-tab" data-tab="desserts">
-                <span class="nav-icon">🍰</span>
-                <span>Postres</span>
-            </button>
-            <button class="nav-tab" data-tab="funds">
-                <span class="nav-icon">🏦</span>
-                <span>Fondos</span>
-            </button>
-            <button class="nav-tab" data-tab="savings">
-                <span class="nav-icon">⭐</span>
-                <span>Ahorro</span>
-            </button>
-            <button class="nav-tab" data-tab="history">
-                <span class="nav-icon">📝</span>
-                <span>Historial</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal para nuevo movimiento -->
-    <div id="movement-modal" class="modal hidden">
+    <!-- Modal para agregar movimiento -->
+    <div id="movement-modal" class="modal">
         <div class="modal-content">
-            <div class="card-header">
-                <h2 class="card-title">Nuevo Movimiento</h2>
-                <button onclick="closeModal()" class="btn btn-outline btn-sm">
-                    <span class="icon-close"></span>
-                </button>
+            <div class="modal-header">
+                <h3 id="modal-title">Nuevo Movimiento</h3>
+                <button class="close-modal">&times;</button>
             </div>
-            
             <form id="movement-form">
-                <div class="p-6">
-                    <div class="form-group">
-                        <label for="movement-type" class="form-label">Tipo de Movimiento</label>
-                        <select id="movement-type" class="form-select" required>
-                            <option value="">Seleccionar tipo</option>
-                            <option value="gasto_hogar">Gasto del Hogar</option>
-                            <option value="ingreso_diario">Ingreso Diario</option>
-                            <option value="insumos_postres">Insumos Postres</option>
-                            <option value="ventas_postres">Ventas Postres</option>
-                            <option value="fondo">Fondo</option>
-                            <option value="ahorro">Ahorro</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="movement-category" class="form-label">Categoría</label>
-                        <select id="movement-category" class="form-select" required disabled>
-                            <option value="">Primero selecciona un tipo</option>
-                        </select>
-                    </div>
-                    
-                    <div id="person-field" class="form-group hidden">
-                        <label for="movement-person" class="form-label">Persona</label>
-                        <select id="movement-person" class="form-select">
-                            <option value="Sebastián">Sebastián</option>
-                            <option value="Ludmila">Ludmila</option>
-                        </select>
-                    </div>
-                    
-                    <div id="fund-type-field" class="form-group hidden">
-                        <label for="movement-fund-type" class="form-label">Tipo de Fondo</label>
-                        <select id="movement-fund-type" class="form-select">
-                            <option value="hogar">Fondo Hogar</option>
-                            <option value="postres">Fondo Postres</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="movement-amount" class="form-label">Monto ($)</label>
-                        <input type="number" id="movement-amount" class="form-control" 
-                               min="1" step="0.01" placeholder="0.00" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="movement-payment" class="form-label">Medio de Pago</label>
-                        <select id="movement-payment" class="form-select" required>
-                            <option value="efectivo">💵 Efectivo</option>
-                            <option value="mercado_pago">💳 Mercado Pago</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="movement-description" class="form-label">Descripción (opcional)</label>
-                        <input type="text" id="movement-description" class="form-control" 
-                               placeholder="Ej: Supermercado, Pago de luz..." maxlength="100">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="movement-date" class="form-label">Fecha</label>
-                        <input type="date" id="movement-date" class="form-control" required>
-                    </div>
-                    
-                    <div class="flex gap-4 mt-6">
-                        <button type="button" onclick="closeModal()" class="btn btn-outline flex-1">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary flex-1">
-                            <span class="icon-check"></span> Guardar
-                        </button>
-                    </div>
+                <div class="form-group">
+                    <label for="movement-type">Tipo de Movimiento</label>
+                    <select id="movement-type" required>
+                        <option value="">Seleccionar tipo</option>
+                        <option value="gasto_hogar">Gasto Hogar</option>
+                        <option value="ingreso">Ingreso Diario</option>
+                        <option value="insumos_postres">Insumos Postres</option>
+                        <option value="ventas_postres">Venta Postres</option>
+                        <option value="fondos">Fondos</option>
+                        <option value="ahorros">Ahorros</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="movement-category">Categoría</label>
+                    <select id="movement-category" required>
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="movement-amount">Monto ($)</label>
+                    <input type="number" id="movement-amount" min="0.01" step="0.01" required placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="movement-source">Medio de Dinero</label>
+                    <select id="movement-source" required>
+                        <option value="1">Efectivo</option>
+                        <option value="2">Mercado Pago</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="movement-description">Descripción (opcional)</label>
+                    <input type="text" id="movement-description" placeholder="Ej: Compra en supermercado">
+                </div>
+
+                <div class="form-group">
+                    <label for="movement-date">Fecha</label>
+                    <input type="date" id="movement-date" required>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary close-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Movimiento</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal para editar objetivos -->
-    <div id="goal-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="card-header">
-                <h2 id="goal-title" class="card-title">Editar Meta</h2>
-                <button onclick="closeGoalModal()" class="btn btn-outline btn-sm">
-                    <span class="icon-close"></span>
-                </button>
-            </div>
-            
-            <form id="goal-form">
-                <div class="p-6">
-                    <input type="hidden" id="goal-type">
-                    
-                    <div class="form-group">
-                        <label for="goal-target" class="form-label">Objetivo ($)</label>
-                        <input type="number" id="goal-target" class="form-control" 
-                               min="1" step="0.01" placeholder="0.00" required>
-                    </div>
-                    
-                    <div class="alert alert-warning">
-                        <span class="icon-warning alert-icon"></span>
-                        <div>
-                            <strong>Nota:</strong> Cambiar la meta no afecta el progreso actual.
-                            Solo establece un nuevo objetivo.
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-4 mt-6">
-                        <button type="button" onclick="closeGoalModal()" class="btn btn-outline flex-1">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary flex-1">
-                            <span class="icon-check"></span> Guardar
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal de confirmación -->
-    <div id="confirm-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="p-6">
-                <h3 id="confirm-title" class="card-title mb-4"></h3>
-                <p id="confirm-message" class="mb-6"></p>
-                <div class="flex gap-4">
-                    <button onclick="closeConfirmModal(false)" class="btn btn-outline flex-1">
-                        Cancelar
-                    </button>
-                    <button onclick="closeConfirmModal(true)" id="confirm-action" class="btn btn-danger flex-1">
-                        Confirmar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alertas flotantes -->
-    <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;"></div>
-
-    <script>
-        // =============================================
-        // CONFIGURACIÓN SUPABASE (REEMPLAZAR ESTOS VALORES)
-        // =============================================
-        // Obtener configuración de variables de entorno o usar valores predeterminados
-        const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI';
-        
-        // =============================================
-        // INICIALIZACIÓN
-        // =============================================
-        let supabase;
-        let currentUser = null;
-        let currentMonth = new Date().toISOString().slice(0, 7);
-        let movements = [];
-        let balances = [];
-        let funds = [];
-        let savings = [];
-        
-        // Categorías definitivas
-        const CATEGORIES = {
-            gasto_hogar: [
-                'Alquiler', 'Servicios', 'Comida hogar', 'Transporte',
-                'Bebé', 'Mascotas', 'Salud', 'Ropa', 'Imprevistos'
-            ],
-            ingreso_diario: ['Ingreso diario Sebastián', 'Ingreso diario Ludmila'],
-            insumos_postres: ['Insumos postres'],
-            ventas_postres: ['Ventas postres'],
-            fondo: ['Fondo fijo hogar', 'Fondo fijo postres'],
-            ahorro: ['Ahorro general']
-        };
-        
-        // Mapeo de tipos a íconos
-        const TYPE_ICONS = {
-            gasto_hogar: '🛒',
-            ingreso_diario: '💰',
-            insumos_postres: '📦',
-            ventas_postres: '🍰',
-            fondo: '🏦',
-            ahorro: '⭐'
-        };
-        
-        // Mapeo de tipos a colores
-        const TYPE_COLORS = {
-            gasto_hogar: '#ef4444',
-            ingreso_diario: '#10b981',
-            insumos_postres: '#f59e0b',
-            ventas_postres: '#8b5cf6',
-            fondo: '#3b82f6',
-            ahorro: '#ec4899'
-        };
-
-        // =============================================
-        // FUNCIONES DE INICIALIZACIÓN
-        // =============================================
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Configuración dinámica para diferentes entornos
-                let supabaseUrl = SUPABASE_URL;
-                let supabaseKey = SUPABASE_ANON_KEY;
-                
-                // Intentar obtener configuración de parámetros de URL o localStorage
-                const urlParams = new URLSearchParams(window.location.search);
-                const storedConfig = localStorage.getItem('familia-finanzas-config');
-                
-                if (urlParams.has('supabase_url') && urlParams.has('supabase_key')) {
-                    supabaseUrl = urlParams.get('supabase_url');
-                    supabaseKey = urlParams.get('supabase_key');
-                    
-                    // Guardar en localStorage para futuras sesiones
-                    localStorage.setItem('familia-finanzas-config', JSON.stringify({
-                        url: supabaseUrl,
-                        key: supabaseKey
-                    }));
-                } else if (storedConfig) {
-                    try {
-                        const config = JSON.parse(storedConfig);
-                        supabaseUrl = config.url;
-                        supabaseKey = config.key;
-                    } catch (e) {
-                        console.error('Error al cargar configuración:', e);
-                    }
-                }
-                
-                // Verificar que Supabase está disponible
-                if (typeof supabase === 'undefined') {
-                    console.error('Supabase no está cargado. Verifica que el CDN esté accesible.');
-                    
-                    // Mostrar interfaz para configuración manual
-                    showConfigScreen();
-                    hideLoading();
-                    return;
-                }
-                
-                // Inicializar cliente Supabase
-                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-                
-                // Verificar conexión a Supabase
-                try {
-                    const { data, error } = await supabase.auth.getSession();
-                    
-                    if (error) {
-                        console.warn('Error al verificar sesión:', error.message);
-                        // Continuar, puede ser un problema temporal
-                    }
-                    
-                    if (data?.session) {
-                        currentUser = data.session.user;
-                        await loadUserData();
-                        showMainApp();
-                    } else {
-                        showAuthScreen();
-                    }
-                } catch (connectionError) {
-                    console.error('Error de conexión a Supabase:', connectionError);
-                    showAlert(
-                        'No se pudo conectar con el servidor. Verifica tu conexión a internet y la configuración de Supabase.',
-                        'error'
-                    );
-                    showConfigScreen();
-                }
-                
-                hideLoading();
-                setupEventListeners();
-                updateCurrentMonth();
-                setupMonthSelectors();
-                setupPWA();
-                
-            } catch (error) {
-                console.error('Error inicializando la aplicación:', error);
-                showAlert('Error al iniciar la aplicación. Recarga la página.', 'error');
-                hideLoading();
-                showAuthScreen();
-            }
-        });
-
-        // =============================================
-        // PANTALLA DE CONFIGURACIÓN (para configurar Supabase manualmente)
-        // =============================================
-        function showConfigScreen() {
-            // Ocultar todas las pantallas
-            document.getElementById('auth-nav').classList.add('hidden');
-            document.getElementById('auth-content').classList.add('hidden');
-            document.getElementById('main-nav').classList.add('hidden');
-            document.getElementById('main-content').classList.add('hidden');
-            document.getElementById('bottom-nav').classList.add('hidden');
-            
-            // Crear pantalla de configuración si no existe
-            let configScreen = document.getElementById('config-screen');
-            if (!configScreen) {
-                configScreen = document.createElement('div');
-                configScreen.id = 'config-screen';
-                configScreen.className = 'container';
-                configScreen.innerHTML = `
-                    <div class="card" style="max-width: 500px; margin: 2rem auto;">
-                        <div class="card-header">
-                            <h2 class="card-title">Configuración de Supabase</h2>
-                        </div>
-                        <div class="p-6">
-                            <div class="alert alert-warning mb-6">
-                                <span class="icon-warning alert-icon"></span>
-                                <div>
-                                    <strong>Configuración requerida:</strong> Para usar esta aplicación, necesitas configurar tu proyecto de Supabase.
-                                </div>
-                            </div>
-                            
-                            <form id="config-form">
-                                <div class="form-group">
-                                    <label class="form-label">URL de Supabase</label>
-                                    <input type="url" id="config-url" class="form-control" 
-                                           placeholder="https://tu-proyecto.supabase.co" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label class="form-label">Clave Anónima</label>
-                                    <input type="text" id="config-key" class="form-control" 
-                                           placeholder="tu-clave-anon-publica" required>
-                                </div>
-                                
-                                <div class="text-muted mb-6">
-                                    <small>
-                                        💡 Puedes encontrar estos valores en tu proyecto de Supabase:<br>
-                                        Dashboard → Settings → API
-                                    </small>
-                                </div>
-                                
-                                <div class="flex gap-4">
-                                    <button type="button" onclick="location.reload()" class="btn btn-outline flex-1">
-                                        Cancelar
-                                    </button>
-                                    <button type="submit" class="btn btn-primary flex-1">
-                                        Guardar y Continuar
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(configScreen);
-                
-                // Configurar evento del formulario
-                document.getElementById('config-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const url = document.getElementById('config-url').value;
-                    const key = document.getElementById('config-key').value;
-                    
-                    // Guardar configuración
-                    localStorage.setItem('familia-finanzas-config', JSON.stringify({
-                        url: url,
-                        key: key
-                    }));
-                    
-                    // Recargar para aplicar cambios
-                    location.reload();
-                });
-            }
-            
-            configScreen.classList.remove('hidden');
-        }
-
-        // =============================================
-        // FUNCIONES DE AUTENTICACIÓN
-        // =============================================
-        async function handleLogin(email, password) {
-            try {
-                showLoading();
-                
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email.trim(),
-                    password: password
-                });
-
-                if (error) {
-                    if (error.message.includes('Invalid login credentials')) {
-                        throw new Error('Email o contraseña incorrectos');
-                    } else if (error.message.includes('Email not confirmed')) {
-                        throw new Error('Confirma tu email antes de iniciar sesión');
-                    }
-                    throw error;
-                }
-
-                currentUser = data.user;
-                await loadUserData();
-                showMainApp();
-                showAlert('¡Bienvenido de nuevo!', 'success');
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function handleRegister(name, email, password) {
-            try {
-                if (password.length < 6) {
-                    throw new Error('La contraseña debe tener al menos 6 caracteres');
-                }
-                
-                showLoading();
-                
-                const { data, error } = await supabase.auth.signUp({
-                    email: email.trim(),
-                    password: password,
-                    options: {
-                        data: {
-                            full_name: name.trim(),
-                            family_role: 'parent'
-                        }
-                    }
-                });
-
-                if (error) {
-                    if (error.message.includes('already registered')) {
-                        throw new Error('Este email ya está registrado');
-                    } else if (error.message.includes('password')) {
-                        throw new Error('La contraseña es muy débil. Usa al menos 6 caracteres');
-                    }
-                    throw error;
-                }
-
-                showAlert('¡Cuenta creada exitosamente! Revisa tu email para confirmar.', 'success');
-                
-                // Autocompletar el email en el login
-                document.getElementById('login-email').value = email;
-                
-                // Cambiar a pestaña de login
-                showAuthTab('login');
-                
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function handleLogout() {
-            try {
-                showLoading();
-                await supabase.auth.signOut();
-                currentUser = null;
-                showAuthScreen();
-                showAlert('Sesión cerrada correctamente', 'success');
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // =============================================
-        // FUNCIONES DE DATOS
-        // =============================================
-        async function loadUserData() {
-            if (!currentUser) return;
-
-            try {
-                showLoading();
-                
-                // Cargar en paralelo para mejor performance
-                const [balancesData, fundsData, savingsData, movementsData] = await Promise.all([
-                    loadBalances(),
-                    loadFunds(),
-                    loadSavings(),
-                    loadMonthlyMovements()
-                ]);
-                
-                balances = balancesData;
-                funds = fundsData;
-                savings = savingsData;
-                movements = movementsData;
-                
-                // Actualizar UI
-                updateSummary();
-                updateBalancesDisplay();
-                updateFundsDisplay();
-                updateSavingsDisplay();
-                updateRecentMovements();
-                
-            } catch (error) {
-                console.error('Error cargando datos:', error);
-                showAlert('Error al cargar los datos. Intenta recargar la página.', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadBalances() {
-            try {
-                const { data, error } = await supabase
-                    .from('balances')
-                    .select('*')
-                    .eq('user_id', currentUser.id);
-
-                if (error) throw error;
-
-                let balancesData = data || [];
-                
-                // Si no hay balances, crear iniciales
-                if (balancesData.length === 0) {
-                    await initializeUserBalances();
-                    return await loadBalances();
-                }
-
-                return balancesData;
-            } catch (error) {
-                console.error('Error cargando balances:', error);
-                // Devolver valores por defecto
-                return [
-                    { user_id: currentUser.id, payment_method: 'efectivo', balance: 0 },
-                    { user_id: currentUser.id, payment_method: 'mercado_pago', balance: 0 }
-                ];
-            }
-        }
-
-        async function initializeUserBalances() {
-            const { error } = await supabase
-                .from('balances')
-                .insert([
-                    { user_id: currentUser.id, payment_method: 'efectivo', balance: 0 },
-                    { user_id: currentUser.id, payment_method: 'mercado_pago', balance: 0 }
-                ]);
-
-            if (error) {
-                console.error('Error inicializando balances:', error);
-                throw error;
-            }
-        }
-
-        async function loadFunds() {
-            try {
-                const { data, error } = await supabase
-                    .from('funds')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true);
-
-                if (error) throw error;
-
-                let fundsData = data || [];
-                
-                // Si no hay fondos, crear iniciales
-                if (fundsData.length === 0) {
-                    await initializeUserFunds();
-                    return await loadFunds();
-                }
-
-                return fundsData;
-            } catch (error) {
-                console.error('Error cargando fondos:', error);
-                return [];
-            }
-        }
-
-        async function initializeUserFunds() {
-            const { error } = await supabase
-                .from('funds')
-                .insert([
-                    { user_id: currentUser.id, fund_type: 'hogar', target_amount: 0, current_amount: 0 },
-                    { user_id: currentUser.id, fund_type: 'postres', target_amount: 0, current_amount: 0 }
-                ]);
-
-            if (error) {
-                console.error('Error inicializando fondos:', error);
-                throw error;
-            }
-        }
-
-        async function loadSavings() {
-            try {
-                const { data, error } = await supabase
-                    .from('savings')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true);
-
-                if (error) throw error;
-
-                let savingsData = data || [];
-                
-                // Si no hay ahorros, crear inicial
-                if (savingsData.length === 0) {
-                    await initializeUserSavings();
-                    return await loadSavings();
-                }
-
-                return savingsData;
-            } catch (error) {
-                console.error('Error cargando ahorros:', error);
-                return [];
-            }
-        }
-
-        async function initializeUserSavings() {
-            const { error } = await supabase
-                .from('savings')
-                .insert([
-                    { user_id: currentUser.id, target_amount: 0, current_amount: 0 }
-                ]);
-
-            if (error) {
-                console.error('Error inicializando ahorros:', error);
-                throw error;
-            }
-        }
-
-        async function loadMonthlyMovements(month = currentMonth) {
-            try {
-                const startDate = `${month}-01`;
-                const endDate = getLastDayOfMonth(month);
-
-                const { data, error } = await supabase
-                    .from('movements')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .gte('movement_date', startDate)
-                    .lte('movement_date', endDate)
-                    .order('movement_date', { ascending: false })
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                return data || [];
-            } catch (error) {
-                console.error('Error cargando movimientos:', error);
-                return [];
-            }
-        }
-
-        // =============================================
-        // FUNCIONES DE MOVIMIENTOS
-        // =============================================
-        async function createMovement(movementData) {
-            try {
-                showLoading();
-                
-                // Validar fecha (no permitir fechas futuras)
-                const movementDate = new Date(movementData.movement_date);
-                const today = new Date();
-                today.setHours(23, 59, 59, 999);
-                
-                if (movementDate > today) {
-                    throw new Error('No se pueden registrar movimientos con fecha futura');
-                }
-                
-                // Validar que no sea un movimiento antiguo (más de 1 día)
-                const oneDayAgo = new Date();
-                oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-                
-                if (movementDate < oneDayAgo && movementDate.toDateString() !== oneDayAgo.toDateString()) {
-                    throw new Error('No se pueden registrar movimientos con fecha anterior a ayer');
-                }
-                
-                const { error } = await supabase
-                    .from('movements')
-                    .insert([{
-                        ...movementData,
-                        user_id: currentUser.id,
-                        created_at: new Date().toISOString(),
-                        is_processed: true,
-                        processed_at: new Date().toISOString()
-                    }]);
-
-                if (error) {
-                    if (error.message.includes('movements_movement_date_check')) {
-                        throw new Error('No se pueden editar movimientos antiguos');
-                    }
-                    throw error;
-                }
-
-                // Recargar datos
-                await loadUserData();
-                
-                closeModal();
-                showAlert('Movimiento registrado correctamente', 'success');
-                
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function deleteMovement(movementId) {
-            try {
-                showLoading();
-                
-                // Primero obtener el movimiento para verificar la fecha
-                const { data: movement, error: fetchError } = await supabase
-                    .from('movements')
-                    .select('*')
-                    .eq('id', movementId)
-                    .eq('user_id', currentUser.id)
-                    .single();
-
-                if (fetchError) throw fetchError;
-                
-                // Verificar que no sea un movimiento antiguo
-                const movementDate = new Date(movement.movement_date);
-                const today = new Date();
-                const oneDayAgo = new Date();
-                oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-                
-                if (movementDate < oneDayAgo && movementDate.toDateString() !== oneDayAgo.toDateString()) {
-                    throw new Error('No se pueden eliminar movimientos antiguos');
-                }
-                
-                const { error } = await supabase
-                    .from('movements')
-                    .delete()
-                    .eq('id', movementId)
-                    .eq('user_id', currentUser.id);
-
-                if (error) throw error;
-
-                // Recargar datos
-                await loadUserData();
-                
-                showAlert('Movimiento eliminado correctamente', 'success');
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // =============================================
-        // FUNCIONES DE CÁLCULO
-        // =============================================
-        function calculateMonthlySummary() {
-            const summary = {
-                income: 0,
-                expenses: 0,
-                sales: 0,
-                costs: 0,
-                funds: 0,
-                savings: 0,
-                balance: 0
-            };
-
-            movements.forEach(movement => {
-                const amount = parseFloat(movement.amount);
-                
-                switch (movement.type) {
-                    case 'ingreso_diario':
-                        summary.income += amount;
-                        break;
-                    case 'ventas_postres':
-                        summary.income += amount;
-                        summary.sales += amount;
-                        break;
-                    case 'gasto_hogar':
-                        summary.expenses += amount;
-                        break;
-                    case 'insumos_postres':
-                        summary.expenses += amount;
-                        summary.costs += amount;
-                        break;
-                    case 'fondo':
-                        summary.funds += amount;
-                        break;
-                    case 'ahorro':
-                        summary.savings += amount;
-                        break;
-                }
-            });
-
-            summary.balance = summary.income - summary.expenses - summary.funds - summary.savings;
-            return summary;
-        }
-
-        function calculateAvailableBalance() {
-            const cashBalance = balances.find(b => b.payment_method === 'efectivo')?.balance || 0;
-            const mpBalance = balances.find(b => b.payment_method === 'mercado_pago')?.balance || 0;
-            const totalSavings = savings.reduce((sum, s) => sum + parseFloat(s.current_amount), 0);
-            const totalFunds = funds.reduce((sum, f) => sum + parseFloat(f.current_amount), 0);
-            
-            return {
-                cash: parseFloat(cashBalance),
-                mp: parseFloat(mpBalance),
-                total: parseFloat(cashBalance) + parseFloat(mpBalance),
-                available: parseFloat(cashBalance) + parseFloat(mpBalance) - totalSavings - totalFunds
-            };
-        }
-
-        function calculateDessertProfit() {
-            const sales = movements
-                .filter(m => m.type === 'ventas_postres')
-                .reduce((sum, m) => sum + parseFloat(m.amount), 0);
-                
-            const costs = movements
-                .filter(m => m.type === 'insumos_postres')
-                .reduce((sum, m) => sum + parseFloat(m.amount), 0);
-                
-            const profit = sales - costs;
-            const profitability = costs > 0 ? (profit / costs) * 100 : 0;
-            
-            return {
-                sales: sales,
-                costs: costs,
-                profit: profit,
-                profitability: profitability
-            };
-        }
-
-        // =============================================
-        // FUNCIONES DE UI
-        // =============================================
-        function showMainApp() {
-            document.getElementById('auth-nav').classList.add('hidden');
-            document.getElementById('auth-content').classList.add('hidden');
-            const configScreen = document.getElementById('config-screen');
-            if (configScreen) configScreen.classList.add('hidden');
-            document.getElementById('main-nav').classList.remove('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('bottom-nav').classList.remove('hidden');
-        }
-
-        function showAuthScreen() {
-            document.getElementById('auth-nav').classList.remove('hidden');
-            document.getElementById('auth-content').classList.remove('hidden');
-            const configScreen = document.getElementById('config-screen');
-            if (configScreen) configScreen.classList.add('hidden');
-            document.getElementById('main-nav').classList.add('hidden');
-            document.getElementById('main-content').classList.add('hidden');
-            document.getElementById('bottom-nav').classList.add('hidden');
-            showAuthTab('login');
-        }
-
-        function showAuthTab(tabName) {
-            // Actualizar botones
-            document.getElementById('login-tab-btn').classList.remove('active');
-            document.getElementById('register-tab-btn').classList.remove('active');
-            
-            if (tabName === 'login') {
-                document.getElementById('login-tab-btn').classList.add('active');
-            } else {
-                document.getElementById('register-tab-btn').classList.add('active');
-            }
-            
-            // Actualizar contenido
-            document.getElementById('login-tab').classList.remove('active');
-            document.getElementById('register-tab').classList.remove('active');
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-        }
-
-        function showTab(tabName) {
-            // Actualizar botones de navegación
-            document.querySelectorAll('.nav-tab').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tab === tabName) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            // Actualizar contenido
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-                if (content.id === `${tabName}-tab`) {
-                    content.classList.add('active');
-                    
-                    // Cargar datos específicos de la pestaña
-                    switch (tabName) {
-                        case 'expenses':
-                            updateExpensesDisplay();
-                            break;
-                        case 'desserts':
-                            updateDessertsDisplay();
-                            break;
-                        case 'history':
-                            loadHistory();
-                            break;
-                    }
-                }
-            });
-        }
-
-        function updateSummary() {
-            const summary = calculateMonthlySummary();
-            const availableBalance = calculateAvailableBalance();
-            
-            // Actualizar valores
-            document.getElementById('total-income').textContent = formatCurrency(summary.income);
-            document.getElementById('total-expenses').textContent = formatCurrency(summary.expenses);
-            
-            const monthBalanceEl = document.getElementById('month-balance');
-            monthBalanceEl.textContent = formatCurrency(summary.balance);
-            monthBalanceEl.className = 'summary-value ' + (summary.balance >= 0 ? 'text-success' : 'text-danger');
-            
-            document.getElementById('available-balance').textContent = formatCurrency(availableBalance.available);
-            document.getElementById('cash-amount').textContent = formatCurrency(availableBalance.cash);
-            document.getElementById('mp-amount').textContent = formatCurrency(availableBalance.mp);
-            
-            // Actualizar ahorros
-            if (savings.length > 0) {
-                const saving = savings[0];
-                const current = parseFloat(saving.current_amount);
-                const target = parseFloat(saving.target_amount);
-                const percentage = target > 0 ? (current / target) * 100 : 0;
-                
-                document.getElementById('savings-amount').textContent = formatCurrency(current);
-                document.getElementById('savings-target-amount').textContent = formatCurrency(target);
-                document.getElementById('savings-progress').style.width = `${Math.min(percentage, 100)}%`;
-            }
-        }
-
-        function updateBalancesDisplay() {
-            const availableBalance = calculateAvailableBalance();
-            
-            document.getElementById('cash-balance').textContent = formatCurrency(availableBalance.cash);
-            document.getElementById('mp-balance').textContent = formatCurrency(availableBalance.mp);
-            document.getElementById('total-available').textContent = formatCurrency(availableBalance.available);
-            
-            // Aplicar clases de color
-            const cashEl = document.getElementById('cash-balance');
-            const mpEl = document.getElementById('mp-balance');
-            const totalEl = document.getElementById('total-available');
-            
-            cashEl.className = 'text-3xl font-bold mb-2 ' + (availableBalance.cash >= 0 ? 'balance-positive' : 'balance-negative');
-            mpEl.className = 'text-3xl font-bold mb-2 ' + (availableBalance.mp >= 0 ? 'balance-positive' : 'balance-negative');
-            totalEl.className = 'text-3xl font-bold mb-2 ' + (availableBalance.available >= 0 ? 'balance-positive' : 'balance-negative');
-        }
-
-        function updateFundsDisplay() {
-            funds.forEach(fund => {
-                const current = parseFloat(fund.current_amount);
-                const target = parseFloat(fund.target_amount);
-                const percentage = target > 0 ? (current / target) * 100 : 0;
-                
-                if (fund.fund_type === 'hogar') {
-                    document.getElementById('home-fund-amount').textContent = formatCurrency(current);
-                    document.getElementById('home-fund-target-amount').textContent = formatCurrency(target);
-                    document.getElementById('home-fund-progress').style.width = `${Math.min(percentage, 100)}%`;
-                } else if (fund.fund_type === 'postres') {
-                    document.getElementById('dessert-fund-amount').textContent = formatCurrency(current);
-                    document.getElementById('dessert-fund-target-amount').textContent = formatCurrency(target);
-                    document.getElementById('dessert-fund-progress').style.width = `${Math.min(percentage, 100)}%`;
-                }
-            });
-        }
-
-        function updateSavingsDisplay() {
-            if (savings.length > 0) {
-                const saving = savings[0];
-                const current = parseFloat(saving.current_amount);
-                const target = parseFloat(saving.target_amount);
-                const percentage = target > 0 ? (current / target) * 100 : 0;
-                
-                document.getElementById('savings-current').textContent = formatCurrency(current);
-                document.getElementById('savings-target-display').textContent = formatCurrency(target);
-                document.getElementById('savings-overall-progress').style.width = `${Math.min(percentage, 100)}%`;
-                document.getElementById('savings-percentage').textContent = `${Math.round(percentage)}%`;
-            }
-        }
-
-        function updateRecentMovements() {
-            const container = document.getElementById('recent-movements');
-            const recentMovements = movements.slice(0, 10); // Mostrar solo 10 más recientes
-            
-            if (recentMovements.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center p-6 text-muted">
-                        No hay movimientos registrados este mes
-                        <div class="mt-2">
-                            <button onclick="showModal()" class="btn btn-primary btn-sm mt-2">
-                                Registrar primer movimiento
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = recentMovements.map(movement => `
-                <div class="list-item" data-id="${movement.id}">
-                    <div class="list-item-content">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xl">${TYPE_ICONS[movement.type] || '📄'}</span>
-                            <div>
-                                <div class="list-item-title">${movement.category}</div>
-                                <div class="list-item-subtitle">
-                                    ${formatDate(movement.movement_date)} • 
-                                    ${movement.payment_method === 'efectivo' ? '💵 Efectivo' : '💳 Mercado Pago'}
-                                    ${movement.description ? `• ${movement.description}` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list-item-amount ${movement.type.includes('gasto') || movement.type === 'insumos_postres' ? 'text-danger' : 'text-success'}">
-                        ${movement.type.includes('gasto') || movement.type === 'insumos_postres' ? '-' : '+'}${formatCurrency(movement.amount)}
-                    </div>
-                </div>
-            `).join('');
-            
-            // Agregar evento para eliminar movimientos recientes
-            container.querySelectorAll('.list-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    if (e.target.closest('button')) return;
-                    
-                    const movementId = item.dataset.id;
-                    const movement = movements.find(m => m.id === movementId);
-                    
-                    if (movement) {
-                        showConfirmModal(
-                            'Eliminar movimiento',
-                            `¿Estás seguro de eliminar este movimiento de ${formatCurrency(movement.amount)}?`,
-                            () => deleteMovement(movementId)
-                        );
-                    }
-                });
-            });
-        }
-
-        function updateExpensesDisplay() {
-            const currentMonthExpenses = movements.filter(m => m.type === 'gasto_hogar');
-            const expensesByCategory = {};
-            
-            currentMonthExpenses.forEach(expense => {
-                if (!expensesByCategory[expense.category]) {
-                    expensesByCategory[expense.category] = 0;
-                }
-                expensesByCategory[expense.category] += parseFloat(expense.amount);
-            });
-            
-            const container = document.getElementById('expenses-ranking');
-            const sortedCategories = Object.entries(expensesByCategory)
-                .sort(([,a], [,b]) => b - a);
-            
-            if (sortedCategories.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center p-6 text-muted">
-                        No hay gastos registrados este mes
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = sortedCategories.map(([category, amount], index) => `
-                <div class="list-item">
-                    <div class="flex items-center gap-4">
-                        <span class="text-2xl">${index + 1}.</span>
-                        <div>
-                            <div class="list-item-title">${category}</div>
-                            <div class="list-item-subtitle">${movements.filter(m => m.category === category).length} movimientos</div>
-                        </div>
-                    </div>
-                    <div class="list-item-amount text-danger">
-                        ${formatCurrency(amount)}
-                    </div>
-                </div>
-            `).join('');
-            
-            // También actualizar el gráfico simplificado
-            updateExpensesChart();
-        }
-
-        function updateExpensesChart() {
-            const container = document.getElementById('expenses-chart');
-            const currentMonthExpenses = movements.filter(m => m.type === 'gasto_hogar');
-            
-            if (currentMonthExpenses.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center p-6 text-muted">
-                        No hay datos de gastos este mes
-                    </div>
-                `;
-                return;
-            }
-            
-            const expensesByCategory = {};
-            currentMonthExpenses.forEach(expense => {
-                if (!expensesByCategory[expense.category]) {
-                    expensesByCategory[expense.category] = 0;
-                }
-                expensesByCategory[expense.category] += parseFloat(expense.amount);
-            });
-            
-            const total = Object.values(expensesByCategory).reduce((a, b) => a + b, 0);
-            const sortedCategories = Object.entries(expensesByCategory)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 5); // Mostrar solo top 5
-            
-            container.innerHTML = `
-                <div style="height: 300px; display: flex; flex-direction: column; justify-content: space-between;">
-                    ${sortedCategories.map(([category, amount]) => {
-                        const percentage = total > 0 ? (amount / total) * 100 : 0;
-                        return `
-                            <div style="margin-bottom: 1rem;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                    <span>${category}</span>
-                                    <span>${formatCurrency(amount)} (${percentage.toFixed(1)}%)</span>
-                                </div>
-                                <div style="height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
-                                    <div style="height: 100%; width: ${percentage}%; background: var(--primary); border-radius: 4px;"></div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-        }
-
-        function updateDessertsDisplay() {
-            const profitData = calculateDessertProfit();
-            
-            document.getElementById('dessert-sales').textContent = formatCurrency(profitData.sales);
-            document.getElementById('dessert-costs').textContent = formatCurrency(profitData.costs);
-            document.getElementById('dessert-profit').textContent = formatCurrency(profitData.profit);
-            document.getElementById('dessert-profitability').textContent = 
-                `Rentabilidad: ${profitData.profitability.toFixed(1)}%`;
-            
-            // Actualizar estado de rentabilidad
-            const statusEl = document.getElementById('profitability-status');
-            const detailsEl = document.getElementById('profitability-details');
-            
-            if (profitData.profitability > 20) {
-                statusEl.className = 'alert alert-success';
-                statusEl.innerHTML = `
-                    <span class="icon-success alert-icon"></span>
-                    <div>
-                        <strong>¡Excelente rentabilidad!</strong>
-                        <div class="text-sm mt-1">Las ganancias superan el 20% de los costos</div>
-                    </div>
-                `;
-            } else if (profitData.profitability > 0) {
-                statusEl.className = 'alert alert-warning';
-                statusEl.innerHTML = `
-                    <span class="icon-warning alert-icon"></span>
-                    <div>
-                        <strong>Rentabilidad baja</strong>
-                        <div class="text-sm mt-1">Considera reducir costos o aumentar precios</div>
-                    </div>
-                `;
-            } else {
-                statusEl.className = 'alert alert-error';
-                statusEl.innerHTML = `
-                    <span class="icon-error alert-icon"></span>
-                    <div>
-                        <strong>Pérdidas detectadas</strong>
-                        <div class="text-sm mt-1">Revisa los costos y precios urgentemente</div>
-                    </div>
-                `;
-            }
-        }
-
-        async function loadHistory() {
-            try {
-                const typeFilter = document.getElementById('history-type-filter').value;
-                const dateFilter = document.getElementById('history-date-filter').value;
-                
-                let query = supabase
-                    .from('movements')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('movement_date', { ascending: false })
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-                
-                if (typeFilter !== 'all') {
-                    query = query.eq('type', typeFilter);
-                }
-                
-                if (dateFilter) {
-                    query = query.eq('movement_date', dateFilter);
-                }
-                
-                const { data, error } = await query;
-                
-                if (error) throw error;
-                
-                const container = document.getElementById('history-list');
-                
-                if (!data || data.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center p-6 text-muted">
-                            No hay movimientos con los filtros aplicados
-                        </div>
-                    `;
-                    return;
-                }
-                
-                container.innerHTML = data.map(movement => `
-                    <div class="list-item" data-id="${movement.id}">
-                        <div class="list-item-content">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">${TYPE_ICONS[movement.type] || '📄'}</span>
-                                <div>
-                                    <div class="list-item-title">${movement.category}</div>
-                                    <div class="list-item-subtitle">
-                                        ${formatDate(movement.movement_date)} • 
-                                        ${movement.type.replace('_', ' ')}
-                                        ${movement.payment_method === 'efectivo' ? '• 💵' : '• 💳'}
-                                        ${movement.description ? `<div class="text-xs mt-1">${movement.description}</div>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item-amount ${movement.type.includes('gasto') || movement.type === 'insumos_postres' ? 'text-danger' : 'text-success'}">
-                            ${movement.type.includes('gasto') || movement.type === 'insumos_postres' ? '-' : '+'}${formatCurrency(movement.amount)}
-                        </div>
-                    </div>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Error cargando historial:', error);
-                showAlert('Error al cargar el historial', 'error');
-            }
-        }
-
-        function showModal() {
-            document.getElementById('movement-modal').classList.remove('hidden');
-            document.getElementById('movement-date').value = new Date().toISOString().split('T')[0];
-            document.getElementById('movement-amount').focus();
-        }
-
-        function closeModal() {
-            document.getElementById('movement-modal').classList.add('hidden');
-            document.getElementById('movement-form').reset();
-            document.getElementById('movement-category').innerHTML = '<option value="">Primero selecciona un tipo</option>';
-            document.getElementById('movement-category').disabled = true;
-            document.getElementById('person-field').classList.add('hidden');
-            document.getElementById('fund-type-field').classList.add('hidden');
-        }
-
-        function editFund(fundType) {
-            const fund = funds.find(f => f.fund_type === fundType);
-            if (fund) {
-                document.getElementById('goal-title').textContent = `Editar Meta - ${fundType === 'hogar' ? 'Fondo Hogar' : 'Fondo Postres'}`;
-                document.getElementById('goal-type').value = fundType;
-                document.getElementById('goal-target').value = parseFloat(fund.target_amount).toFixed(2);
-                document.getElementById('goal-modal').classList.remove('hidden');
-            }
-        }
-
-        async function saveGoal() {
-            try {
-                const type = document.getElementById('goal-type').value;
-                const target = parseFloat(document.getElementById('goal-target').value);
-                
-                if (target <= 0) {
-                    throw new Error('El objetivo debe ser mayor a 0');
-                }
-                
-                showLoading();
-                
-                const { error } = await supabase
-                    .from('funds')
-                    .update({ target_amount: target, updated_at: new Date().toISOString() })
-                    .eq('user_id', currentUser.id)
-                    .eq('fund_type', type);
-                
-                if (error) throw error;
-                
-                await loadFunds();
-                updateFundsDisplay();
-                closeGoalModal();
-                showAlert('Meta actualizada correctamente', 'success');
-                
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function editSavings() {
-            if (savings.length > 0) {
-                const saving = savings[0];
-                document.getElementById('goal-title').textContent = 'Editar Meta de Ahorro';
-                document.getElementById('goal-type').value = 'ahorro';
-                document.getElementById('goal-target').value = parseFloat(saving.target_amount).toFixed(2);
-                document.getElementById('goal-modal').classList.remove('hidden');
-            }
-        }
-
-        async function saveSavingsGoal() {
-            try {
-                const target = parseFloat(document.getElementById('goal-target').value);
-                
-                if (target <= 0) {
-                    throw new Error('El objetivo debe ser mayor a 0');
-                }
-                
-                showLoading();
-                
-                const { error } = await supabase
-                    .from('savings')
-                    .update({ target_amount: target, updated_at: new Date().toISOString() })
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true);
-                
-                if (error) throw error;
-                
-                await loadSavings();
-                updateSavingsDisplay();
-                closeGoalModal();
-                showAlert('Meta de ahorro actualizada', 'success');
-                
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function closeGoalModal() {
-            document.getElementById('goal-modal').classList.add('hidden');
-            document.getElementById('goal-form').reset();
-        }
-
-        function showConfirmModal(title, message, callback) {
-            document.getElementById('confirm-title').textContent = title;
-            document.getElementById('confirm-message').textContent = message;
-            window.confirmCallback = callback;
-            document.getElementById('confirm-modal').classList.remove('hidden');
-        }
-
-        function closeConfirmModal(confirmed) {
-            document.getElementById('confirm-modal').classList.add('hidden');
-            if (confirmed && typeof window.confirmCallback === 'function') {
-                window.confirmCallback();
-            }
-            window.confirmCallback = null;
-        }
-
-        function showAlert(message, type = 'success') {
-            const container = document.getElementById('alert-container');
-            const alertId = 'alert-' + Date.now();
-            
-            const alert = document.createElement('div');
-            alert.id = alertId;
-            alert.className = `alert alert-${type} mb-2`;
-            alert.innerHTML = `
-                <span class="alert-icon">${type === 'success' ? '✓' : type === 'error' ? '✗' : '⚠'}</span>
-                <div>${message}</div>
-            `;
-            
-            container.appendChild(alert);
-            
-            // Auto-remove después de 5 segundos
-            setTimeout(() => {
-                const alertEl = document.getElementById(alertId);
-                if (alertEl) {
-                    alertEl.style.opacity = '0';
-                    alertEl.style.transition = 'opacity 0.3s';
-                    setTimeout(() => alertEl.remove(), 300);
-                }
-            }, 5000);
-        }
-
-        function showLoading() {
-            document.getElementById('loading').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').classList.add('hidden');
-        }
-
-        function updateCurrentMonth() {
-            const now = new Date();
-            const monthNames = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-            ];
-            document.getElementById('current-month').textContent = 
-                `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-        }
-
-        function setupMonthSelectors() {
-            const monthSelector = document.getElementById('month-selector');
-            const expenseMonthSelector = document.getElementById('expense-month-selector');
-            
-            // Generar últimos 6 meses
-            const months = [];
-            const now = new Date();
-            
-            for (let i = 0; i < 6; i++) {
-                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const monthName = date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
-                const value = `${year}-${month}`;
-                
-                months.push({ value, label: monthName.charAt(0).toUpperCase() + monthName.slice(1) });
-            }
-            
-            months.forEach(month => {
-                const option = document.createElement('option');
-                option.value = month.value;
-                option.textContent = month.label;
-                if (month.value === currentMonth) {
-                    option.selected = true;
-                }
-                
-                monthSelector.appendChild(option.cloneNode(true));
-                expenseMonthSelector.appendChild(option);
-            });
-            
-            // Event listeners para cambios de mes
-            monthSelector.addEventListener('change', async () => {
-                currentMonth = monthSelector.value;
-                await loadMonthlyMovements();
-                updateSummary();
-                updateRecentMovements();
-            });
-            
-            expenseMonthSelector.addEventListener('change', async () => {
-                const selectedMonth = expenseMonthSelector.value;
-                await loadMonthlyMovements(selectedMonth);
-                updateExpensesDisplay();
-            });
-        }
-
-        // =============================================
-        // FUNCIONES UTILITARIAS
-        // =============================================
-        function getLastDayOfMonth(yearMonth) {
-            const [year, month] = yearMonth.split('-').map(Number);
-            return new Date(year, month, 0).toISOString().slice(0, 10);
-        }
-
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-AR', {
-                style: 'currency',
-                currency: 'ARS',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(amount);
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('es-AR', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            }).replace('.', '');
-        }
-
-        // =============================================
-        // PWA FUNCTIONS - SIN SERVICE WORKER
-        // =============================================
-        function setupPWA() {
-            // Mostrar prompt de instalación sin Service Worker
-            let deferredPrompt;
-            
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                
-                // Mostrar botón de instalación después de 5 segundos si el usuario no ha instalado
-                setTimeout(() => {
-                    if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
-                        const installBtn = document.createElement('button');
-                        installBtn.className = 'btn btn-primary btn-sm';
-                        installBtn.innerHTML = '📱 Instalar App';
-                        installBtn.style.position = 'fixed';
-                        installBtn.style.bottom = '80px';
-                        installBtn.style.right = '20px';
-                        installBtn.style.zIndex = '1000';
-                        installBtn.onclick = async () => {
-                            if (deferredPrompt) {
-                                deferredPrompt.prompt();
-                                const { outcome } = await deferredPrompt.userChoice;
-                                if (outcome === 'accepted') {
-                                    console.log('Usuario aceptó la instalación');
-                                }
-                                deferredPrompt = null;
-                                installBtn.remove();
-                            }
-                        };
-                        
-                        document.body.appendChild(installBtn);
-                        
-                        // Auto-remove después de 30 segundos
-                        setTimeout(() => {
-                            if (installBtn.parentNode) {
-                                installBtn.remove();
-                            }
-                        }, 30000);
-                    }
-                }, 5000);
-            });
-            
-            // Detectar si la app está instalada
-            window.addEventListener('appinstalled', () => {
-                console.log('App instalada exitosamente');
-                deferredPrompt = null;
-                
-                // Mostrar mensaje de éxito
-                showAlert('¡App instalada correctamente! Ahora puedes acceder desde tu pantalla de inicio.', 'success');
-            });
-            
-            // Detectar modo standalone (app instalada)
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                console.log('La app se está ejecutando en modo standalone (instalada)');
-            }
-        }
-
-        // =============================================
-        // EVENT LISTENERS
-        // =============================================
-        function setupEventListeners() {
-            // Tabs de autenticación
-            document.getElementById('login-tab-btn').addEventListener('click', () => showAuthTab('login'));
-            document.getElementById('register-tab-btn').addEventListener('click', () => showAuthTab('register'));
-            
-            // Formularios de autenticación
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                await handleLogin(email, password);
-            });
-            
-            document.getElementById('register-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const name = document.getElementById('register-name').value;
-                const email = document.getElementById('register-email').value;
-                const password = document.getElementById('register-password').value;
-                await handleRegister(name, email, password);
-            });
-            
-            // Navegación inferior
-            document.querySelectorAll('.nav-tab').forEach(btn => {
-                btn.addEventListener('click', () => showTab(btn.dataset.tab));
-            });
-            
-            // Botones principales
-            document.getElementById('add-movement-btn').addEventListener('click', showModal);
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                showConfirmModal(
-                    'Cerrar sesión',
-                    '¿Estás seguro de que quieres salir?',
-                    handleLogout
-                );
-            });
-            
-            document.getElementById('refresh-movements').addEventListener('click', async () => {
-                showLoading();
-                await loadUserData();
-                hideLoading();
-                showAlert('Datos actualizados', 'success');
-            });
-            
-            // Formulario de movimiento
-            document.getElementById('movement-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const type = document.getElementById('movement-type').value;
-                const category = document.getElementById('movement-category').value;
-                const amount = parseFloat(document.getElementById('movement-amount').value);
-                const payment = document.getElementById('movement-payment').value;
-                const description = document.getElementById('movement-description').value;
-                const date = document.getElementById('movement-date').value;
-                
-                if (!type || !category || !amount || !payment || !date) {
-                    showAlert('Por favor completa todos los campos requeridos', 'error');
-                    return;
-                }
-                
-                if (amount <= 0) {
-                    showAlert('El monto debe ser mayor a 0', 'error');
-                    return;
-                }
-                
-                let movementData = {
-                    type,
-                    category,
-                    amount,
-                    payment_method: payment,
-                    description: description || null,
-                    movement_date: date
-                };
-                
-                // Campos adicionales según tipo
-                if (type === 'ingreso_diario') {
-                    movementData.person = document.getElementById('movement-person').value;
-                } else if (type === 'fondo') {
-                    movementData.fund_type = document.getElementById('movement-fund-type').value;
-                }
-                
-                await createMovement(movementData);
-            });
-            
-            // Cambiar categorías según tipo de movimiento
-            document.getElementById('movement-type').addEventListener('change', function() {
-                const type = this.value;
-                const categorySelect = document.getElementById('movement-category');
-                const personField = document.getElementById('person-field');
-                const fundField = document.getElementById('fund-type-field');
-                
-                // Limpiar y habilitar selector de categorías
-                categorySelect.innerHTML = '';
-                categorySelect.disabled = !type;
-                
-                if (type && CATEGORIES[type]) {
-                    CATEGORIES[type].forEach(cat => {
-                        const option = document.createElement('option');
-                        option.value = cat;
-                        option.textContent = cat;
-                        categorySelect.appendChild(option);
-                    });
-                }
-                
-                // Mostrar/ocultar campos adicionales
-                personField.classList.toggle('hidden', type !== 'ingreso_diario');
-                fundField.classList.toggle('hidden', type !== 'fondo');
-            });
-            
-            // Formulario de metas
-            document.getElementById('goal-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const type = document.getElementById('goal-type').value;
-                
-                if (type === 'ahorro') {
-                    await saveSavingsGoal();
-                } else {
-                    await saveGoal();
-                }
-            });
-            
-            // Filtros del historial
-            document.getElementById('history-type-filter').addEventListener('change', loadHistory);
-            document.getElementById('history-date-filter').addEventListener('change', loadHistory);
-            
-            // Cerrar modales con Escape
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    if (!document.getElementById('movement-modal').classList.contains('hidden')) {
-                        closeModal();
-                    } else if (!document.getElementById('goal-modal').classList.contains('hidden')) {
-                        closeGoalModal();
-                    } else if (!document.getElementById('confirm-modal').classList.contains('hidden')) {
-                        closeConfirmModal(false);
-                    }
-                }
-            });
-            
-            // Cerrar modales haciendo clic fuera
-            document.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    if (!document.getElementById('movement-modal').classList.contains('hidden')) {
-                        closeModal();
-                    } else if (!document.getElementById('goal-modal').classList.contains('hidden')) {
-                        closeGoalModal();
-                    } else if (!document.getElementById('confirm-modal').classList.contains('hidden')) {
-                        closeConfirmModal(false);
-                    }
-                }
-            });
-            
-            // Guardar datos antes de cerrar la página
-            window.addEventListener('beforeunload', () => {
-                // Puedes agregar lógica para guardar datos pendientes aquí
-                console.log('Guardando datos antes de salir...');
-            });
-            
-            // Detectar cuando la app vuelve a estar activa
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && currentUser) {
-                    // Recargar datos si el usuario vuelve a la app
-                    console.log('App activa, recargando datos...');
-                    loadUserData();
-                }
-            });
-        }
-    </script>
+    <!-- Overlay para modal -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <!-- Script principal -->
+    <script src="app.js"></script>
 </body>
 </html>
