@@ -1,69 +1,48 @@
 {
-  "name": "Economía Familiar",
-  "short_name": "EcoFam",
-  "description": "App para ordenar la economía familiar de Sebastián y Ludmila",
+  "name": "Familia Unida - Finanzas",
+  "short_name": "FamiliaUnida",
+  "description": "Aplicación para ordenar las finanzas familiares juntos",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#4F46E5",
+  "background_color": "#F9FAFB",
   "theme_color": "#4F46E5",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-192x192.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMTQzXzU4NDcpIi8+CjxwYXRoIGQ9Ik0xMDMuNzk0IDY3LjI1ODZDMTEwLjA4MSA2Mi4zODM5IDExOC41MzggNjIuODA2OCAxMjQuMzU0IDY4LjM3MDZMMTg1LjE5MiAxMjIuNjY5QzE5MS43MzUgMTI4Ljg4NSAxOTEuMTY1IDEzOS4wMjkgMTgzLjk3MiAxNDQuNTY3TDEyOS43MDYgMTgzLjA4NEMxMjMuNDM5IDE4OC4xMjMgMTE0LjU2MSAxODguMTIzIDEwOC4yOTQgMTgzLjA4NEw1NC4wMjgxIDE0NC41NjdDNDYuODM1NSAxMzkuMDI5IDQ2LjI2NDkgMTI4Ljg4NSA1Mi44MDgzIDEyMi42NjlMMTEzLjY0NiA2OC4zNzA2QzExNC4xNDkgNjcuOTIyOSAxMTQuNjgxIDY3LjUyNTIgMTE1LjIzNiA2Ny4xNzc0QzExNC42ODEgNjcuNTI1MiAxMTQuMTQ5IDY3LjkyMjkgMTEzLjY0NiA2OC4zNzA2TDEwMy43OTQgNjcuMjU4NloiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOCIvPgo8cGF0aCBkPSJNMTE0LjQxNSA5Ny4xMjAxQzExNC40MTUgOTIuMTgxOSAxMTguNDU2IDg4LjEyMDEgMTIzLjM3MyA4OC4xMjAxSDEzMi42MjZDMTM3LjU0MyA4OC4xMjAxIDE0MS41ODQgOTIuMTgxOSAxNDEuNTg0IDk3LjEyMDFWMTQ1LjEyQzE0MS41ODQgMTUwLjA1OCAxMzcuNTQzIDE1NC4xMiAxMzIuNjI2IDE1NC4xMkgxMjMuMzczQzExOC40NTYgMTU0LjEyIDExNC40MTUgMTUwLjA1OCAxMTQuNDE1IDE0NS4xMlY5Ny4xMjAxWiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8xNDNfNTg0NyIgeDE9IjEyOCIgeTE9IjAiIHgyPSIxMjgiIHkyPSIyNTYiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzRGNDZFNSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MTgzRjgiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml"
     },
     {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512x512.png",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMTQzXzU4NDcpIi8+CjxwYXRoIGQ9Ik0xMDMuNzk0IDY3LjI1ODZDMTEwLjA4MSA2Mi4zODM5IDExOC41MzggNjIuODA2OCAxMjQuMzU0IDY4LjM3MDZMMTg1LjE5MiAxMjIuNjY5QzE5MS43MzUgMTI4Ljg4NSAxOTEuMTY1IDEzOS4wMjkgMTgzLjk3MiAxNDQuNTY3TDEyOS43MDYgMTgzLjA4NEMxMjMuNDM5IDE4OC4xMjMgMTE0LjU2MSAxODguMTIzIDEwOC4yOTQgMTgzLjA4NEw1NC4wMjgxIDE0NC41NjdDNDYuODM1NSAxMzkuMDI5IDQ2LjI2NDkgMTI4Ljg4NSA1Mi44MDgzIDEyMi42NjlMMTEzLjY0NiA2OC4zNzA2QzExNC4xNDkgNjcuOTIyOSAxMTQuNjgxIDY3LjUyNTIgMTE1LjIzNiA2Ny4xNzc0QzExNC42ODEgNjcuNTI1MiAxMTQuMTQ5IDY3LjkyMjkgMTEzLjY0NiA2OC4zNzA2TDEwMy43OTQgNjcuMjU4NloiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOCIvPgo8cGF0aCBkPSJNMTE0LjQxNSA5Ny4xMjAxQzExNC40MTUgOTIuMTgxOSAxMTguNDU2IDg4LjEyMDEgMTIzLjM3MyA4OC4xMjAxSDEzMi42MjZDMTM3LjU0MyA4OC4xMjAxIDE0MS41ODQgOTIuMTgxOSAxNDEuNTg0IDk3LjEyMDFWMTQ1LjEyQzE0MS41ODQgMTUwLjA1OCAxMzcuNTQzIDE1NC4xMiAxMzIuNjI2IDE1NC4xMkgxMjMuMzczQzExOC40NTYgMTU0LjEyIDExNC40MTUgMTUwLjA1OCAxMTQuNDE1IDE0NS4xMlY5Ny4xMjAxWiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8xNDNfNTg0NyIgeDE9IjEyOCIgeTE9IjAiIHgyPSIxMjgiIHkyPSIyNTYiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzRGNDZFNSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MTgzRjgiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ],
   "categories": ["finance", "productivity"],
   "shortcuts": [
     {
-      "name": "Registrar Gasto",
-      "short_name": "Gasto",
-      "description": "Registrar un nuevo gasto",
-      "url": "/?action=add-expense",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+      "name": "Agregar movimiento",
+      "short_name": "Agregar",
+      "description": "Agregar nuevo movimiento",
+      "url": "/?tab=add-transaction",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Ver Resumen",
+      "name": "Ver resumen",
       "short_name": "Resumen",
       "description": "Ver resumen mensual",
-      "url": "/?screen=resumen",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+      "url": "/?tab=dashboard",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard de finanzas familiares"
     }
   ]
 }
