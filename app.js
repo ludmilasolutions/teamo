@@ -1,10 +1,10 @@
 // ============================================
-// CONFIGURACIÓN SUPABASE
+// CONFIGURACIÓN SUPABASE - COMPLETA
 // ============================================
 
 // ¡IMPORTANTE! REEMPLAZAR CON TUS DATOS REALES
 const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Tu URL de Supabase
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Tu Anon Key
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzOTAwNDIsImV4cCI6MjA1Mzk2NjA0Mn0.VwWQhU4eihkv7G5_tu4PFAfpnGSe7Oov9TnHqWH9xYs'; // Tu Anon Key
 
 // Crear cliente Supabase globalmente
 let supabaseClient = null;
@@ -25,32 +25,69 @@ const AppState = {
     transactions: [],
     emotionalMessages: [],
     isOffline: false,
-    deferredInstallPrompt: null
+    deferredInstallPrompt: null,
+    isLoading: false
 };
+
+// ============================================
+// INICIALIZACIÓN DE LA APLICACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Aplicación Familia Unida - Iniciando...');
+    
+    try {
+        // Inicializar Supabase
+        await initSupabase();
+        
+        // Inicializar UI
+        initUI();
+        
+        // Configurar PWA
+        setupPWAInstall();
+        
+        // Registrar Service Worker
+        await registerServiceWorker();
+        
+        // Verificar autenticación
+        await checkAuth();
+        
+        console.log('✅ Aplicación inicializada correctamente');
+    } catch (error) {
+        console.error('❌ Error inicializando aplicación:', error);
+        showNotification('Error al iniciar la aplicación. Recarga la página.', 'error');
+    }
+});
 
 // ============================================
 // FUNCIONES DE UTILIDAD
 // ============================================
 function formatCurrency(amount) {
+    if (typeof amount !== 'number') amount = parseFloat(amount) || 0;
     return new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: 'ARS',
-        minimumFractionDigits: 2
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     }).format(amount);
 }
 
 function formatDate(dateString) {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-AR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    } catch (e) {
+        return dateString;
+    }
 }
 
 function showNotification(message, type = 'info') {
-    // Crear contenedor si no existe
+    console.log(`📢 Notificación [${type}]:`, message);
+    
     let container = document.getElementById('notificationContainer');
     if (!container) {
         container = document.createElement('div');
@@ -68,7 +105,6 @@ function showNotification(message, type = 'info') {
     
     container.appendChild(notification);
     
-    // Auto-remover
     setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => {
@@ -77,6 +113,8 @@ function showNotification(message, type = 'info') {
             }
         }, 300);
     }, 5000);
+    
+    return notification;
 }
 
 function getNotificationIcon(type) {
@@ -88,40 +126,21 @@ function getNotificationIcon(type) {
     }
 }
 
-// ============================================
-// INICIALIZACIÓN DE LA APLICACIÓN
-// ============================================
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM cargado, iniciando aplicación...');
-    
-    // Inicializar Supabase
-    await initSupabase();
-    
-    // Inicializar UI
-    initUI();
-    
-    // Configurar PWA
-    setupPWAInstall();
-    
-    // Registrar Service Worker
-    if ('serviceWorker' in navigator) {
-        try {
-            await navigator.serviceWorker.register('/service-worker.js');
-            console.log('Service Worker registrado correctamente');
-        } catch (error) {
-            console.warn('Error registrando Service Worker:', error);
-        }
-    }
-    
-    // Verificar autenticación
-    await checkAuth();
-});
+function setLoading(loading) {
+    AppState.isLoading = loading;
+    document.body.classList.toggle('loading', loading);
+}
 
+// ============================================
+// INICIALIZACIÓN DE SUPABASE
+// ============================================
 async function initSupabase() {
+    console.log('🔄 Inicializando Supabase...');
+    
     try {
-        // Verificar que Supabase esté disponible
+        // Verificar que Supabase esté cargado
         if (typeof supabase === 'undefined') {
-            throw new Error('Supabase no está cargado. Verifica el script en index.html');
+            throw new Error('Biblioteca Supabase no encontrada');
         }
         
         // Crear cliente
@@ -133,54 +152,68 @@ async function initSupabase() {
             }
         });
         
-        console.log('Supabase inicializado correctamente');
+        console.log('✅ Supabase inicializado correctamente');
         return true;
     } catch (error) {
-        console.error('Error inicializando Supabase:', error);
-        showNotification('Error de conexión. La aplicación funcionará en modo offline.', 'error');
+        console.error('❌ Error inicializando Supabase:', error);
+        showNotification('Error de conexión. La aplicación funcionará en modo offline limitado.', 'error');
         return false;
     }
 }
 
 // ============================================
-// AUTENTICACIÓN
+// AUTENTICACIÓN Y USUARIO
 // ============================================
 async function checkAuth() {
+    console.log('🔐 Verificando autenticación...');
+    
+    if (!supabaseClient) {
+        console.log('⚠️ Supabase no disponible, mostrando login');
+        showLoginScreen();
+        return;
+    }
+    
     try {
-        if (!supabaseClient) {
-            showLoginScreen();
-            return;
-        }
-        
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         
         if (error) {
-            console.error('Error al verificar sesión:', error);
+            console.error('❌ Error al verificar sesión:', error);
             showLoginScreen();
             return;
         }
         
         if (session?.user) {
+            console.log('👤 Usuario autenticado:', session.user.email);
             AppState.currentUser = session.user;
             await loadUserProfile();
         } else {
+            console.log('👤 No hay sesión activa');
             showLoginScreen();
         }
     } catch (error) {
-        console.error('Error en checkAuth:', error);
+        console.error('❌ Error en checkAuth:', error);
         showLoginScreen();
     }
 }
 
 async function loadUserProfile() {
+    console.log('📋 Cargando perfil de usuario...');
+    setLoading(true);
+    
     try {
-        const { data: userData, error } = await supabaseClient
+        // Primero verificar si el usuario existe en la tabla users
+        const { data: userData, error: userError } = await supabaseClient
             .from('users')
             .select('*, families(*)')
             .eq('id', AppState.currentUser.id)
             .single();
         
-        if (error) throw error;
+        if (userError) {
+            // Usuario no existe en tabla users, crearlo
+            console.log('👤 Usuario no encontrado en tabla users, creando...');
+            await createUserProfile();
+            return;
+        }
         
         if (userData && userData.families) {
             AppState.currentFamily = userData.families;
@@ -188,23 +221,123 @@ async function loadUserProfile() {
             await loadInitialData();
             updateUI();
             startEmotionalMessagesRotation();
-            showNotification(`¡Bienvenido/a ${userData.full_name || 'Familia'}!`, 'success');
+            console.log('✅ Perfil cargado exitosamente');
         } else {
+            console.log('🏠 Usuario sin familia, creando nueva...');
             await createNewFamily();
         }
     } catch (error) {
-        console.error('Error cargando perfil:', error);
+        console.error('❌ Error cargando perfil:', error);
         showNotification('Error cargando datos del usuario', 'error');
-        showLoginScreen();
+    } finally {
+        setLoading(false);
+    }
+}
+
+async function createUserProfile() {
+    try {
+        // Crear familia primero
+        const familyName = `Familia de ${AppState.currentUser.email.split('@')[0]}`;
+        const { data: family, error: familyError } = await supabaseClient
+            .from('families')
+            .insert({ name: familyName })
+            .select()
+            .single();
+        
+        if (familyError) throw familyError;
+        
+        // Crear usuario en tabla users
+        const { error: userError } = await supabaseClient
+            .from('users')
+            .insert({
+                id: AppState.currentUser.id,
+                family_id: family.id,
+                full_name: AppState.currentUser.user_metadata?.full_name || 'Usuario'
+            });
+        
+        if (userError) throw userError;
+        
+        // Inicializar datos de familia
+        await initializeFamilyData(family.id);
+        
+        AppState.currentFamily = family;
+        updateUserUI({ 
+            full_name: AppState.currentUser.user_metadata?.full_name || 'Usuario',
+            email: AppState.currentUser.email 
+        });
+        
+        await loadInitialData();
+        updateUI();
+        startEmotionalMessagesRotation();
+        
+        showNotification('¡Perfil creado exitosamente!', 'success');
+        
+    } catch (error) {
+        console.error('❌ Error creando perfil:', error);
+        showNotification('Error creando perfil de usuario', 'error');
+    }
+}
+
+async function initializeFamilyData(familyId) {
+    console.log('🏗️ Inicializando datos de familia...');
+    
+    try {
+        // Insertar personas
+        await supabaseClient.from('persons').insert([
+            { family_id: familyId, name: 'Sebastián', avatar_color: '#4F46E5' },
+            { family_id: familyId, name: 'Ludmila', avatar_color: '#EC4899' }
+        ]);
+        
+        // Insertar medios de pago
+        await supabaseClient.from('payment_methods').insert([
+            { family_id: familyId, name: 'Efectivo', icon: '💰' },
+            { family_id: familyId, name: 'Mercado Pago', icon: '📱' }
+        ]);
+        
+        // Insertar categorías
+        const categories = [
+            // Gastos del hogar
+            { family_id: familyId, name: 'Alquiler', type: 'household_expense', color: '#EF4444', icon: '🏠' },
+            { family_id: familyId, name: 'Servicios', type: 'household_expense', color: '#3B82F6', icon: '💡' },
+            { family_id: familyId, name: 'Comida hogar', type: 'household_expense', color: '#10B981', icon: '🛒' },
+            { family_id: familyId, name: 'Transporte', type: 'household_expense', color: '#F59E0B', icon: '🚗' },
+            { family_id: familyId, name: 'Bebé', type: 'household_expense', color: '#8B5CF6', icon: '👶' },
+            { family_id: familyId, name: 'Mascotas', type: 'household_expense', color: '#F97316', icon: '🐕' },
+            { family_id: familyId, name: 'Salud', type: 'household_expense', color: '#EC4899', icon: '❤️' },
+            { family_id: familyId, name: 'Ropa', type: 'household_expense', color: '#06B6D4', icon: '👕' },
+            { family_id: familyId, name: 'Imprevistos', type: 'household_expense', color: '#71717A', icon: '🎲' },
+            // Postres
+            { family_id: familyId, name: 'Insumos postres', type: 'business_expense', color: '#8B5CF6', icon: '🧁' },
+            { family_id: familyId, name: 'Ventas postres', type: 'business_income', color: '#10B981', icon: '💰' },
+            // Ingresos
+            { family_id: familyId, name: 'Ingreso diario Sebastián', type: 'personal_income', color: '#4F46E5', icon: '💼' },
+            { family_id: familyId, name: 'Ingreso diario Ludmila', type: 'personal_income', color: '#EC4899', icon: '💼' }
+        ];
+        
+        await supabaseClient.from('categories').insert(categories);
+        
+        // Insertar fondos
+        await supabaseClient.from('funds').insert([
+            { family_id: familyId, name: 'Fondo fijo hogar', monthly_goal: 0, color: '#10B981', icon: '🏠' },
+            { family_id: familyId, name: 'Fondo fijo postres', monthly_goal: 0, color: '#8B5CF6', icon: '🧁' }
+        ]);
+        
+        console.log('✅ Datos de familia inicializados');
+        
+    } catch (error) {
+        console.error('❌ Error inicializando datos de familia:', error);
+        throw error;
     }
 }
 
 async function createNewFamily() {
-    const familyName = prompt('Nombre para tu familia:', 'Nuestra Familia');
+    const familyName = prompt('🏠 ¿Cómo quieres llamar a tu familia?', 'Nuestra Familia');
     if (!familyName) {
         showNotification('Se necesita un nombre para la familia', 'warning');
         return;
     }
+    
+    setLoading(true);
     
     try {
         // Crear familia
@@ -216,7 +349,7 @@ async function createNewFamily() {
         
         if (familyError) throw familyError;
         
-        // Actualizar usuario
+        // Actualizar usuario con familia
         const { error: userError } = await supabaseClient
             .from('users')
             .update({ family_id: family.id })
@@ -225,110 +358,222 @@ async function createNewFamily() {
         if (userError) throw userError;
         
         // Inicializar datos
-        try {
-            const { error: initError } = await supabaseClient.rpc('initialize_family_data', {
-                family_uuid: family.id,
-                admin_user_uuid: AppState.currentUser.id
-            });
-            
-            if (initError) console.warn('Error en initialize_family_data:', initError);
-        } catch (initError) {
-            console.warn('No se pudo inicializar datos:', initError);
-        }
+        await initializeFamilyData(family.id);
         
         AppState.currentFamily = family;
-        await loadInitialData();
+        await loadFamilyData();
+        
+        showNotification(`¡Familia "${familyName}" creada exitosamente!`, 'success');
         updateUI();
-        showNotification('¡Familia creada exitosamente!', 'success');
         
     } catch (error) {
-        console.error('Error creando familia:', error);
-        showNotification('Error creando familia', 'error');
+        console.error('❌ Error creando familia:', error);
+        showNotification('Error creando familia: ' + error.message, 'error');
+    } finally {
+        setLoading(false);
     }
 }
 
+// ============================================
+// PANTALLA DE LOGIN/REGISTRO
+// ============================================
 function showLoginScreen() {
+    console.log('👋 Mostrando pantalla de login...');
+    
     const mainContent = document.querySelector('.main-content');
-    if (!mainContent) return;
+    if (!mainContent) {
+        console.error('❌ No se encontró .main-content');
+        return;
+    }
     
     mainContent.innerHTML = `
-        <div class="login-container" style="max-width: 400px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <h1 style="color: #4F46E5; margin-bottom: 0.5rem; font-size: 2rem;">👨‍👩‍👧‍👦 Familia Unida</h1>
-                <p style="color: #6B7280; margin-bottom: 1.5rem; font-size: 1.1rem;">Ordenando finanzas juntos, sin estrés</p>
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 0.75rem; color: white; margin-bottom: 1.5rem;">
-                    <p style="margin: 0; font-style: italic; font-size: 1.2rem;">"Esto lo estamos ordenando juntos"</p>
+        <div class="login-container">
+            <div class="login-header">
+                <h1>👨‍👩‍👧‍👦 Familia Unida</h1>
+                <p class="subtitle">Ordenando finanzas juntos, sin estrés</p>
+                <div class="emotional-quote">
+                    <p>"Esto lo estamos ordenando juntos"</p>
                 </div>
             </div>
             
-            <form id="loginForm" style="margin-bottom: 1.5rem;">
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Email</label>
-                    <input type="email" id="loginEmail" required 
-                           style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
-                           placeholder="tu@email.com">
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Contraseña</label>
-                    <input type="password" id="loginPassword" required 
-                           style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
-                           placeholder="••••••">
-                </div>
-                <button type="submit" 
-                        style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: transform 0.2s;">
-                    Iniciar Sesión
-                </button>
-            </form>
-            
-            <div style="text-align: center; margin-bottom: 1.5rem; position: relative;">
-                <div style="height: 1px; background: #E5E7EB; position: absolute; top: 50%; left: 0; right: 0;"></div>
-                <span style="background: white; padding: 0 1rem; color: #6B7280; font-size: 0.875rem;">¿No tienes cuenta?</span>
+            <div class="login-forms">
+                <!-- Formulario de Login -->
+                <form id="loginForm" class="auth-form">
+                    <h2>Iniciar Sesión</h2>
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Contraseña</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        Iniciar Sesión
+                    </button>
+                    <p class="switch-form">
+                        ¿No tienes cuenta? <a href="#" id="showRegister">Crear una</a>
+                    </p>
+                </form>
+                
+                <!-- Formulario de Registro -->
+                <form id="registerForm" class="auth-form" style="display: none;">
+                    <h2>Crear Cuenta</h2>
+                    <div class="form-group">
+                        <label for="registerName">Nombre Completo</label>
+                        <input type="text" id="registerName" required placeholder="Ej: Sebastián y Ludmila">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Contraseña (mínimo 6 caracteres)</label>
+                        <input type="password" id="registerPassword" required minlength="6" placeholder="••••••">
+                    </div>
+                    <button type="submit" class="btn-success">
+                        Crear Cuenta
+                    </button>
+                    <p class="switch-form">
+                        ¿Ya tienes cuenta? <a href="#" id="showLogin">Iniciar sesión</a>
+                    </p>
+                </form>
             </div>
             
-            <form id="registerForm">
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Nombre Completo</label>
-                    <input type="text" id="registerName" required 
-                           style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 0.5rem; font-size: 1rem;"
-                           placeholder="Ej: Sebastián y Ludmila">
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Email</label>
-                    <input type="email" id="registerEmail" required 
-                           style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 0.5rem; font-size: 1rem;"
-                           placeholder="tu@email.com">
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Contraseña</label>
-                    <input type="password" id="registerPassword" required minlength="6"
-                           style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 0.5rem; font-size: 1rem;"
-                           placeholder="Mínimo 6 caracteres">
-                </div>
-                <button type="submit" 
-                        style="width: 100%; padding: 0.75rem; background: #10B981; color: white; border: none; border-radius: 0.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: transform 0.2s;">
-                    Crear Cuenta
-                </button>
-            </form>
-            
-            <div style="margin-top: 2rem; text-align: center; color: #6B7280; font-size: 0.875rem;">
+            <div class="login-footer">
                 <p>💝 Diseñado con amor para ayudar a familias a ordenar sus finanzas juntos</p>
             </div>
         </div>
     `;
     
-    // Agregar estilos dinámicos para hover
+    // Agregar estilos inline para la pantalla de login
     const style = document.createElement('style');
     style.textContent = `
-        #loginForm input:focus, #registerForm input:focus {
-            border-color: #4F46E5 !important;
-            outline: none;
-        }
-        #loginForm button:hover, #registerForm button:hover {
-            transform: translateY(-2px) !important;
-        }
         .login-container {
+            max-width: 400px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             animation: fadeIn 0.5s ease-out;
         }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h1 {
+            color: #4F46E5;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+        
+        .subtitle {
+            color: #6B7280;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .emotional-quote {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        
+        .emotional-quote p {
+            margin: 0;
+            font-style: italic;
+            font-size: 1.2rem;
+        }
+        
+        .auth-form {
+            margin-bottom: 1.5rem;
+        }
+        
+        .auth-form h2 {
+            color: #374151;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #4F46E5;
+            outline: none;
+        }
+        
+        .btn-primary, .btn-success {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10B981;
+            color: white;
+        }
+        
+        .btn-primary:hover, .btn-success:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        .switch-form {
+            text-align: center;
+            margin-top: 1rem;
+            color: #6B7280;
+        }
+        
+        .switch-form a {
+            color: #4F46E5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .switch-form a:hover {
+            text-decoration: underline;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6B7280;
+            font-size: 0.875rem;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -337,14 +582,26 @@ function showLoginScreen() {
     document.head.appendChild(style);
     
     // Event Listeners
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await handleLogin();
     });
     
-    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await handleRegister();
+    });
+    
+    document.getElementById('showRegister').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    });
+    
+    document.getElementById('showLogin').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
     });
 }
 
@@ -357,6 +614,8 @@ async function handleLogin() {
         return;
     }
     
+    setLoading(true);
+    
     try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({
             email,
@@ -366,16 +625,26 @@ async function handleLogin() {
         if (error) throw error;
         
         AppState.currentUser = data.user;
-        showNotification('¡Bienvenido de vuelta!', 'success');
+        showNotification(`¡Bienvenido de vuelta, ${email}!`, 'success');
         
-        // Pequeño delay para mostrar notificación
+        // Pequeño delay para mostrar la notificación
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 1500);
         
     } catch (error) {
-        console.error('Error en login:', error);
-        showNotification(error.message || 'Error al iniciar sesión', 'error');
+        console.error('❌ Error en login:', error);
+        
+        let errorMessage = 'Error al iniciar sesión';
+        if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Email o contraseña incorrectos';
+        } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = 'Confirma tu email antes de iniciar sesión';
+        }
+        
+        showNotification(errorMessage, 'error');
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -394,7 +663,10 @@ async function handleRegister() {
         return;
     }
     
+    setLoading(true);
+    
     try {
+        // Registrar usuario en Supabase Auth
         const { data, error } = await supabaseClient.auth.signUp({
             email,
             password,
@@ -407,17 +679,35 @@ async function handleRegister() {
         
         if (error) throw error;
         
-        showNotification('¡Cuenta creada! Revisa tu email para confirmar.', 'success');
-        
-        // Cambiar a formulario de login
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('registerName').value = '';
-        document.getElementById('registerEmail').value = '';
-        document.getElementById('registerPassword').value = '';
+        if (data.user) {
+            showNotification('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.', 'success');
+            
+            // Cambiar a formulario de login
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            
+            // Limpiar formulario de registro
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+        } else {
+            showNotification('Error al crear la cuenta', 'error');
+        }
         
     } catch (error) {
-        console.error('Error en registro:', error);
-        showNotification(error.message || 'Error al crear cuenta', 'error');
+        console.error('❌ Error en registro:', error);
+        
+        let errorMessage = 'Error al crear cuenta';
+        if (error.message.includes('User already registered')) {
+            errorMessage = 'Este email ya está registrado';
+        } else if (error.message.includes('invalid email')) {
+            errorMessage = 'Email inválido';
+        }
+        
+        showNotification(errorMessage, 'error');
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -432,10 +722,14 @@ async function handleLogout() {
         AppState.transactions = [];
         
         showNotification('Sesión cerrada exitosamente', 'success');
-        showLoginScreen();
+        
+        // Pequeño delay antes de mostrar login
+        setTimeout(() => {
+            showLoginScreen();
+        }, 500);
         
     } catch (error) {
-        console.error('Error al cerrar sesión:', error);
+        console.error('❌ Error al cerrar sesión:', error);
         showNotification('Error al cerrar sesión', 'error');
     }
 }
@@ -446,15 +740,21 @@ async function handleLogout() {
 async function loadInitialData() {
     if (!AppState.currentFamily) return;
     
+    console.log('📊 Cargando datos iniciales...');
+    setLoading(true);
+    
     try {
         await Promise.all([
             loadFamilyData(),
             loadTransactions(),
             loadEmotionalMessages()
         ]);
-        console.log('Datos iniciales cargados');
+        console.log('✅ Datos iniciales cargados correctamente');
     } catch (error) {
-        console.error('Error cargando datos iniciales:', error);
+        console.error('❌ Error cargando datos iniciales:', error);
+        showNotification('Error cargando datos', 'warning');
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -474,8 +774,10 @@ async function loadFamilyData() {
         AppState.familyData.categories = categoriesRes.data || [];
         AppState.familyData.funds = fundsRes.data || [];
         
+        console.log(`📋 Datos familiares cargados: ${AppState.familyData.persons.length} personas, ${AppState.familyData.categories.length} categorías`);
+        
     } catch (error) {
-        console.error('Error cargando datos familiares:', error);
+        console.error('❌ Error cargando datos familiares:', error);
     }
 }
 
@@ -503,9 +805,10 @@ async function loadTransactions() {
         if (error) throw error;
         
         AppState.transactions = data || [];
+        console.log(`💰 ${AppState.transactions.length} transacciones cargadas`);
         
     } catch (error) {
-        console.error('Error cargando transacciones:', error);
+        console.error('❌ Error cargando transacciones:', error);
         AppState.transactions = [];
     }
 }
@@ -522,11 +825,13 @@ async function loadEmotionalMessages() {
         AppState.emotionalMessages = data || [
             { message: 'Esto lo estamos ordenando juntos' },
             { message: 'No es culpa, es equipo' },
-            { message: 'Estamos construyendo tranquilidad' }
+            { message: 'Estamos construyendo tranquilidad' },
+            { message: 'Sebastián y Ludmila están del mismo lado' },
+            { message: 'La plata es un medio, la familia es lo importante' }
         ];
         
     } catch (error) {
-        console.error('Error cargando mensajes:', error);
+        console.error('❌ Error cargando mensajes:', error);
         AppState.emotionalMessages = [
             { message: 'Esto lo estamos ordenando juntos' },
             { message: 'No es culpa, es equipo' },
@@ -536,24 +841,37 @@ async function loadEmotionalMessages() {
 }
 
 // ============================================
-// INTERFAZ DE USUARIO
+// INTERFAZ DE USUARIO - NAVEGACIÓN
 // ============================================
 function initUI() {
+    console.log('🎨 Inicializando interfaz de usuario...');
+    
     // Menú lateral
-    document.getElementById('menuButton').addEventListener('click', () => {
-        document.querySelector('.side-menu').classList.add('open');
-        document.getElementById('menuOverlay').classList.add('show');
-    });
+    const menuButton = document.getElementById('menuButton');
+    const closeMenu = document.getElementById('closeMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const sideMenu = document.querySelector('.side-menu');
     
-    document.getElementById('closeMenu').addEventListener('click', () => {
-        document.querySelector('.side-menu').classList.remove('open');
-        document.getElementById('menuOverlay').classList.remove('show');
-    });
+    if (menuButton && sideMenu && menuOverlay) {
+        menuButton.addEventListener('click', () => {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('show');
+        });
+    }
     
-    document.getElementById('menuOverlay').addEventListener('click', () => {
-        document.querySelector('.side-menu').classList.remove('open');
-        document.getElementById('menuOverlay').classList.remove('show');
-    });
+    if (closeMenu && sideMenu && menuOverlay) {
+        closeMenu.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('show');
+        });
+    }
+    
+    if (menuOverlay && sideMenu) {
+        menuOverlay.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('show');
+        });
+    }
     
     // Navegación por pestañas
     document.querySelectorAll('.menu-item').forEach(item => {
@@ -561,9 +879,10 @@ function initUI() {
             const tab = item.dataset.tab;
             switchTab(tab);
             
+            // Cerrar menú en móvil
             if (window.innerWidth < 768) {
-                document.querySelector('.side-menu').classList.remove('open');
-                document.getElementById('menuOverlay').classList.remove('show');
+                sideMenu?.classList.remove('open');
+                menuOverlay?.classList.remove('show');
             }
         });
     });
@@ -576,17 +895,24 @@ function initUI() {
     });
     
     // Navegación de meses
-    document.getElementById('prevMonth').addEventListener('click', () => {
-        AppState.currentMonth.setMonth(AppState.currentMonth.getMonth() - 1);
-        updateMonthUI();
-        loadTransactions().then(updateUI);
-    });
+    const prevMonthBtn = document.getElementById('prevMonth');
+    const nextMonthBtn = document.getElementById('nextMonth');
     
-    document.getElementById('nextMonth').addEventListener('click', () => {
-        AppState.currentMonth.setMonth(AppState.currentMonth.getMonth() + 1);
-        updateMonthUI();
-        loadTransactions().then(updateUI);
-    });
+    if (prevMonthBtn) {
+        prevMonthBtn.addEventListener('click', () => {
+            AppState.currentMonth.setMonth(AppState.currentMonth.getMonth() - 1);
+            updateMonthUI();
+            loadTransactions().then(updateUI);
+        });
+    }
+    
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', () => {
+            AppState.currentMonth.setMonth(AppState.currentMonth.getMonth() + 1);
+            updateMonthUI();
+            loadTransactions().then(updateUI);
+        });
+    }
     
     // Formulario de transacción
     const transactionForm = document.getElementById('transactionForm');
@@ -601,18 +927,23 @@ function initUI() {
     }
     
     // Logout
-    document.getElementById('logoutButton').addEventListener('click', handleLogout);
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', handleLogout);
+    }
     
-    // Botón de instalación
+    // Botón de instalación PWA
     const installButton = document.getElementById('installButton');
     if (installButton) {
         installButton.addEventListener('click', installPWA);
     }
     
-    // Configurar fecha por defecto
+    // Configurar fecha actual en formulario
     const transactionDate = document.getElementById('transactionDate');
     if (transactionDate) {
-        transactionDate.value = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        transactionDate.value = today;
+        transactionDate.max = today; // No permitir fechas futuras
     }
     
     // Filtros de historial
@@ -620,6 +951,8 @@ function initUI() {
     document.getElementById('filterPerson')?.addEventListener('change', updateHistory);
     document.getElementById('filterPayment')?.addEventListener('change', updateHistory);
     document.getElementById('filterDate')?.addEventListener('change', updateHistory);
+    
+    console.log('✅ Interfaz de usuario inicializada');
 }
 
 function updateUserUI(userData) {
@@ -630,12 +963,15 @@ function updateUserUI(userData) {
     if (avatar) {
         const initials = userData.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'FU';
         avatar.textContent = initials.substring(0, 2);
+        avatar.style.backgroundColor = '#4F46E5';
     }
     if (name) name.textContent = userData.full_name || 'Familia';
     if (email) email.textContent = userData.email || '';
 }
 
 function switchTab(tabName) {
+    console.log(`🔄 Cambiando a pestaña: ${tabName}`);
+    
     // Actualizar menú activo
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.toggle('active', item.dataset.tab === tabName);
@@ -646,18 +982,28 @@ function switchTab(tabName) {
         tab.classList.toggle('active', tab.id === tabName);
     });
     
-    // Cargar datos específicos
-    if (tabName === 'history') updateHistory();
-    if (tabName === 'add-transaction') setupTransactionForm();
-    if (tabName === 'settings') updateSettings();
+    // Cargar datos específicos si es necesario
+    if (tabName === 'history') {
+        updateHistory();
+    } else if (tabName === 'add-transaction') {
+        setupTransactionForm();
+    } else if (tabName === 'settings') {
+        updateSettings();
+    }
 }
 
+// ============================================
+// ACTUALIZACIÓN DE INTERFAZ
+// ============================================
 function updateMonthUI() {
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const month = monthNames[AppState.currentMonth.getMonth()];
     const year = AppState.currentMonth.getFullYear();
-    document.getElementById('currentMonth').textContent = `${month} ${year}`;
+    const currentMonthEl = document.getElementById('currentMonth');
+    if (currentMonthEl) {
+        currentMonthEl.textContent = `${month} ${year}`;
+    }
 }
 
 function updateUI() {
@@ -677,44 +1023,57 @@ function updateDashboard() {
     const totalIncome = transactions
         .filter(t => t.transaction_type === 'personal_income')
         .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+    
+    const totalIncomeEl = document.getElementById('totalIncome');
+    if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(totalIncome);
     
     // Gastos del hogar
     const totalExpenses = transactions
         .filter(t => t.transaction_type === 'household_expense')
         .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+    
+    const totalExpensesEl = document.getElementById('totalExpenses');
+    if (totalExpensesEl) totalExpensesEl.textContent = formatCurrency(totalExpenses);
     
     // Resultado postres
     const sales = transactions
         .filter(t => t.transaction_type === 'business_income')
         .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    
     const supplies = transactions
         .filter(t => t.transaction_type === 'business_expense')
         .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    
     const businessResult = sales - supplies;
-    document.getElementById('businessResult').textContent = formatCurrency(businessResult);
+    const businessResultEl = document.getElementById('businessResult');
+    if (businessResultEl) businessResultEl.textContent = formatCurrency(businessResult);
     
     // Ahorro del mes
     const monthlySavings = transactions
         .filter(t => t.transaction_type === 'fund_deposit')
         .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    document.getElementById('monthlySavings').textContent = formatCurrency(monthlySavings);
+    
+    const monthlySavingsEl = document.getElementById('monthlySavings');
+    if (monthlySavingsEl) monthlySavingsEl.textContent = formatCurrency(monthlySavings);
     
     // Balance final
     const finalBalance = totalIncome - totalExpenses + businessResult;
     const balanceEl = document.getElementById('finalBalance');
-    balanceEl.textContent = formatCurrency(finalBalance);
-    balanceEl.className = `balance-value ${finalBalance >= 0 ? 'positive' : 'negative'}`;
+    if (balanceEl) {
+        balanceEl.textContent = formatCurrency(finalBalance);
+        balanceEl.className = `balance-value ${finalBalance >= 0 ? 'positive' : 'negative'}`;
+    }
     
     // Mensaje de balance
     const messageEl = document.getElementById('balanceMessage');
-    if (finalBalance >= 0) {
-        messageEl.textContent = '¡Excelente trabajo en equipo! Sigan así.';
-        messageEl.style.color = 'var(--color-success)';
-    } else {
-        messageEl.textContent = 'Es momento de revisar juntos los gastos. No es culpa, es equipo.';
-        messageEl.style.color = 'var(--color-danger)';
+    if (messageEl) {
+        if (finalBalance >= 0) {
+            messageEl.textContent = '¡Excelente trabajo en equipo! Sigan así.';
+            messageEl.style.color = 'var(--color-success)';
+        } else {
+            messageEl.textContent = 'Es momento de revisar juntos los gastos. No es culpa, es equipo.';
+            messageEl.style.color = 'var(--color-danger)';
+        }
     }
 }
 
@@ -741,12 +1100,15 @@ function updateBalance() {
     // Total combinado
     const total = AppState.familyData.paymentMethods.reduce((sum, method) => 
         sum + parseFloat(method.current_balance || 0), 0);
-    document.getElementById('totalBalance').textContent = formatCurrency(total);
+    
+    const totalBalanceEl = document.getElementById('totalBalance');
+    if (totalBalanceEl) totalBalanceEl.textContent = formatCurrency(total);
 }
 
 function updateExpenses() {
     const categoryChart = document.getElementById('categoryChart');
     const categoryRanking = document.getElementById('categoryRanking');
+    
     if (!categoryChart || !categoryRanking) return;
     
     const transactions = AppState.transactions.filter(t => t.transaction_type === 'household_expense');
@@ -759,37 +1121,47 @@ function updateExpenses() {
         categories[catName] = (categories[catName] || 0) + parseFloat(t.amount || 0);
     });
     
-    // Crear gráfico
+    // Crear gráfico simple
     categoryChart.innerHTML = '<h3>Distribución de gastos</h3>';
-    Object.entries(categories).forEach(([name, amount]) => {
-        const maxAmount = Math.max(...Object.values(categories), 1);
-        const percentage = (amount / maxAmount) * 100;
-        
-        const bar = document.createElement('div');
-        bar.className = 'category-bar';
-        bar.innerHTML = `
-            <div class="bar-label">${name}</div>
-            <div class="bar-container">
-                <div class="bar-fill" style="width: ${percentage}%"></div>
-                <div class="bar-amount">${formatCurrency(amount)}</div>
-            </div>
-        `;
-        categoryChart.appendChild(bar);
-    });
+    
+    if (Object.keys(categories).length === 0) {
+        categoryChart.innerHTML += '<p class="empty-state">No hay gastos este mes</p>';
+    } else {
+        Object.entries(categories).forEach(([name, amount]) => {
+            const maxAmount = Math.max(...Object.values(categories), 1);
+            const percentage = (amount / maxAmount) * 100;
+            
+            const bar = document.createElement('div');
+            bar.className = 'category-bar';
+            bar.innerHTML = `
+                <div class="bar-label">${name}</div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${percentage}%"></div>
+                    <div class="bar-amount">${formatCurrency(amount)}</div>
+                </div>
+            `;
+            categoryChart.appendChild(bar);
+        });
+    }
     
     // Ranking
     categoryRanking.innerHTML = '<h3>Ranking de categorías</h3>';
-    const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
-    sorted.forEach(([name, amount], index) => {
-        const item = document.createElement('div');
-        item.className = 'category-item';
-        item.innerHTML = `
-            <span class="category-rank">${index + 1}</span>
-            <span class="category-name">${name}</span>
-            <span class="category-amount">${formatCurrency(amount)}</span>
-        `;
-        categoryRanking.appendChild(item);
-    });
+    
+    if (Object.keys(categories).length === 0) {
+        categoryRanking.innerHTML += '<p class="empty-state">No hay gastos este mes</p>';
+    } else {
+        const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+        sorted.forEach(([name, amount], index) => {
+            const item = document.createElement('div');
+            item.className = 'category-item';
+            item.innerHTML = `
+                <span class="category-rank">${index + 1}</span>
+                <span class="category-name">${name}</span>
+                <span class="category-amount">${formatCurrency(amount)}</span>
+            `;
+            categoryRanking.appendChild(item);
+        });
+    }
 }
 
 function updateBusiness() {
@@ -805,9 +1177,13 @@ function updateBusiness() {
     
     const profit = sales - supplies;
     
-    document.getElementById('totalSales').textContent = formatCurrency(sales);
-    document.getElementById('totalSupplies').textContent = formatCurrency(supplies);
-    document.getElementById('businessProfit').textContent = formatCurrency(profit);
+    const totalSalesEl = document.getElementById('totalSales');
+    const totalSuppliesEl = document.getElementById('totalSupplies');
+    const businessProfitEl = document.getElementById('businessProfit');
+    
+    if (totalSalesEl) totalSalesEl.textContent = formatCurrency(sales);
+    if (totalSuppliesEl) totalSuppliesEl.textContent = formatCurrency(supplies);
+    if (businessProfitEl) businessProfitEl.textContent = formatCurrency(profit);
     
     // Fondo postres
     const dessertFund = AppState.familyData.funds.find(f => f.name === 'Fondo fijo postres');
@@ -817,11 +1193,17 @@ function updateBusiness() {
         const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
         const missing = Math.max(goal - current, 0);
         
-        document.getElementById('dessertFundCurrent').textContent = formatCurrency(current);
-        document.getElementById('dessertFundGoal').textContent = formatCurrency(goal);
-        document.getElementById('dessertFundProgress').style.width = `${percentage}%`;
-        document.getElementById('dessertFundMissing').textContent = 
-            `Faltan ${formatCurrency(missing)} para el objetivo`;
+        const dessertFundCurrentEl = document.getElementById('dessertFundCurrent');
+        const dessertFundGoalEl = document.getElementById('dessertFundGoal');
+        const dessertFundProgressEl = document.getElementById('dessertFundProgress');
+        const dessertFundMissingEl = document.getElementById('dessertFundMissing');
+        
+        if (dessertFundCurrentEl) dessertFundCurrentEl.textContent = formatCurrency(current);
+        if (dessertFundGoalEl) dessertFundGoalEl.textContent = formatCurrency(goal);
+        if (dessertFundProgressEl) dessertFundProgressEl.style.width = `${percentage}%`;
+        if (dessertFundMissingEl) {
+            dessertFundMissingEl.textContent = `Faltan ${formatCurrency(missing)} para el objetivo`;
+        }
     }
 }
 
@@ -830,6 +1212,11 @@ function updateFundsPreview() {
     if (!fundsList) return;
     
     fundsList.innerHTML = '';
+    
+    if (AppState.familyData.funds.length === 0) {
+        fundsList.innerHTML = '<p class="empty-state">No hay fondos configurados</p>';
+        return;
+    }
     
     AppState.familyData.funds.forEach(fund => {
         const current = parseFloat(fund.current_amount) || 0;
@@ -850,6 +1237,9 @@ function updateFundsPreview() {
             <div class="progress-bar">
                 <div class="progress-fill" style="width: ${percentage}%"></div>
             </div>
+            <div class="fund-stats">
+                <span>${percentage.toFixed(0)}% de ${formatCurrency(goal)}</span>
+            </div>
         `;
         
         fundsList.appendChild(fundEl);
@@ -861,6 +1251,11 @@ function updateFunds() {
     if (!fullFundsList) return;
     
     fullFundsList.innerHTML = '';
+    
+    if (AppState.familyData.funds.length === 0) {
+        fullFundsList.innerHTML = '<div class="empty-state">No hay fondos configurados. Ve a Configuración para agregarlos.</div>';
+        return;
+    }
     
     AppState.familyData.funds.forEach(fund => {
         const current = parseFloat(fund.current_amount) || 0;
@@ -907,6 +1302,9 @@ function updateFunds() {
     });
 }
 
+// ============================================
+// HISTORIAL
+// ============================================
 function updateHistory() {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
@@ -951,46 +1349,23 @@ function updateHistory() {
     historyList.innerHTML = '';
     
     if (filtered.length === 0) {
-        historyList.innerHTML = '<div class="empty-state">No hay movimientos para mostrar</div>';
+        historyList.innerHTML = '<div class="empty-state">No hay movimientos para mostrar con estos filtros</div>';
         return;
     }
     
     filtered.forEach(transaction => {
         const item = document.createElement('div');
-        const typeClass = transaction.transaction_type.includes('income') ? 'income' : 
-                         transaction.transaction_type.includes('expense') ? 'expense' : 
-                         transaction.transaction_type.includes('fund') ? 'fund' : 'business';
-        item.className = `history-item ${typeClass}`;
+        item.className = `history-item ${getTransactionTypeClass(transaction.transaction_type)}`;
         
         const person = AppState.familyData.persons.find(p => p.id === transaction.person_id);
         const category = AppState.familyData.categories.find(c => c.id === transaction.category_id);
         const payment = AppState.familyData.paymentMethods.find(p => p.id === transaction.payment_method_id);
         const fund = AppState.familyData.funds.find(f => f.id === transaction.fund_id);
         
-        let description = '';
-        switch(transaction.transaction_type) {
-            case 'household_expense':
-                description = `🏠 ${category?.name || 'Gasto'}`;
-                break;
-            case 'personal_income':
-                description = `💼 ${category?.name || 'Ingreso'}`;
-                break;
-            case 'business_expense':
-                description = `🧁 ${category?.name || 'Insumos'}`;
-                break;
-            case 'business_income':
-                description = `💰 ${category?.name || 'Ventas'}`;
-                break;
-            case 'fund_deposit':
-                description = `🏦 Ingreso a ${fund?.name || 'fondo'}`;
-                break;
-            case 'fund_withdrawal':
-                description = `🏦 Uso de ${fund?.name || 'fondo'}`;
-                break;
-        }
-        
+        let description = getTransactionDescription(transaction, category, fund);
         let details = [];
-        if (person) details.push(person.name);
+        
+        if (person) details.push(`<span class="person-${person.name.toLowerCase()}">${person.name}</span>`);
         if (payment) details.push(payment.name);
         
         item.innerHTML = `
@@ -998,7 +1373,7 @@ function updateHistory() {
                 <div class="history-date">${formatDate(transaction.date)}</div>
                 <div class="history-description">${description}</div>
                 <div class="history-details">${details.join(' • ')}</div>
-                ${transaction.description ? `<div class="history-note">${transaction.description}</div>` : ''}
+                ${transaction.description ? `<div class="history-note">"${transaction.description}"</div>` : ''}
             </div>
             <div class="history-amount ${transaction.transaction_type.includes('income') || transaction.transaction_type === 'fund_withdrawal' ? 'positive' : 'negative'}">
                 ${transaction.transaction_type.includes('income') || transaction.transaction_type === 'fund_withdrawal' ? '+' : '-'}${formatCurrency(transaction.amount)}
@@ -1037,95 +1412,154 @@ function populateHistoryFilters() {
     }
 }
 
+function getTransactionTypeClass(type) {
+    if (type.includes('income')) return 'income';
+    if (type.includes('expense')) return 'expense';
+    if (type.includes('fund')) return 'fund';
+    if (type.includes('business')) return 'business';
+    return '';
+}
+
+function getTransactionDescription(transaction, category, fund) {
+    switch(transaction.transaction_type) {
+        case 'household_expense':
+            return `🏠 ${category?.name || 'Gasto del hogar'}`;
+        case 'personal_income':
+            return `💼 ${category?.name || 'Ingreso diario'}`;
+        case 'business_expense':
+            return `🧁 ${category?.name || 'Insumos postres'}`;
+        case 'business_income':
+            return `💰 ${category?.name || 'Ventas postres'}`;
+        case 'fund_deposit':
+            return `🏦 Ingreso a ${fund?.name || 'fondo'}`;
+        case 'fund_withdrawal':
+            return `🏦 Uso de ${fund?.name || 'fondo'}`;
+        default:
+            return 'Movimiento';
+    }
+}
+
+// ============================================
+// CONFIGURACIÓN
+// ============================================
 function updateSettings() {
     const familyMembers = document.getElementById('familyMembers');
     const goalSettings = document.getElementById('goalSettings');
     
-    // Miembros de familia
+    // Configurar lista de personas
     if (familyMembers) {
         familyMembers.innerHTML = '';
-        AppState.familyData.persons.forEach(person => {
-            const memberEl = document.createElement('div');
-            memberEl.className = 'family-member';
-            memberEl.innerHTML = `
-                <div class="member-info">
-                    <div class="member-avatar" style="background: ${person.avatar_color}">
-                        ${person.name.charAt(0)}
+        
+        if (AppState.familyData.persons.length === 0) {
+            familyMembers.innerHTML = '<p class="empty-state">No hay miembros en la familia</p>';
+        } else {
+            AppState.familyData.persons.forEach(person => {
+                const memberEl = document.createElement('div');
+                memberEl.className = 'family-member';
+                memberEl.innerHTML = `
+                    <div class="member-info">
+                        <div class="member-avatar" style="background: ${person.avatar_color}">
+                            ${person.name.charAt(0)}
+                        </div>
+                        <div class="member-name ${person.name === 'Sebastián' ? 'person-sebastian' : 'person-ludmila'}">
+                            ${person.name}
+                        </div>
                     </div>
-                    <div class="member-name ${person.name === 'Sebastián' ? 'person-sebastian' : 'person-ludmila'}">
-                        ${person.name}
+                    <div class="member-status">
+                        ${person.is_active ? '✅ Activo' : '⏸️ Inactivo'}
                     </div>
-                </div>
-                <div class="member-status">
-                    ${person.is_active ? '✅ Activo' : '⏸️ Inactivo'}
-                </div>
-            `;
-            familyMembers.appendChild(memberEl);
-        });
+                `;
+                familyMembers.appendChild(memberEl);
+            });
+        }
     }
     
-    // Objetivos de fondos
+    // Configurar objetivos de fondos
     if (goalSettings) {
         goalSettings.innerHTML = '';
-        AppState.familyData.funds.forEach(fund => {
-            const settingEl = document.createElement('div');
-            settingEl.className = 'goal-setting';
-            settingEl.innerHTML = `
-                <div class="goal-info">
-                    <div class="goal-name">${fund.icon} ${fund.name}</div>
-                    <div class="goal-current">Actual: ${formatCurrency(fund.current_amount)}</div>
-                </div>
-                <div class="goal-input">
-                    <input type="number" 
-                           min="0" 
-                           step="0.01" 
-                           value="${fund.monthly_goal || 0}" 
-                           data-fund-id="${fund.id}"
-                           class="goal-input-field"
-                           placeholder="Objetivo mensual">
-                </div>
-                <button class="save-goal" data-fund-id="${fund.id}">💾 Guardar</button>
-            `;
-            goalSettings.appendChild(settingEl);
-        });
         
-        // Event listeners para guardar objetivos
-        document.querySelectorAll('.save-goal').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const fundId = e.target.dataset.fundId;
-                const input = document.querySelector(`.goal-input-field[data-fund-id="${fundId}"]`);
-                const goal = parseFloat(input.value);
-                
-                if (isNaN(goal) || goal < 0) {
-                    showNotification('Ingresa un objetivo válido', 'warning');
-                    return;
-                }
-                
-                try {
-                    const { error } = await supabaseClient
-                        .from('funds')
-                        .update({ monthly_goal: goal })
-                        .eq('id', fundId);
-                    
-                    if (error) throw error;
-                    
-                    showNotification('Objetivo actualizado', 'success');
-                    
-                    // Actualizar estado local
-                    const fund = AppState.familyData.funds.find(f => f.id === fundId);
-                    if (fund) fund.monthly_goal = goal;
-                    
-                    updateFunds();
-                    updateFundsPreview();
-                    
-                } catch (error) {
-                    showNotification('Error actualizando objetivo', 'error');
-                }
+        if (AppState.familyData.funds.length === 0) {
+            goalSettings.innerHTML = '<p class="empty-state">No hay fondos configurados</p>';
+        } else {
+            AppState.familyData.funds.forEach(fund => {
+                const settingEl = document.createElement('div');
+                settingEl.className = 'goal-setting';
+                settingEl.innerHTML = `
+                    <div class="goal-info">
+                        <div class="goal-name">${fund.icon} ${fund.name}</div>
+                        <div class="goal-current">Actual: ${formatCurrency(fund.current_amount)}</div>
+                    </div>
+                    <div class="goal-input">
+                        <input type="number" 
+                               min="0" 
+                               step="0.01" 
+                               value="${fund.monthly_goal || 0}" 
+                               data-fund-id="${fund.id}"
+                               class="goal-input-field"
+                               placeholder="Objetivo mensual">
+                    </div>
+                    <button class="save-goal" data-fund-id="${fund.id}">💾 Guardar</button>
+                `;
+                goalSettings.appendChild(settingEl);
             });
-        });
+            
+            // Event listeners para guardar objetivos
+            document.querySelectorAll('.save-goal').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const fundId = e.target.dataset.fundId;
+                    const input = document.querySelector(`.goal-input-field[data-fund-id="${fundId}"]`);
+                    const goal = parseFloat(input.value);
+                    
+                    if (isNaN(goal) || goal < 0) {
+                        showNotification('Por favor ingresa un objetivo válido', 'warning');
+                        return;
+                    }
+                    
+                    try {
+                        const { error } = await supabaseClient
+                            .from('funds')
+                            .update({ monthly_goal: goal })
+                            .eq('id', fundId);
+                        
+                        if (error) throw error;
+                        
+                        showNotification('Objetivo actualizado correctamente', 'success');
+                        
+                        // Actualizar datos locales
+                        const fund = AppState.familyData.funds.find(f => f.id === fundId);
+                        if (fund) fund.monthly_goal = goal;
+                        
+                        updateFunds();
+                        updateFundsPreview();
+                        
+                    } catch (error) {
+                        console.error('Error actualizando objetivo:', error);
+                        showNotification('Error actualizando objetivo', 'error');
+                    }
+                });
+            });
+        }
+    }
+    
+    // Configurar botón de instalación PWA
+    const installButton = document.getElementById('installButton');
+    if (installButton && AppState.deferredInstallPrompt) {
+        installButton.style.display = 'flex';
+    } else if (installButton) {
+        // Verificar si ya está instalado
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            installButton.textContent = '📱 Ya instalada';
+            installButton.disabled = true;
+        } else {
+            installButton.style.display = 'none';
+        }
     }
 }
 
+// ============================================
+// FORMULARIO DE TRANSACCIONES
+// ============================================
 function setupTransactionForm() {
     // Personas
     const personSelect = document.getElementById('transactionPerson');
@@ -1163,10 +1597,11 @@ function setupTransactionForm() {
         });
     }
     
-    // Fecha actual
+    // Fecha actual por defecto
     const transactionDate = document.getElementById('transactionDate');
     if (transactionDate) {
-        transactionDate.value = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        transactionDate.value = today;
     }
     
     updateTransactionForm();
@@ -1179,7 +1614,7 @@ function updateTransactionForm() {
     
     if (!type) return;
     
-    // Categorías según tipo
+    // Actualizar categorías según tipo
     const categorySelect = document.getElementById('transactionCategory');
     if (categorySelect) {
         categorySelect.innerHTML = '<option value="">Seleccionar categoría</option>';
@@ -1233,7 +1668,7 @@ async function handleTransactionSubmit(e) {
     
     // Validaciones
     if (!type || !amount || !date || !personId || !paymentMethodId) {
-        showNotification('Completa todos los campos requeridos', 'warning');
+        showNotification('Por favor completa todos los campos requeridos', 'warning');
         return;
     }
     
@@ -1243,12 +1678,12 @@ async function handleTransactionSubmit(e) {
     }
     
     if (type.includes('fund') && !fundId) {
-        showNotification('Selecciona un fondo', 'warning');
+        showNotification('Por favor selecciona un fondo', 'warning');
         return;
     }
     
     if ((type === 'household_expense' || type === 'business_expense' || type === 'business_income') && !categoryId) {
-        showNotification('Selecciona una categoría', 'warning');
+        showNotification('Por favor selecciona una categoría', 'warning');
         return;
     }
     
@@ -1265,6 +1700,8 @@ async function handleTransactionSubmit(e) {
     if (categoryId) transactionData.category_id = categoryId;
     if (fundId) transactionData.fund_id = fundId;
     
+    setLoading(true);
+    
     try {
         const { data, error } = await supabaseClient
             .from('transactions')
@@ -1274,11 +1711,12 @@ async function handleTransactionSubmit(e) {
         
         if (error) throw error;
         
-        showNotification('Movimiento registrado', 'success');
+        showNotification('✅ Movimiento registrado correctamente', 'success');
         
         // Resetear formulario
         e.target.reset();
-        document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+        const transactionDateEl = document.getElementById('transactionDate');
+        if (transactionDateEl) transactionDateEl.value = new Date().toISOString().split('T')[0];
         
         // Actualizar datos
         await Promise.all([
@@ -1290,8 +1728,10 @@ async function handleTransactionSubmit(e) {
         switchTab('dashboard');
         
     } catch (error) {
-        console.error('Error guardando transacción:', error);
-        showNotification('Error al guardar movimiento', 'error');
+        console.error('❌ Error guardando transacción:', error);
+        showNotification('Error al guardar el movimiento: ' + error.message, 'error');
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -1299,12 +1739,12 @@ async function editFundGoal(fundId) {
     const fund = AppState.familyData.funds.find(f => f.id === fundId);
     if (!fund) return;
     
-    const newGoal = prompt(`Nuevo objetivo para ${fund.name}:`, fund.monthly_goal);
+    const newGoal = prompt(`Nuevo objetivo mensual para ${fund.name}:`, fund.monthly_goal);
     if (newGoal === null) return;
     
     const goalValue = parseFloat(newGoal);
     if (isNaN(goalValue) || goalValue < 0) {
-        showNotification('Ingresa un valor válido', 'warning');
+        showNotification('Por favor ingresa un valor válido', 'warning');
         return;
     }
     
@@ -1319,33 +1759,48 @@ async function editFundGoal(fundId) {
         fund.monthly_goal = goalValue;
         updateFunds();
         updateFundsPreview();
-        showNotification('Objetivo actualizado', 'success');
+        showNotification('✅ Objetivo actualizado correctamente', 'success');
         
     } catch (error) {
+        console.error('❌ Error actualizando objetivo:', error);
         showNotification('Error actualizando objetivo', 'error');
     }
 }
 
 // ============================================
-// PWA
+// PWA Y SERVICE WORKER
 // ============================================
 function setupPWAInstall() {
     window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('📱 Evento de instalación PWA capturado');
         e.preventDefault();
         AppState.deferredInstallPrompt = e;
         
+        // Mostrar botón de instalación después de un tiempo
         setTimeout(() => {
             const installButton = document.getElementById('installButton');
             if (installButton) {
                 installButton.style.display = 'flex';
+                installButton.addEventListener('click', installPWA);
             }
-        }, 3000);
+        }, 5000);
+    });
+    
+    // Verificar si ya está instalado
+    window.addEventListener('appinstalled', () => {
+        console.log('📱 PWA instalada');
+        AppState.deferredInstallPrompt = null;
+        const installButton = document.getElementById('installButton');
+        if (installButton) {
+            installButton.textContent = '📱 Ya instalada';
+            installButton.disabled = true;
+        }
     });
 }
 
 function installPWA() {
     if (!AppState.deferredInstallPrompt) {
-        showNotification('La app ya está instalada', 'info');
+        showNotification('La aplicación ya está instalada o no está disponible para instalación', 'info');
         return;
     }
     
@@ -1353,10 +1808,32 @@ function installPWA() {
     
     AppState.deferredInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-            showNotification('¡App instalada!', 'success');
+            showNotification('¡App instalada! Ahora está disponible en tu pantalla principal.', 'success');
+            console.log('📱 Usuario aceptó la instalación');
+        } else {
+            console.log('📱 Usuario rechazó la instalación');
         }
         AppState.deferredInstallPrompt = null;
     });
+}
+
+async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            console.log('✅ Service Worker registrado correctamente:', registration.scope);
+            
+            // Verificar actualizaciones
+            registration.addEventListener('updatefound', () => {
+                console.log('🔄 Nueva versión del Service Worker encontrada');
+            });
+            
+        } catch (error) {
+            console.warn('⚠️ Service Worker no registrado:', error);
+        }
+    } else {
+        console.warn('⚠️ Service Worker no soportado en este navegador');
+    }
 }
 
 // ============================================
@@ -1366,20 +1843,45 @@ function startEmotionalMessagesRotation() {
     const messageEl = document.getElementById('emotionalMessage');
     if (!messageEl || AppState.emotionalMessages.length === 0) return;
     
-    let index = 0;
-    messageEl.textContent = AppState.emotionalMessages[0].message;
+    let index = Math.floor(Math.random() * AppState.emotionalMessages.length);
+    messageEl.textContent = AppState.emotionalMessages[index].message;
     
+    // Rotar cada 15 segundos
     setInterval(() => {
         index = (index + 1) % AppState.emotionalMessages.length;
-        messageEl.textContent = AppState.emotionalMessages[index].message;
+        messageEl.style.opacity = '0';
         
-        messageEl.style.opacity = '0.5';
         setTimeout(() => {
+            messageEl.textContent = AppState.emotionalMessages[index].message;
             messageEl.style.opacity = '1';
         }, 300);
-    }, 10000);
+    }, 15000);
 }
 
-// Exportar para debugging
+// ============================================
+// MANEJO DE CONEXIÓN
+// ============================================
+window.addEventListener('online', () => {
+    AppState.isOffline = false;
+    console.log('🌐 Conexión restablecida');
+    showNotification('Conexión restablecida. Sincronizando datos...', 'success');
+    
+    // Intentar sincronizar datos pendientes
+    setTimeout(() => {
+        loadInitialData().then(updateUI);
+    }, 1000);
+});
+
+window.addEventListener('offline', () => {
+    AppState.isOffline = true;
+    console.log('⚠️ Sin conexión a internet');
+    showNotification('Modo offline. Los cambios se guardarán localmente.', 'warning');
+});
+
+// ============================================
+// EXPORTAR PARA DEBUGGING
+// ============================================
 window.AppState = AppState;
 window.supabaseClient = supabaseClient;
+
+console.log('🎉 app.js cargado completamente');
