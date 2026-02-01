@@ -1,50 +1,50 @@
 {
-  "name": "Finanzas Familiares",
-  "short_name": "Finanzas",
-  "description": "Gestión de finanzas familiares para Sebastián y Ludmila",
+  "name": "Economía Familiar",
+  "short_name": "EcoFam",
+  "description": "App para ordenar la economía familiar de Sebastián y Ludmila",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#4361ee",
-  "theme_color": "#4361ee",
+  "background_color": "#4F46E5",
+  "theme_color": "#4F46E5",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icons/icon-72x72.png",
+      "src": "/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-96x96.png",
+      "src": "/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-128x128.png",
+      "src": "/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-144x144.png",
+      "src": "/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-152x152.png",
+      "src": "/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-192x192.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-384x384.png",
+      "src": "/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512x512.png",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -52,16 +52,18 @@
   "categories": ["finance", "productivity"],
   "shortcuts": [
     {
-      "name": "Nuevo Gasto",
+      "name": "Registrar Gasto",
       "short_name": "Gasto",
-      "description": "Agregar nuevo gasto",
-      "url": "/?action=new-expense"
+      "description": "Registrar un nuevo gasto",
+      "url": "/?action=add-expense",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Nuevo Ingreso",
-      "short_name": "Ingreso",
-      "description": "Agregar nuevo ingreso",
-      "url": "/?action=new-income"
+      "name": "Ver Resumen",
+      "short_name": "Resumen",
+      "description": "Ver resumen mensual",
+      "url": "/?screen=resumen",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
     }
   ]
 }
