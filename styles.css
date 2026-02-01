@@ -1,1102 +1,588 @@
-/* ============================================
-   VARIABLES Y RESET
-   ============================================ */
-:root {
-    /* Colores suaves (diseño emocional) */
-    --color-primary: #4F46E5;
-    --color-primary-light: #818CF8;
-    --color-primary-dark: #3730A3;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economía Familiar - Juntos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span class="navbar-icon">💰</span>
+            <span class="navbar-title">Economía Familiar</span>
+        </div>
+        <div class="navbar-user">
+            <span id="userEmail"></span>
+            <button class="btn-logout" onclick="logout()">Salir</button>
+        </div>
+    </nav>
     
-    --color-success: #10B981;
-    --color-success-light: #34D399;
-    --color-warning: #F59E0B;
-    --color-danger: #EF4444;
-    --color-danger-light: #FCA5A5;
+    <!-- Emotional Component -->
+    <div class="emotional-banner" id="emotionalBanner">
+        <p>"Esto lo estamos ordenando juntos"</p>
+    </div>
     
-    --color-text: #1F2937;
-    --color-text-light: #6B7280;
-    --color-text-lighter: #9CA3AF;
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item active" data-screen="resumen">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Resumen Mensual</span>
+                </li>
+                <li class="nav-item" data-screen="saldo">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-text">Saldo por Medio</span>
+                </li>
+                <li class="nav-item" data-screen="gastos">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Gastos por Categoría</span>
+                </li>
+                <li class="nav-item" data-screen="postres">
+                    <span class="nav-icon">🍰</span>
+                    <span class="nav-text">Postres</span>
+                </li>
+                <li class="nav-item" data-screen="fondos">
+                    <span class="nav-icon">🏦</span>
+                    <span class="nav-text">Fondos / Ahorros</span>
+                </li>
+                <li class="nav-item" data-screen="historial">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Historial</span>
+                </li>
+                <li class="nav-item" data-screen="nuevo">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">Nuevo Movimiento</span>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="balance-summary">
+                    <p class="balance-label">Balance del mes</p>
+                    <p class="balance-amount" id="balanceAmount">$0</p>
+                </div>
+                <p class="emotional-quote">"Construyendo tranquilidad juntos"</p>
+            </div>
+        </nav>
+        
+        <!-- Content Area -->
+        <main class="content">
+            <!-- Resumen Mensual Screen -->
+            <div class="screen active" id="resumen">
+                <div class="screen-header">
+                    <h1>📊 Resumen Mensual</h1>
+                    <div class="month-selector">
+                        <button class="btn-icon" onclick="changeMonth(-1)">←</button>
+                        <span id="currentMonth">Mayo 2024</span>
+                        <button class="btn-icon" onclick="changeMonth(1)">→</button>
+                    </div>
+                </div>
+                
+                <div class="summary-cards">
+                    <div class="summary-card income">
+                        <h3>Ingresos Totales</h3>
+                        <p class="amount" id="totalIncome">$0</p>
+                        <div class="person-breakdown">
+                            <span>Sebastián: <span id="incomeSebastian">$0</span></span>
+                            <span>Ludmila: <span id="incomeLudmila">$0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card expense">
+                        <h3>Gastos Totales</h3>
+                        <p class="amount" id="totalExpense">$0</p>
+                        <div class="category-preview" id="topCategories"></div>
+                    </div>
+                    
+                    <div class="summary-card balance">
+                        <h3>Balance del Mes</h3>
+                        <p class="amount" id="monthBalance">$0</p>
+                        <div class="emotional-message" id="balanceMessage">
+                            "No es culpa, es equipo"
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="funds-overview">
+                    <h2>🏦 Estado de Fondos</h2>
+                    <div class="funds-container" id="fundsContainer"></div>
+                </div>
+                
+                <div class="postres-summary">
+                    <h2>🍰 Balance Postres</h2>
+                    <div class="postres-card">
+                        <div class="postres-item">
+                            <span>Ventas:</span>
+                            <span class="positive" id="postresSales">$0</span>
+                        </div>
+                        <div class="postres-item">
+                            <span>Insumos:</span>
+                            <span class="negative" id="postresSupplies">$0</span>
+                        </div>
+                        <div class="postres-item total">
+                            <span>Resultado:</span>
+                            <span id="postresResult">$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Saldo por Medio Screen -->
+            <div class="screen" id="saldo">
+                <div class="screen-header">
+                    <h1>💳 Saldo por Medio</h1>
+                </div>
+                
+                <div class="medium-cards">
+                    <div class="medium-card">
+                        <h3>💵 Efectivo</h3>
+                        <p class="amount" id="cashBalance">$0</p>
+                        <div class="medium-breakdown">
+                            <p>Ingresos: <span id="cashIncome">$0</span></p>
+                            <p>Gastos: <span id="cashExpense">$0</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="medium-card">
+                        <h3>📱 Mercado Pago</h3>
+                        <p class="amount" id="mpBalance">$0</p>
+                        <div class="medium-breakdown">
+                            <p>Ingresos: <span id="mpIncome">$0</span></p>
+                            <p>Gastos: <span id="mpExpense">$0</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="transfer-section">
+                    <h3>Transferir entre Medios</h3>
+                    <div class="transfer-form">
+                        <select id="transferFrom">
+                            <option value="efectivo">De: Efectivo</option>
+                            <option value="mercadopago">De: Mercado Pago</option>
+                        </select>
+                        <select id="transferTo">
+                            <option value="mercadopago">A: Mercado Pago</option>
+                            <option value="efectivo">A: Efectivo</option>
+                        </select>
+                        <input type="number" id="transferAmount" placeholder="Monto">
+                        <button class="btn-primary" onclick="makeTransfer()">Transferir</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gastos por Categoría Screen -->
+            <div class="screen" id="gastos">
+                <div class="screen-header">
+                    <h1>📈 Gastos por Categoría</h1>
+                </div>
+                
+                <div class="category-chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                
+                <div class="category-list" id="categoryList"></div>
+            </div>
+            
+            <!-- Postres Screen -->
+            <div class="screen" id="postres">
+                <div class="screen-header">
+                    <h1>🍰 Postres - Resultado Real</h1>
+                </div>
+                
+                <div class="postres-actions">
+                    <button class="btn-primary" onclick="showModal('insumo')">
+                        ➕ Agregar Insumo
+                    </button>
+                    <button class="btn-success" onclick="showModal('venta')">
+                        💰 Registrar Venta
+                    </button>
+                </div>
+                
+                <div class="postres-stats">
+                    <div class="stat-card">
+                        <h3>Inversión Total</h3>
+                        <p id="totalInsumos">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ventas Totales</h3>
+                        <p id="totalVentas">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ganancia Neta</h3>
+                        <p id="gananciaNeta">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Margen %</h3>
+                        <p id="margen">0%</p>
+                    </div>
+                </div>
+                
+                <div class="postres-history">
+                    <h3>Últimos Movimientos</h3>
+                    <div class="history-table" id="postresHistory"></div>
+                </div>
+            </div>
+            
+            <!-- Fondos / Ahorros Screen -->
+            <div class="screen" id="fondos">
+                <div class="screen-header">
+                    <h1>🏦 Fondos / Ahorros</h1>
+                    <button class="btn-primary" onclick="showModal('fondo')">
+                        ➕ Movimiento en Fondo
+                    </button>
+                </div>
+                
+                <div class="funds-management">
+                    <div class="fund-card" id="fundHogar">
+                        <div class="fund-header">
+                            <h3>Fondo Fijo Hogar</h3>
+                            <span class="fund-status ok">OK</span>
+                        </div>
+                        <div class="fund-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="hogarProgress"></div>
+                            </div>
+                            <div class="fund-numbers">
+                                <span class="current" id="hogarCurrent">$0</span>
+                                <span class="target" id="hogarTarget">/$0</span>
+                            </div>
+                        </div>
+                        <div class="fund-actions">
+                            <button class="btn-success" onclick="addToFund('hogar')">➕ Agregar</button>
+                            <button class="btn-warning" onclick="useFromFund('hogar')">➖ Usar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="fund-card" id="fundPostres">
+                        <div class="fund-header">
+                            <h3>Fondo Fijo Postres</h3>
+                            <span class="fund-status ok">OK</span>
+                        </div>
+                        <div class="fund-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="postresFundProgress"></div>
+                            </div>
+                            <div class="fund-numbers">
+                                <span class="current" id="postresFundCurrent">$0</span>
+                                <span class="target" id="postresFundTarget">/$0</span>
+                            </div>
+                        </div>
+                        <div class="fund-actions">
+                            <button class="btn-success" onclick="addToFund('postres')">➕ Agregar</button>
+                            <button class="btn-warning" onclick="useFromFund('postres')">➖ Usar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fund-history">
+                    <h3>Historial de Movimientos</h3>
+                    <div class="history-table" id="fundHistory"></div>
+                </div>
+            </div>
+            
+            <!-- Historial Screen -->
+            <div class="screen" id="historial">
+                <div class="screen-header">
+                    <h1>📋 Historial Completo</h1>
+                    <div class="filters">
+                        <select id="filterType">
+                            <option value="">Todos los tipos</option>
+                            <option value="income">Ingresos</option>
+                            <option value="expense">Gastos</option>
+                            <option value="fund_transfer">Fondos</option>
+                            <option value="postre">Postres</option>
+                        </select>
+                        <select id="filterPerson">
+                            <option value="">Todas las personas</option>
+                            <option value="sebastian">Sebastián</option>
+                            <option value="ludmila">Ludmila</option>
+                            <option value="joint">Conjunto</option>
+                        </select>
+                        <input type="date" id="filterDateFrom">
+                        <input type="date" id="filterDateTo">
+                        <button class="btn-primary" onclick="applyFilters()">Filtrar</button>
+                    </div>
+                </div>
+                
+                <div class="history-container">
+                    <div class="history-table-container">
+                        <table class="history-table-full">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Persona</th>
+                                    <th>Medio</th>
+                                    <th>Monto</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nuevo Movimiento Screen -->
+            <div class="screen" id="nuevo">
+                <div class="screen-header">
+                    <h1>➕ Nuevo Movimiento</h1>
+                </div>
+                
+                <div class="movement-type-selector">
+                    <button class="movement-type-btn active" data-type="expense">
+                        💸 Gasto
+                    </button>
+                    <button class="movement-type-btn" data-type="income">
+                        💰 Ingreso
+                    </button>
+                    <button class="movement-type-btn" data-type="fund">
+                        🏦 Fondo
+                    </button>
+                    <button class="movement-type-btn" data-type="postre">
+                        🍰 Postre
+                    </button>
+                </div>
+                
+                <!-- Expense Form -->
+                <form id="expenseForm" class="movement-form active">
+                    <div class="form-group">
+                        <label>Categoría *</label>
+                        <select id="expenseCategory" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="alquiler">Alquiler</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="comida_hogar">Comida hogar</option>
+                            <option value="transporte">Transporte</option>
+                            <option value="bebe">Bebé</option>
+                            <option value="mascotas">Mascotas</option>
+                            <option value="salud">Salud</option>
+                            <option value="ropa">Ropa</option>
+                            <option value="imprevistos">Imprevistos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="expenseAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Persona *</label>
+                        <select id="expensePerson" required>
+                            <option value="sebastian">Sebastián</option>
+                            <option value="ludmila">Ludmila</option>
+                            <option value="joint">Ambos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="expenseMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="expenseDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nota (opcional)</label>
+                        <textarea id="expenseNote" rows="2"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="saveExpense()">
+                        Guardar Gasto
+                    </button>
+                </form>
+                
+                <!-- Income Form -->
+                <form id="incomeForm" class="movement-form">
+                    <div class="form-group">
+                        <label>Tipo de ingreso *</label>
+                        <select id="incomeCategory" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="ingreso_diario_sebastian">Ingreso diario Sebastián</option>
+                            <option value="ingreso_diario_ludmila">Ingreso diario Ludmila</option>
+                            <option value="otro">Otro ingreso</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="incomeAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="incomeMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="incomeDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nota (opcional)</label>
+                        <textarea id="incomeNote" rows="2"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="saveIncome()">
+                        Guardar Ingreso
+                    </button>
+                </form>
+                
+                <!-- Fund Form -->
+                <form id="fundForm" class="movement-form">
+                    <div class="form-group">
+                        <label>Fondo *</label>
+                        <select id="fundSelect" required>
+                            <option value="">Seleccionar fondo</option>
+                            <option value="hogar">Fondo fijo hogar</option>
+                            <option value="postres">Fondo fijo postres</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tipo de operación *</label>
+                        <select id="fundOperation" required>
+                            <option value="ingreso">Agregar dinero (ahorro)</option>
+                            <option value="uso">Usar dinero</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="fundAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Persona *</label>
+                        <select id="fundPerson" required>
+                            <option value="sebastian">Sebastián</option>
+                            <option value="ludmila">Ludmila</option>
+                            <option value="joint">Ambos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="fundMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="saveFundMovement()">
+                        Guardar Movimiento
+                    </button>
+                </form>
+                
+                <!-- Postre Form -->
+                <form id="postreForm" class="movement-form">
+                    <div class="form-group">
+                        <label>Tipo de movimiento *</label>
+                        <select id="postreType" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="insumo">Compra de insumos</option>
+                            <option value="venta">Venta de postres</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="postreAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="postreMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="postreDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descripción (opcional)</label>
+                        <textarea id="postreDescription" rows="2"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="savePostreMovement()">
+                        Guardar Movimiento
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
     
-    --color-bg: #F9FAFB;
-    --color-bg-card: #FFFFFF;
-    --color-border: #E5E7EB;
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
     
-    --color-sebastian: #4F46E5;
-    --color-ludmila: #EC4899;
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('firebase-messaging-sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Error registrando Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Sugerencia de instalación PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar sugerencia después de 30 segundos
+            setTimeout(() => {
+                if (deferredPrompt && confirm('¿Quieres instalar la aplicación para acceso rápido?')) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        deferredPrompt = null;
+                    });
+                }
+            }, 30000);
+        });
+    </script>
     
-    /* Espaciado */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-2xl: 3rem;
+    <!-- Firebase and Chart.js -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    /* Bordes */
-    --border-radius: 0.75rem;
-    --border-radius-sm: 0.5rem;
-    
-    /* Sombras */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    
-    /* Transiciones */
-    --transition-fast: 150ms ease;
-    --transition-normal: 300ms ease;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    font-size: 16px;
-    -webkit-text-size-adjust: 100%;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    line-height: 1.5;
-    color: var(--color-text);
-    background: var(--color-bg);
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-/* ============================================
-   TYPOGRAPHY
-   ============================================ */
-h1, h2, h3, h4 {
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-h1 { font-size: 1.5rem; }
-h2 { font-size: 1.25rem; margin-bottom: var(--spacing-md); }
-h3 { font-size: 1rem; margin-bottom: var(--spacing-sm); }
-
-p { margin-bottom: var(--spacing-md); }
-
-small {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-/* ============================================
-   LAYOUT Y COMPONENTES
-   ============================================ */
-.app-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: var(--color-bg-card);
-    box-shadow: var(--shadow-sm);
-    padding: var(--spacing-md);
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 64px;
-}
-
-.header-content {
-    flex: 1;
-}
-
-.app-title {
-    color: var(--color-primary);
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.emotional-message {
-    color: var(--color-text-light);
-    font-size: 0.875rem;
-    margin-top: var(--spacing-xs);
-    font-style: italic;
-}
-
-.menu-button {
-    background: none;
-    border: none;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: var(--spacing-sm);
-}
-
-.menu-button span {
-    display: block;
-    height: 2px;
-    width: 100%;
-    background: var(--color-text);
-    border-radius: 1px;
-    transition: var(--transition-fast);
-}
-
-/* Menú lateral */
-.side-menu {
-    position: fixed;
-    top: 0;
-    left: -300px;
-    width: 280px;
-    height: 100vh;
-    background: var(--color-bg-card);
-    box-shadow: var(--shadow-lg);
-    z-index: 1100;
-    transition: var(--transition-normal);
-    display: flex;
-    flex-direction: column;
-}
-
-.side-menu.open {
-    left: 0;
-}
-
-.menu-header {
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.close-menu {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--color-text-light);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.menu-nav {
-    flex: 1;
-    padding: var(--spacing-md);
-    overflow-y: auto;
-}
-
-.menu-item {
-    width: 100%;
-    padding: var(--spacing-md);
-    background: none;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xs);
-    transition: var(--transition-fast);
-    color: var(--color-text);
-}
-
-.menu-item:hover {
-    background: var(--color-bg);
-}
-
-.menu-item.active {
-    background: var(--color-primary);
-    color: white;
-}
-
-.menu-icon {
-    font-size: 1.25rem;
-}
-
-.menu-divider {
-    height: 1px;
-    background: var(--color-border);
-    margin: var(--spacing-md) 0;
-}
-
-.menu-footer {
-    padding: var(--spacing-md);
-    border-top: 1px solid var(--color-border);
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-}
-
-.logout-button {
-    width: 100%;
-    padding: var(--spacing-md);
-    background: var(--color-danger-light);
-    color: var(--color-danger);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-weight: 500;
-    transition: var(--transition-fast);
-}
-
-.logout-button:hover {
-    background: var(--color-danger);
-    color: white;
-}
-
-.menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1050;
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--transition-normal);
-}
-
-.menu-overlay.show {
-    opacity: 1;
-    pointer-events: all;
-}
-
-/* Contenido principal */
-.main-content {
-    margin-top: 64px;
-    padding: var(--spacing-md);
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ============================================
-   COMPONENTES ESPECÍFICOS
-   ============================================ */
-.month-selector {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-}
-
-.month-nav {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-
-.month-nav:hover {
-    background: var(--color-bg);
-}
-
-.summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-}
-
-.summary-card {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition-fast);
-}
-
-.summary-card:hover {
-    box-shadow: var(--shadow-md);
-}
-
-.summary-card.income {
-    border-top: 4px solid var(--color-success);
-}
-
-.summary-card.expense {
-    border-top: 4px solid var(--color-danger);
-}
-
-.summary-card.business {
-    border-top: 4px solid var(--color-primary);
-}
-
-.summary-card.savings {
-    border-top: 4px solid var(--color-warning);
-}
-
-.card-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.card-icon {
-    font-size: 1.5rem;
-}
-
-.card-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-xs);
-}
-
-.card-trend, .card-subtitle {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-.balance-card {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-}
-
-.balance-value {
-    font-size: 3rem;
-    font-weight: 700;
-    margin: var(--spacing-md) 0;
-}
-
-.final-balance .balance-value.positive {
-    color: var(--color-success);
-}
-
-.final-balance .balance-value.negative {
-    color: var(--color-danger);
-}
-
-.balance-message {
-    font-style: italic;
-    color: var(--color-text-light);
-    padding: var(--spacing-md);
-    background: var(--color-bg);
-    border-radius: var(--border-radius-sm);
-}
-
-/* Fondos */
-.funds-preview, .fund-status {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-    box-shadow: var(--shadow-sm);
-}
-
-.fund-item {
-    padding: var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.fund-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-}
-
-.fund-name {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-weight: 600;
-}
-
-.fund-amount {
-    font-weight: 700;
-}
-
-.progress-bar {
-    height: 8px;
-    background: var(--color-border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: var(--spacing-sm);
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--color-success);
-    transition: width 0.5s ease;
-}
-
-.fund-stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-.fund-missing {
-    font-size: 0.875rem;
-    margin-top: var(--spacing-sm);
-}
-
-.fund-item.critical .progress-fill {
-    background: var(--color-danger);
-}
-
-.fund-item.low .progress-fill {
-    background: var(--color-warning);
-}
-
-/* Formularios */
-.transaction-form {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-xl);
-    box-shadow: var(--shadow-sm);
-}
-
-.form-group {
-    margin-bottom: var(--spacing-lg);
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
-}
-
-label {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: 500;
-    color: var(--color-text);
-}
-
-select, input, textarea {
-    width: 100%;
-    padding: var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-sm);
-    font-size: 1rem;
-    transition: var(--transition-fast);
-}
-
-select:focus, input:focus, textarea:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.form-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xl);
-}
-
-.cancel-button, .submit-button {
-    flex: 1;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-
-.cancel-button {
-    background: var(--color-bg);
-    color: var(--color-text);
-}
-
-.submit-button {
-    background: var(--color-primary);
-    color: white;
-}
-
-.cancel-button:hover {
-    background: var(--color-border);
-}
-
-.submit-button:hover {
-    background: var(--color-primary-dark);
-}
-
-/* Historial */
-.history-filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-    background: var(--color-bg-card);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md);
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-sm);
-    border-left: 4px solid;
-    box-shadow: var(--shadow-sm);
-}
-
-.history-item.income { border-left-color: var(--color-success); }
-.history-item.expense { border-left-color: var(--color-danger); }
-.history-item.fund { border-left-color: var(--color-warning); }
-.history-item.business { border-left-color: var(--color-primary); }
-
-.history-info {
-    flex: 1;
-}
-
-.history-date {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-.history-description {
-    font-weight: 500;
-    margin: var(--spacing-xs) 0;
-}
-
-.history-details {
-    display: flex;
-    gap: var(--spacing-md);
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-.history-amount {
-    font-weight: 700;
-    font-size: 1.125rem;
-}
-
-/* Notificaciones */
-.notification-container {
-    position: fixed;
-    bottom: var(--spacing-md);
-    right: var(--spacing-md);
-    z-index: 2000;
-}
-
-.notification {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius-sm);
-    padding: var(--spacing-md);
-    margin-top: var(--spacing-sm);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    animation: slideIn 0.3s ease;
-    min-width: 300px;
-}
-
-.notification.success {
-    border-left: 4px solid var(--color-success);
-}
-
-.notification.error {
-    border-left: 4px solid var(--color-danger);
-}
-
-.notification.warning {
-    border-left: 4px solid var(--color-warning);
-}
-
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-/* ============================================
-   ESTILOS PARA HISTORIAL Y CONFIGURACIÓN
-   ============================================ */
-
-.empty-state {
-    text-align: center;
-    padding: var(--spacing-2xl) var(--spacing-md);
-    color: var(--color-text-light);
-    font-style: italic;
-}
-
-.person-sebastian {
-    color: var(--color-sebastian);
-    font-weight: 500;
-}
-
-.person-ludmila {
-    color: var(--color-ludmila);
-    font-weight: 500;
-}
-
-.history-note {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-    margin-top: var(--spacing-xs);
-    font-style: italic;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--color-bg);
-    border-radius: var(--border-radius-sm);
-}
-
-.family-member {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md);
-    background: var(--color-bg);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-sm);
-}
-
-.member-info {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-
-.member-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-}
-
-.member-name {
-    font-weight: 500;
-}
-
-.member-status {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-/* Estilos para el gráfico de categorías */
-.category-bar {
-    margin-bottom: var(--spacing-md);
-}
-
-.bar-label {
-    font-size: 0.875rem;
-    margin-bottom: var(--spacing-xs);
-    color: var(--color-text);
-}
-
-.bar-container {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-
-.bar-fill {
-    height: 20px;
-    background: var(--color-primary);
-    border-radius: var(--border-radius-sm);
-    min-width: 4px;
-    transition: width 0.5s ease;
-}
-
-.bar-amount {
-    font-size: 0.875rem;
-    color: var(--color-text);
-    min-width: 80px;
-    text-align: right;
-}
-
-.category-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-bg);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-xs);
-}
-
-.category-rank {
-    width: 24px;
-    height: 24px;
-    background: var(--color-primary);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    margin-right: var(--spacing-md);
-}
-
-.category-name {
-    flex: 1;
-    font-size: 0.875rem;
-}
-
-.category-amount {
-    font-weight: 600;
-    color: var(--color-text);
-}
-
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
-@media (max-width: 768px) {
-    html { font-size: 14px; }
-    
-    .summary-cards {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .history-filters {
-        grid-template-columns: 1fr;
-    }
-    
-    .month-selector {
-        gap: var(--spacing-md);
-    }
-    
-    .balance-value {
-        font-size: 2rem;
-    }
-    
-    .main-content {
-        padding: var(--spacing-sm);
-    }
-}
-
-@media (max-width: 480px) {
-    .side-menu {
-        width: 100%;
-        left: -100%;
-    }
-    
-    .notification {
-        min-width: auto;
-        max-width: calc(100vw - var(--spacing-md) * 2);
-    }
-}
-
-/* ============================================
-   ESTADOS ESPECIALES
-   ============================================ */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* Estados de fondos */
-.fund-status-indicator {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: var(--spacing-xs);
-}
-
-.fund-status-ok { background: var(--color-success); }
-.fund-status-low { background: var(--color-warning); }
-.fund-status-critical { background: var(--color-danger); }
-
-/* Personalización por persona */
-.person-sebastian {
-    color: var(--color-sebastian);
-}
-
-.person-ludmila {
-    color: var(--color-ludmila);
-}
-
-/* Botón de instalación PWA */
-.install-button {
-    width: 100%;
-    padding: var(--spacing-lg);
-    background: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 1.125rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-md);
-    margin: var(--spacing-md) 0;
-    transition: var(--transition-fast);
-}
-
-.install-button:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.install-hint {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-    text-align: center;
-}
-
-/* Configuración de objetivos */
-.goal-setting {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: var(--color-bg);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-.goal-input {
-    flex: 1;
-}
-
-/* Estado offline */
-.offline-indicator {
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
-    background: var(--color-warning);
-    color: white;
-    text-align: center;
-    padding: var(--spacing-sm);
-    font-size: 0.875rem;
-    z-index: 900;
-}
-
-/* Animaciones suaves */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.pulse {
-    animation: pulse 2s infinite;
-}
-
-/* Scrollbar personalizado */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--color-bg);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-lighter);
-}
-
-/* ============================================
-   ESTILOS PARA BUSINESS CARDS (POSTRES)
-   ============================================ */
-.business-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-}
-
-.business-card {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-    text-align: center;
-}
-
-.business-card.sales {
-    border-top: 4px solid var(--color-success);
-}
-
-.business-card.expenses {
-    border-top: 4px solid var(--color-danger);
-}
-
-.business-card.profit {
-    border-top: 4px solid var(--color-primary);
-}
-
-.business-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: var(--spacing-sm) 0;
-}
-
-.business-subtitle {
-    font-size: 0.875rem;
-    color: var(--color-text-light);
-}
-
-/* ============================================
-   ESTILOS PARA BALANCE CARDS
-   ============================================ */
-.balance-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-}
-
-.total-balance-card {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-}
-
-.total-balance {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: var(--spacing-md) 0;
-}
-
-.total-balance.positive {
-    color: var(--color-success);
-}
-
-.total-balance.negative {
-    color: var(--color-danger);
-}
-
-/* ============================================
-   MEJORAS VISUALES
-   ============================================ */
-.category-chart {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
-    box-shadow: var(--shadow-sm);
-}
-
-.category-ranking {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.funds-management {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.add-fund-button {
-    width: 100%;
-    padding: var(--spacing-md);
-    background: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: var(--spacing-md);
-    transition: var(--transition-fast);
-}
-
-.add-fund-button:hover {
-    background: var(--color-primary-dark);
-}
-
-.fund-progress {
-    margin: var(--spacing-md) 0;
-}
-
-.settings-section {
-    background: var(--color-bg-card);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-    box-shadow: var(--shadow-sm);
-}
-
-.settings-section h3 {
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-md);
-}
-
-.history-amount.positive {
-    color: var(--color-success);
-}
-
-.history-amount.negative {
-    color: var(--color-danger);
-}
+    <!-- Main App -->
+    <script src="app.js"></script>
+</body>
+</html>
