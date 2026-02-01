@@ -4,765 +4,649 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finanzas Familiares</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
-    <meta name="theme-color" content="#4f46e5">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABhSURBVHgB7dKxDYAwDETRk5GYYQRGQDIKI7BCWoQEBnAgEn8qpMvtOck5nudtZmafkVJKKaWUUkoppZRSSimllFJKKaWUUkpd1gN+6AEXhMEHeMAPlDEGyhgDZYzB/9oBNsYBW8OQamcAAAAASUVORK5CYII=">
     <style>
-        /* ===== RESET Y BASE ===== */
+        /* RESET Y VARIABLES */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root {
-            --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --background: #f8fafc;
-            --surface: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px rgba(0,0,0,0.1);
-            --radius: 12px;
-            --radius-sm: 8px;
-            --spacing-xs: 0.25rem;
-            --spacing-sm: 0.5rem;
-            --spacing-md: 1rem;
-            --spacing-lg: 1.5rem;
-            --spacing-xl: 2rem;
-        }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.5;
-            padding-bottom: 5rem;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
         }
-        
-        /* ===== TYPOGRAPHY ===== */
-        h1, h2, h3 {
+
+        /* TYPOGRAPHY */
+        h1, h2, h3, h4 {
             font-weight: 600;
-            margin-bottom: var(--spacing-md);
+            margin-bottom: 1rem;
         }
-        
-        h1 { font-size: 1.5rem; }
-        h2 { font-size: 1.25rem; }
-        h3 { font-size: 1rem; }
-        
-        .text-sm { font-size: 0.875rem; }
-        .text-xs { font-size: 0.75rem; }
-        
-        /* ===== LAYOUT ===== */
+
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 1.5rem; }
+        h3 { font-size: 1.2rem; }
+
+        /* LAYOUT */
         .container {
-            max-width: 100%;
-            padding: var(--spacing-md);
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        
+
+        /* CARD SYSTEM */
         .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-md);
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
             box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            transition: var(--transition);
         }
-        
-        .grid {
-            display: grid;
-            gap: var(--spacing-md);
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
-        
-        .grid-2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-3 { grid-template-columns: repeat(3, 1fr); }
-        
-        .flex {
+
+        .card-header {
             display: flex;
-            gap: var(--spacing-sm);
-        }
-        
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-center { justify-content: center; }
-        .gap-1 { gap: var(--spacing-xs); }
-        .gap-2 { gap: var(--spacing-sm); }
-        .gap-3 { gap: var(--spacing-md); }
-        .gap-4 { gap: var(--spacing-lg); }
-        
-        /* ===== COMPONENTS ===== */
-        .btn {
-            display: inline-flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 500;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            gap: var(--spacing-sm);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-light);
         }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-        
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--border);
-            color: var(--text);
-        }
-        
-        .btn-icon {
-            padding: 0.5rem;
-            border-radius: 50%;
-            width: 2.5rem;
-            height: 2.5rem;
-        }
-        
-        .btn-full {
-            width: 100%;
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .badge-success { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
-        
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--radius-sm);
-            background: var(--background);
-            border: 1px solid var(--border);
-            font-size: 0.875rem;
-        }
-        
-        .input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-        
-        .input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .select {
-            appearance: none;
-            background: white url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E") right 0.75rem center/1.5em no-repeat;
-            padding-right: 2.5rem;
-        }
-        
-        .label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text-light);
-        }
-        
-        /* ===== NAVIGATION ===== */
-        .navbar {
-            position: sticky;
-            top: 0;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: var(--spacing-md);
-            z-index: 100;
-        }
-        
+
+        /* NAVIGATION */
         .nav-tabs {
             display: flex;
             overflow-x: auto;
-            padding-bottom: 2px;
-            gap: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
         }
-        
+
         .nav-tab {
-            padding: var(--spacing-sm) var(--spacing-md);
-            white-space: nowrap;
-            border-bottom: 3px solid transparent;
-            color: var(--text-light);
+            flex: 1;
+            padding: 15px;
+            text-align: center;
             text-decoration: none;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
             font-weight: 500;
-            transition: all 0.2s;
         }
-        
+
         .nav-tab.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
         }
-        
-        /* ===== SECTIONS ===== */
-        .section {
-            margin-bottom: var(--spacing-xl);
+
+        .nav-tab i {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
         }
-        
-        .section-header {
-            margin-bottom: var(--spacing-lg);
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            gap: 8px;
         }
-        
-        /* ===== CHARTS ===== */
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* FORMS */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        /* STATS AND METRICS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* PROGRESS BARS */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
         .progress-bar {
-            height: 0.75rem;
-            background: var(--border);
-            border-radius: 9999px;
+            height: 12px;
+            background: var(--gray-light);
+            border-radius: 6px;
             overflow: hidden;
         }
-        
+
         .progress-fill {
             height: 100%;
-            border-radius: 9999px;
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, var(--success), #4cc9f0);
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
         }
-        
-        .progress-success { background: var(--secondary); }
-        .progress-warning { background: var(--warning); }
-        .progress-danger { background: var(--danger); }
-        
-        /* ===== UTILITIES ===== */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .text-success { color: var(--secondary); }
-        .text-danger { color: var(--danger); }
-        .text-warning { color: var(--warning); }
-        .mt-1 { margin-top: var(--spacing-xs); }
-        .mt-2 { margin-top: var(--spacing-sm); }
-        .mt-3 { margin-top: var(--spacing-md); }
-        .mt-4 { margin-top: var(--spacing-lg); }
-        .mb-1 { margin-bottom: var(--spacing-xs); }
-        .mb-2 { margin-bottom: var(--spacing-sm); }
-        .mb-3 { margin-bottom: var(--spacing-md); }
-        .mb-4 { margin-bottom: var(--spacing-lg); }
-        .p-2 { padding: var(--spacing-sm); }
-        .p-3 { padding: var(--spacing-md); }
-        .p-4 { padding: var(--spacing-lg); }
-        
-        /* ===== MODAL ===== */
+
+        /* TRANSACTION LIST */
+        .transaction-list {
+            list-style: none;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-item:hover {
+            background: var(--gray-light);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .transaction-positive {
+            color: var(--success);
+        }
+
+        .transaction-negative {
+            color: var(--danger);
+        }
+
+        /* MODAL */
         .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0,0,0,0.5);
-            display: flex;
+            z-index: 1000;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            padding: var(--spacing-md);
+            padding: 20px;
         }
-        
+
+        .modal.active {
+            display: flex;
+        }
+
         .modal-content {
-            background: var(--surface);
-            border-radius: var(--radius);
+            background: white;
+            border-radius: var(--border-radius);
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
         }
-        
+
         .modal-header {
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .modal-body {
-            padding: var(--spacing-lg);
-        }
-        
-        .modal-footer {
-            padding: var(--spacing-lg);
-            border-top: 1px solid var(--border);
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-light);
             display: flex;
-            gap: var(--spacing-sm);
-        }
-        
-        /* ===== SPECIFIC COMPONENTS ===== */
-        .balance-card {
-            text-align: center;
-        }
-        
-        .balance-amount {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: var(--spacing-sm) 0;
-        }
-        
-        .category-item {
-            display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-sm);
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .category-item:last-child {
-            border-bottom: none;
-        }
-        
-        .transaction-item {
-            display: flex;
             align-items: center;
-            gap: var(--spacing-md);
-            padding: var(--spacing-sm);
-            border-bottom: 1px solid var(--border);
         }
-        
-        .transaction-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: var(--radius-sm);
-            background: var(--background);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
+
+        .modal-body {
+            padding: 20px;
         }
-        
-        .transaction-details {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .transaction-title {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-        
-        .transaction-meta {
-            font-size: 0.875rem;
-            color: var(--text-light);
-        }
-        
-        .transaction-amount {
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .stat-card {
-            text-align: center;
-        }
-        
-        .stat-value {
+
+        .modal-close {
+            background: none;
+            border: none;
             font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
+            cursor: pointer;
+            color: var(--gray);
         }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-light);
+
+        /* AUTH SCREENS */
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
         }
-        
-        /* ===== LOADING ===== */
+
+        .auth-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-logo {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* UTILITY CLASSES */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-muted { color: var(--gray); }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        .d-none { display: none; }
+        .d-flex { display: flex; }
+        .align-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+
+        /* LOADING STATES */
         .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-        }
-        
-        .spinner {
-            width: 2rem;
-            height: 2rem;
-            border: 3px solid var(--border);
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--gray-light);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (min-width: 768px) {
-            .container {
-                max-width: 768px;
-                margin: 0 auto;
-            }
-            
-            h1 { font-size: 2rem; }
-            
-            .balance-amount { font-size: 2.5rem; }
+
+        /* PWA INSTALL PROMPT */
+        .pwa-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1001;
         }
-        
-        /* ===== DARK MODE SUPPORT ===== */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background: #0f172a;
-                --surface: #1e293b;
-                --text: #f1f5f9;
-                --text-light: #94a3b8;
-                --border: #334155;
-                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+
+        .pwa-prompt.active {
+            display: block;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                padding-bottom: 70px;
             }
             
-            .input, .select {
-                background-color: #334155;
-                border-color: #475569;
-                color: var(--text);
+            .card {
+                padding: 15px;
             }
             
-            .chip {
-                background: #334155;
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
             
-            .badge-success { background: #065f46; color: #d1fae5; }
-            .badge-warning { background: #92400e; color: #fef3c7; }
-            .badge-danger { background: #991b1b; color: #fee2e2; }
+            .btn {
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tab span {
+                display: none;
+            }
+            
+            .nav-tab i {
+                margin-bottom: 0;
+                font-size: 1.5rem;
+            }
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            .nav-tabs,
+            .btn,
+            .modal {
+                display: none !important;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="flex justify-between items-center">
-            <h1>💰 Finanzas Familiares</h1>
-            <div class="flex gap-2">
-                <button id="authBtn" class="btn btn-outline btn-icon">
-                    👤
-                </button>
-                <button id="installBtn" class="btn btn-primary btn-icon">
-                    📱
-                </button>
+    <div class="container">
+        <!-- AUTH SCREEN -->
+        <div id="authScreen" class="auth-container">
+            <div class="auth-card">
+                <div class="auth-logo">💰</div>
+                <h1>Finanzas Familiares</h1>
+                <p class="text-muted mb-4">Control financiero para la familia</p>
+                
+                <div id="loginSection">
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Contraseña" required>
+                    </div>
+                    <button onclick="login()" class="btn btn-primary btn-full mb-2">Iniciar Sesión</button>
+                    <button onclick="showRegister()" class="btn btn-outline btn-full">Crear Cuenta</button>
+                </div>
+                
+                <div id="registerSection" class="d-none">
+                    <div class="form-group">
+                        <input type="text" id="registerName" class="form-control" placeholder="Nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="registerEmail" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="registerPassword" class="form-control" placeholder="Contraseña" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirmar contraseña" required>
+                    </div>
+                    <button onclick="register()" class="btn btn-primary btn-full mb-2">Crear Cuenta</button>
+                    <button onclick="showLogin()" class="btn btn-outline btn-full">Volver al Login</button>
+                </div>
+                
+                <div id="authError" class="text-danger mt-3 d-none"></div>
             </div>
         </div>
-        
-        <!-- Tabs -->
-        <div class="nav-tabs mt-3">
-            <a href="#" class="nav-tab active" data-tab="dashboard">🏠 Resumen</a>
-            <a href="#" class="nav-tab" data-tab="balances">💰 Saldos</a>
-            <a href="#" class="nav-tab" data-tab="expenses">📊 Gastos</a>
-            <a href="#" class="nav-tab" data-tab="business">🎂 Postres</a>
-            <a href="#" class="nav-tab" data-tab="funds">🎯 Fondos</a>
-            <a href="#" class="nav-tab" data-tab="history">📜 Historial</a>
+
+        <!-- MAIN APP (Hidden until auth) -->
+        <div id="appScreen" class="d-none">
+            <!-- HEADER -->
+            <div class="card mb-3">
+                <div class="d-flex justify-between align-center">
+                    <div>
+                        <h1 id="currentMonth">Cargando...</h1>
+                        <p id="greeting" class="text-muted"></p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button onclick="refreshData()" class="btn btn-outline btn-small">⟳</button>
+                        <button onclick="logout()" class="btn btn-outline btn-small">Salir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <nav class="nav-tabs">
+                <a href="#" class="nav-tab active" data-tab="summary">
+                    <i>📊</i>
+                    <span>Resumen</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="balance">
+                    <i>💰</i>
+                    <span>Saldo</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="expenses">
+                    <i>📈</i>
+                    <span>Gastos</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="business">
+                    <i>🍰</i>
+                    <span>Postres</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="funds">
+                    <i>🎯</i>
+                    <span>Fondos</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="savings">
+                    <i>🏦</i>
+                    <span>Ahorros</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="history">
+                    <i>📋</i>
+                    <span>Historial</span>
+                </a>
+                <a href="#" class="nav-tab" data-tab="add">
+                    <i>➕</i>
+                    <span>Nuevo</span>
+                </a>
+            </nav>
+
+            <!-- CONTENT AREA -->
+            <div id="contentArea">
+                <!-- Content loaded dynamically -->
+            </div>
         </div>
-    </nav>
+    </div>
 
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Dashboard Tab -->
-        <section id="dashboard" class="tab-content">
-            <div class="section">
-                <div class="card">
-                    <h2>Resumen Mensual</h2>
-                    <div class="grid grid-2 gap-3 mt-3">
-                        <div class="stat-card">
-                            <div class="stat-value text-success" id="total-income">$0</div>
-                            <div class="stat-label">Ingresos</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value text-danger" id="total-expense">$0</div>
-                            <div class="stat-label">Gastos Hogar</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="business-net">$0</div>
-                            <div class="stat-label">Resultado Postres</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="final-balance">$0</div>
-                            <div class="stat-label">Balance Final</div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <div class="flex justify-between mb-2">
-                            <span>Estado General</span>
-                            <span id="status-indicator" class="badge badge-success">OK</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill progress-success" id="status-progress" style="width: 75%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>Acciones Rápidas</h2>
-                <div class="grid grid-3 gap-2">
-                    <button class="btn btn-outline btn-icon" data-action="add-expense">
-                        <span>💸</span>
-                    </button>
-                    <button class="btn btn-outline btn-icon" data-action="add-income">
-                        <span>💰</span>
-                    </button>
-                    <button class="btn btn-outline btn-icon" data-action="add-sale">
-                        <span>🎂</span>
-                    </button>
-                </div>
-                <div class="grid grid-3 gap-2 mt-2 text-center text-xs">
-                    <span>Gasto</span>
-                    <span>Ingreso</span>
-                    <span>Venta</span>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>Últimos Movimientos</h2>
-                <div class="card">
-                    <div id="recent-transactions"></div>
-                </div>
-            </div>
-        </section>
+    <!-- PWA INSTALL PROMPT -->
+    <div id="pwaPrompt" class="pwa-prompt">
+        <p class="mb-2">📱 Instala esta app para un mejor acceso</p>
+        <div class="d-flex gap-2">
+            <button onclick="installPWA()" class="btn btn-primary">Instalar</button>
+            <button onclick="hidePWA()" class="btn btn-outline">Ahora no</button>
+        </div>
+    </div>
 
-        <!-- Balances Tab -->
-        <section id="balances" class="tab-content hidden">
-            <div class="section">
-                <h2>Saldos Disponibles</h2>
-                <div class="grid grid-2 gap-3">
-                    <div class="card balance-card">
-                        <div class="text-2xl">💵</div>
-                        <h3>Efectivo</h3>
-                        <div class="balance-amount" id="cash-balance">$0</div>
-                    </div>
-                    <div class="card balance-card">
-                        <div class="text-2xl">📱</div>
-                        <h3>Mercado Pago</h3>
-                        <div class="balance-amount" id="mp-balance">$0</div>
-                    </div>
-                </div>
-                
-                <div class="card mt-3">
-                    <div class="flex justify-between items-center">
-                        <h3>Total Combinado</h3>
-                        <div class="text-2xl font-bold" id="total-balance">$0</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Expenses Tab -->
-        <section id="expenses" class="tab-content hidden">
-            <div class="section">
-                <h2>Gastos por Categoría</h2>
-                <div class="card">
-                    <div id="category-chart"></div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>Comparación Mensual</h2>
-                <div class="card">
-                    <div id="month-comparison"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Business Tab -->
-        <section id="business" class="tab-content hidden">
-            <div class="section">
-                <h2>Emprendimiento Postres</h2>
-                <div class="grid grid-3 gap-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="stat-value text-success" id="total-sales">$0</div>
-                        <div class="stat-label">Ventas</div>
-                    </div>
-                    <div class="card stat-card">
-                        <div class="stat-value text-danger" id="total-supplies">$0</div>
-                        <div class="stat-label">Insumos</div>
-                    </div>
-                    <div class="card stat-card">
-                        <div class="stat-value" id="business-profit">$0</div>
-                        <div class="stat-label">Ganancia</div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Fondo Postres</h3>
-                    <div class="flex justify-between mb-2">
-                        <span>Progreso</span>
-                        <span id="business-fund-progress">$0 / $50,000</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill progress-warning" id="business-fund-bar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Funds Tab -->
-        <section id="funds" class="tab-content hidden">
-            <div class="section">
-                <h2>Fondos de Ahorro</h2>
-                <div class="card">
-                    <h3>Fondo Hogar</h3>
-                    <div class="flex justify-between mb-2">
-                        <span>Objetivo: $100,000</span>
-                        <span id="home-fund-progress">$0</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill progress-success" id="home-fund-bar" style="width: 0%"></div>
-                    </div>
-                    <div class="mt-2 text-sm" id="home-fund-remaining"></div>
-                </div>
-                
-                <div class="card mt-3">
-                    <h3>Fondo Postres</h3>
-                    <div class="flex justify-between mb-2">
-                        <span>Objetivo: $50,000</span>
-                        <span id="dessert-fund-progress">$0</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill progress-warning" id="dessert-fund-bar" style="width: 0%"></div>
-                    </div>
-                    <div class="mt-2 text-sm" id="dessert-fund-remaining"></div>
-                </div>
-                
-                <button class="btn btn-primary btn-full mt-3" data-action="transfer-funds">
-                    Transferir entre Fondos
-                </button>
-            </div>
-        </section>
-
-        <!-- History Tab -->
-        <section id="history" class="tab-content hidden">
-            <div class="section">
-                <div class="card">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2>Historial</h2>
-                        <div class="flex gap-2">
-                            <select id="filter-person" class="select text-sm">
-                                <option value="">Todas las personas</option>
-                            </select>
-                            <select id="filter-category" class="select text-sm">
-                                <option value="">Todas las categorías</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div id="history-list"></div>
-                    
-                    <div class="mt-3">
-                        <button id="load-more" class="btn btn-outline btn-full">
-                            Cargar más movimientos
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal para agregar movimiento -->
-    <div id="modal" class="modal hidden">
+    <!-- MODALS -->
+    <div id="transactionModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Nuevo Movimiento</h2>
+                <h3 id="modalTitle">Nuevo Movimiento</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <form id="transaction-form">
-                    <div class="mb-3">
-                        <label class="label">Tipo</label>
-                        <select id="transaction-type" class="input select" required>
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label class="form-label">Tipo</label>
+                        <select id="transactionType" class="form-control" onchange="updateFormFields()" required>
                             <option value="">Seleccionar tipo</option>
-                            <option value="expense">Gasto Hogar</option>
-                            <option value="income">Ingreso Diario</option>
-                            <option value="business_expense">Insumos Postres</option>
-                            <option value="business_income">Venta Postres</option>
-                            <option value="fund_transfer">Transferencia Fondos</option>
+                            <option value="household_expense">Gasto del hogar</option>
+                            <option value="household_income">Ingreso diario</option>
+                            <option value="business_expense">Insumos postres</option>
+                            <option value="business_sale">Venta postres</option>
+                            <option value="fund">Fondo</option>
+                            <option value="saving">Ahorro</option>
                         </select>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="label">Fecha</label>
-                        <input type="date" id="transaction-date" class="input" required value="">
+
+                    <div class="form-group">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" id="transactionDate" class="form-control" required>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="label">Monto ($)</label>
-                        <input type="number" id="transaction-amount" class="input" min="0.01" step="0.01" required placeholder="0.00">
+
+                    <div class="form-group">
+                        <label class="form-label">Monto</label>
+                        <input type="number" id="transactionAmount" class="form-control" min="0.01" step="0.01" required>
                     </div>
-                    
-                    <!-- Campos dinámicos según tipo -->
-                    <div id="dynamic-fields"></div>
-                    
-                    <div class="mb-3">
-                        <label class="label">Nota (opcional)</label>
-                        <input type="text" id="transaction-note" class="input" placeholder="Descripción breve">
+
+                    <div id="categoryField" class="form-group d-none">
+                        <label class="form-label">Categoría</label>
+                        <select id="transactionCategory" class="form-control">
+                            <!-- Loaded dynamically -->
+                        </select>
                     </div>
+
+                    <div id="personField" class="form-group d-none">
+                        <label class="form-label">Persona</label>
+                        <select id="transactionPerson" class="form-control">
+                            <option value="Sebastián">Sebastián</option>
+                            <option value="Ludmila">Ludmila</option>
+                        </select>
+                    </div>
+
+                    <div id="paymentMethodField" class="form-group d-none">
+                        <label class="form-label">Medio</label>
+                        <select id="transactionPaymentMethod" class="form-control" required>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Mercado Pago">Mercado Pago</option>
+                        </select>
+                    </div>
+
+                    <div id="fundField" class="form-group d-none">
+                        <label class="form-label">Fondo</label>
+                        <select id="transactionFund" class="form-control">
+                            <option value="Fondo fijo hogar">Fondo fijo hogar</option>
+                            <option value="Fondo fijo postres">Fondo fijo postres</option>
+                        </select>
+                    </div>
+
+                    <div id="savingField" class="form-group d-none">
+                        <label class="form-label">Ahorro</label>
+                        <select id="transactionSaving" class="form-control">
+                            <option value="Ahorro general">Ahorro general</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nota (opcional)</label>
+                        <textarea id="transactionNote" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">Guardar</button>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" id="modal-cancel">Cancelar</button>
-                <button type="submit" form="transaction-form" class="btn btn-primary" id="modal-save">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Auth Modal -->
-    <div id="auth-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Iniciar Sesión</h2>
-            </div>
-            <div class="modal-body">
-                <div id="auth-state">
-                    <div class="mb-3">
-                        <label class="label">Email</label>
-                        <input type="email" id="auth-email" class="input" placeholder="tu@email.com">
-                    </div>
-                    <div class="mb-3">
-                        <label class="label">Contraseña</label>
-                        <input type="password" id="auth-password" class="input" placeholder="••••••••">
-                    </div>
-                    <button id="auth-login" class="btn btn-primary btn-full mb-2">Ingresar</button>
-                    <button id="auth-signup" class="btn btn-outline btn-full">Crear Cuenta</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Install Prompt -->
-    <div id="install-prompt" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="text-center p-4">
-                    <div class="text-4xl mb-3">📱</div>
-                    <h2 class="mb-2">Instalar App</h2>
-                    <p class="mb-4">Instala esta aplicación en tu celular para usarla más rápido y sin conexión.</p>
-                    <button id="install-confirm" class="btn btn-primary btn-full mb-2">Instalar</button>
-                    <button id="install-cancel" class="btn btn-outline btn-full">Ahora no</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loading" class="modal">
-        <div class="loading">
-            <div class="spinner"></div>
         </div>
     </div>
 
@@ -770,801 +654,1107 @@
         // ============================================
         // CONFIGURACIÓN SUPABASE
         // ============================================
-        const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Reemplazar
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Reemplazar
+        const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Reemplazar con tu URL
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Reemplazar con tu anon key
         
-        // Inicializar Supabase
-        const supabaseClient = window.supabase ? 
-            window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : 
-            null;
+        let supabase;
+        let currentUser = null;
+        let deferredPrompt = null;
 
         // ============================================
-        // ESTADO GLOBAL
+        // INICIALIZACIÓN
         // ============================================
-        let state = {
-            user: null,
-            session: null,
-            persons: [],
-            categories: [],
-            paymentMethods: [],
-            funds: [],
-            transactions: [],
-            currentTab: 'dashboard',
-            filters: {
-                person: '',
-                category: '',
-                limit: 50,
-                offset: 0
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Cargar Supabase desde CDN
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = initializeApp;
+            document.head.appendChild(script);
+            
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js');
             }
-        };
-
-        // ============================================
-        // FUNCIONES DE UTILIDAD
-        // ============================================
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-AR', {
-                style: 'currency',
-                currency: 'ARS'
-            }).format(amount);
-        }
-
-        function formatDate(date) {
-            return new Date(date).toLocaleDateString('es-AR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
+            
+            // PWA Install Prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                setTimeout(() => {
+                    document.getElementById('pwaPrompt').classList.add('active');
+                }, 3000);
             });
-        }
+        });
 
-        function showLoading() {
-            document.getElementById('loading').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').classList.add('hidden');
-        }
-
-        function showModal(type, data = null) {
-            const modal = document.getElementById('modal');
-            const authModal = document.getElementById('auth-modal');
-            const installModal = document.getElementById('install-prompt');
-            
-            // Ocultar todos primero
-            modal.classList.add('hidden');
-            authModal.classList.add('hidden');
-            installModal.classList.add('hidden');
-            
-            // Mostrar el modal correspondiente
-            switch(type) {
-                case 'transaction':
-                    setupTransactionModal(data);
-                    modal.classList.remove('hidden');
-                    break;
-                case 'auth':
-                    authModal.classList.remove('hidden');
-                    break;
-                case 'install':
-                    installModal.classList.remove('hidden');
-                    break;
-            }
-        }
-
-        function hideModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('auth-modal').classList.add('hidden');
-            document.getElementById('install-prompt').classList.add('hidden');
-        }
-
-        // ============================================
-        // FUNCIONES SUPABASE
-        // ============================================
         async function initializeApp() {
-            showLoading();
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             
-            try {
-                // Cargar datos estáticos
-                await Promise.all([
-                    loadPersons(),
-                    loadCategories(),
-                    loadPaymentMethods(),
-                    loadFunds()
-                ]);
-                
-                // Verificar autenticación
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session) {
-                    state.session = session;
-                    state.user = session.user;
-                    updateAuthUI();
-                    await loadDashboardData();
-                } else {
-                    showModal('auth');
-                }
-                
-                // Cargar datos iniciales
-                await loadRecentTransactions();
-                updateBalances();
-                updateBusinessData();
-                updateFundsData();
-                
-            } catch (error) {
-                console.error('Error inicializando app:', error);
-                alert('Error al cargar la aplicación. Recarga la página.');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadPersons() {
-            const { data, error } = await supabaseClient
-                .from('persons')
-                .select('*')
-                .order('display_order');
-            
-            if (!error) state.persons = data;
-        }
-
-        async function loadCategories() {
-            const { data, error } = await supabaseClient
-                .from('categories')
-                .select('*')
-                .order('display_order');
-            
-            if (!error) state.categories = data;
-        }
-
-        async function loadPaymentMethods() {
-            const { data, error } = await supabaseClient
-                .from('payment_methods')
-                .select('*')
-                .order('display_order');
-            
-            if (!error) state.paymentMethods = data;
-        }
-
-        async function loadFunds() {
-            const { data, error } = await supabaseClient
-                .from('funds')
-                .select('*')
-                .order('display_order');
-            
-            if (!error) state.funds = data;
-        }
-
-        async function loadDashboardData() {
-            const now = new Date();
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            
-            // Cargar resumen mensual
-            const { data: summary } = await supabaseClient
-                .rpc('get_monthly_balance', { year_month: monthStart });
-            
-            if (summary && summary.length > 0) {
-                const data = summary[0];
-                document.getElementById('total-income').textContent = formatCurrency(data.total_income);
-                document.getElementById('total-expense').textContent = formatCurrency(data.total_expense);
-                document.getElementById('business-net').textContent = formatCurrency(data.business_net);
-                document.getElementById('final-balance').textContent = formatCurrency(data.final_balance);
-                
-                // Actualizar indicador de estado
-                const statusIndicator = document.getElementById('status-indicator');
-                const statusProgress = document.getElementById('status-progress');
-                
-                if (data.final_balance > 0) {
-                    statusIndicator.className = 'badge badge-success';
-                    statusIndicator.textContent = 'OK';
-                    statusProgress.className = 'progress-fill progress-success';
-                    statusProgress.style.width = '100%';
-                } else if (data.final_balance > -10000) {
-                    statusIndicator.className = 'badge badge-warning';
-                    statusIndicator.textContent = 'ALERTA';
-                    statusProgress.className = 'progress-fill progress-warning';
-                    statusProgress.style.width = '50%';
-                } else {
-                    statusIndicator.className = 'badge badge-danger';
-                    statusIndicator.textContent = 'PELIGRO';
-                    statusProgress.className = 'progress-fill progress-danger';
-                    statusProgress.style.width = '25%';
-                }
-            }
-        }
-
-        async function loadRecentTransactions(limit = 10) {
-            const { data, error } = await supabaseClient
-                .from('transactions')
-                .select(`
-                    *,
-                    category:categories(*),
-                    person:persons(*),
-                    payment_method:payment_methods(*),
-                    fund:funds(*)
-                `)
-                .order('date', { ascending: false })
-                .limit(limit);
-            
-            if (!error) {
-                state.transactions = data;
-                renderRecentTransactions();
-            }
-        }
-
-        async function addTransaction(transactionData) {
-            const { data, error } = await supabaseClient
-                .from('transactions')
-                .insert([{
-                    ...transactionData,
-                    created_by: state.user.id
-                }])
-                .select()
-                .single();
-            
-            if (!error) {
-                // Actualizar datos
-                await Promise.all([
-                    loadDashboardData(),
-                    loadRecentTransactions(),
-                    updateBalances(),
-                    updateBusinessData(),
-                    updateFundsData()
-                ]);
-                
-                hideModal();
-                alert('Movimiento agregado correctamente');
-                return data;
+            // Verificar sesión existente
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                showApp();
             } else {
-                throw error;
-            }
-        }
-
-        // ============================================
-        // FUNCIONES DE UI
-        // ============================================
-        function setupTransactionModal(data = null) {
-            const form = document.getElementById('transaction-form');
-            const dynamicFields = document.getElementById('dynamic-fields');
-            const typeSelect = document.getElementById('transaction-type');
-            const title = document.getElementById('modal-title');
-            
-            // Reset form
-            form.reset();
-            dynamicFields.innerHTML = '';
-            
-            // Set date to today
-            document.getElementById('transaction-date').valueAsDate = new Date();
-            
-            if (data) {
-                // Editar transacción existente
-                title.textContent = 'Editar Movimiento';
-                Object.keys(data).forEach(key => {
-                    const input = document.getElementById(`transaction-${key}`);
-                    if (input) input.value = data[key];
-                });
-            } else {
-                title.textContent = 'Nuevo Movimiento';
+                showAuth();
             }
             
-            // Event listener para cambios en tipo
-            typeSelect.addEventListener('change', updateDynamicFields);
-            
-            // Configurar campos iniciales
-            updateDynamicFields();
-            
-            function updateDynamicFields() {
-                const type = typeSelect.value;
-                let html = '';
-                
-                switch(type) {
-                    case 'expense':
-                        html = `
-                            <div class="mb-3">
-                                <label class="label">Categoría</label>
-                                <select id="transaction-category" class="input select" required>
-                                    <option value="">Seleccionar categoría</option>
-                                    ${state.categories.filter(c => c.type === 'expense').map(c => 
-                                        `<option value="${c.id}">${c.icon} ${c.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Persona</label>
-                                <select id="transaction-person" class="input select" required>
-                                    <option value="">Seleccionar persona</option>
-                                    ${state.persons.map(p => 
-                                        `<option value="${p.id}">${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Medio de Pago</label>
-                                <select id="transaction-payment-method" class="input select" required>
-                                    <option value="">Seleccionar medio</option>
-                                    ${state.paymentMethods.map(p => 
-                                        `<option value="${p.id}">${p.icon} ${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                        `;
-                        break;
-                        
-                    case 'income':
-                        html = `
-                            <div class="mb-3">
-                                <label class="label">Tipo de Ingreso</label>
-                                <select id="transaction-category" class="input select" required>
-                                    <option value="">Seleccionar tipo</option>
-                                    ${state.categories.filter(c => c.type === 'income').map(c => 
-                                        `<option value="${c.id}">${c.icon} ${c.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Persona</label>
-                                <select id="transaction-person" class="input select" required>
-                                    <option value="">Seleccionar persona</option>
-                                    ${state.persons.map(p => 
-                                        `<option value="${p.id}">${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Medio de Pago</label>
-                                <select id="transaction-payment-method" class="input select" required>
-                                    <option value="">Seleccionar medio</option>
-                                    ${state.paymentMethods.map(p => 
-                                        `<option value="${p.id}">${p.icon} ${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                        `;
-                        break;
-                        
-                    case 'business_expense':
-                        html = `
-                            <div class="mb-3">
-                                <label class="label">Persona</label>
-                                <select id="transaction-person" class="input select" required>
-                                    <option value="">Seleccionar persona</option>
-                                    ${state.persons.map(p => 
-                                        `<option value="${p.id}">${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Medio de Pago</label>
-                                <select id="transaction-payment-method" class="input select" required>
-                                    <option value="">Seleccionar medio</option>
-                                    ${state.paymentMethods.map(p => 
-                                        `<option value="${p.id}">${p.icon} ${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                        `;
-                        break;
-                        
-                    case 'business_income':
-                        html = `
-                            <div class="mb-3">
-                                <label class="label">Medio de Pago</label>
-                                <select id="transaction-payment-method" class="input select" required>
-                                    <option value="">Seleccionar medio</option>
-                                    ${state.paymentMethods.map(p => 
-                                        `<option value="${p.id}">${p.icon} ${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                        `;
-                        break;
-                        
-                    case 'fund_transfer':
-                        html = `
-                            <div class="mb-3">
-                                <label class="label">Fondo Origen</label>
-                                <select id="transaction-fund" class="input select" required>
-                                    <option value="">Seleccionar fondo origen</option>
-                                    ${state.funds.map(f => 
-                                        `<option value="${f.id}">${f.icon} ${f.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Fondo Destino</label>
-                                <select id="transaction-to-fund" class="input select" required>
-                                    <option value="">Seleccionar fondo destino</option>
-                                    ${state.funds.map(f => 
-                                        `<option value="${f.id}">${f.icon} ${f.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="label">Medio de Pago</label>
-                                <select id="transaction-payment-method" class="input select" required>
-                                    <option value="">Seleccionar medio</option>
-                                    ${state.paymentMethods.map(p => 
-                                        `<option value="${p.id}">${p.icon} ${p.name}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                        `;
-                        break;
-                }
-                
-                dynamicFields.innerHTML = html;
-            }
-        }
-
-        function renderRecentTransactions() {
-            const container = document.getElementById('recent-transactions');
-            const transactions = state.transactions.slice(0, 10);
-            
-            if (transactions.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 p-4">No hay movimientos recientes</p>';
-                return;
-            }
-            
-            container.innerHTML = transactions.map(t => `
-                <div class="transaction-item">
-                    <div class="transaction-icon" style="background: ${getCategoryColor(t.category.type)}20">
-                        ${t.category?.icon || '💰'}
-                    </div>
-                    <div class="transaction-details">
-                        <div class="transaction-title">${t.category?.name || 'Movimiento'}</div>
-                        <div class="transaction-meta">
-                            ${formatDate(t.date)} • ${t.person?.name || ''} • ${t.payment_method?.name || ''}
-                            ${t.note ? `• ${t.note}` : ''}
-                        </div>
-                    </div>
-                    <div class="transaction-amount ${getAmountColor(t.type)}">
-                        ${t.type.includes('expense') ? '-' : '+'}${formatCurrency(t.amount)}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function updateBalances() {
-            // En una app real, esto vendría de la función get_current_balance
-            // Por ahora simulamos con datos de las transacciones
-            
-            const cashId = state.paymentMethods.find(p => p.name === 'Efectivo')?.id;
-            const mpId = state.paymentMethods.find(p => p.name === 'Mercado Pago')?.id;
-            
-            if (!cashId || !mpId) return;
-            
-            // Calcular saldos desde transacciones
-            let cashBalance = 0;
-            let mpBalance = 0;
-            
-            state.transactions.forEach(t => {
-                const amount = t.type.includes('expense') ? -t.amount : t.amount;
-                
-                if (t.payment_method_id === cashId) {
-                    cashBalance += amount;
-                } else if (t.payment_method_id === mpId) {
-                    mpBalance += amount;
+            // Configurar listener de auth
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    currentUser = session.user;
+                    showApp();
+                } else if (event === 'SIGNED_OUT') {
+                    currentUser = null;
+                    showAuth();
                 }
             });
             
-            document.getElementById('cash-balance').textContent = formatCurrency(cashBalance);
-            document.getElementById('mp-balance').textContent = formatCurrency(mpBalance);
-            document.getElementById('total-balance').textContent = formatCurrency(cashBalance + mpBalance);
-        }
-
-        async function updateBusinessData() {
-            // Calcular datos de negocio
-            const businessTransactions = state.transactions.filter(t => 
-                t.type.includes('business')
-            );
-            
-            const sales = businessTransactions
-                .filter(t => t.type === 'business_income')
-                .reduce((sum, t) => sum + t.amount, 0);
-            
-            const supplies = businessTransactions
-                .filter(t => t.type === 'business_expense')
-                .reduce((sum, t) => sum + t.amount, 0);
-            
-            const profit = sales - supplies;
-            
-            document.getElementById('total-sales').textContent = formatCurrency(sales);
-            document.getElementById('total-supplies').textContent = formatCurrency(supplies);
-            document.getElementById('business-profit').textContent = formatCurrency(profit);
-            
-            // Actualizar fondo postres
-            const dessertFund = state.funds.find(f => f.name === 'Fondo fijo postres');
-            if (dessertFund) {
-                const progress = (dessertFund.current_amount / dessertFund.target_amount) * 100;
-                document.getElementById('business-fund-progress').textContent = 
-                    `${formatCurrency(dessertFund.current_amount)} / ${formatCurrency(dessertFund.target_amount)}`;
-                document.getElementById('business-fund-bar').style.width = `${Math.min(progress, 100)}%`;
-            }
-        }
-
-        async function updateFundsData() {
-            state.funds.forEach(fund => {
-                if (fund.name === 'Fondo fijo hogar') {
-                    const progress = (fund.current_amount / fund.target_amount) * 100;
-                    const remaining = fund.target_amount - fund.current_amount;
-                    
-                    document.getElementById('home-fund-progress').textContent = 
-                        formatCurrency(fund.current_amount);
-                    document.getElementById('home-fund-bar').style.width = `${Math.min(progress, 100)}%`;
-                    document.getElementById('home-fund-remaining').textContent = 
-                        `Faltan ${formatCurrency(remaining)} para el objetivo`;
-                }
-                
-                if (fund.name === 'Fondo fijo postres') {
-                    const progress = (fund.current_amount / fund.target_amount) * 100;
-                    const remaining = fund.target_amount - fund.current_amount;
-                    
-                    document.getElementById('dessert-fund-progress').textContent = 
-                        formatCurrency(fund.current_amount);
-                    document.getElementById('dessert-fund-bar').style.width = `${Math.min(progress, 100)}%`;
-                    document.getElementById('dessert-fund-remaining').textContent = 
-                        `Faltan ${formatCurrency(remaining)} para el objetivo`;
-                }
-            });
-        }
-
-        function updateAuthUI() {
-            const authBtn = document.getElementById('authBtn');
-            if (state.user) {
-                authBtn.innerHTML = '👤';
-                authBtn.title = `Conectado como ${state.user.email}`;
-            } else {
-                authBtn.innerHTML = '🔓';
-                authBtn.title = 'Iniciar sesión';
-            }
-        }
-
-        function getCategoryColor(type) {
-            const colors = {
-                'expense': '#ef4444',
-                'income': '#10b981',
-                'business_expense': '#f59e0b',
-                'business_income': '#8b5cf6',
-                'fund_transfer': '#3b82f6'
-            };
-            return colors[type] || '#64748b';
-        }
-
-        function getAmountColor(type) {
-            return type.includes('expense') ? 'text-danger' : 'text-success';
-        }
-
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        document.addEventListener('DOMContentLoaded', () => {
             // Navegación por tabs
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
                     e.preventDefault();
-                    
-                    // Actualizar tabs activos
-                    document.querySelectorAll('.nav-tab').forEach(t => 
-                        t.classList.remove('active'));
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    
-                    // Mostrar contenido correspondiente
-                    document.querySelectorAll('.tab-content').forEach(content => 
-                        content.classList.add('hidden'));
-                    document.getElementById(tab.dataset.tab).classList.remove('hidden');
-                    
-                    state.currentTab = tab.dataset.tab;
-                    
-                    // Cargar datos específicos del tab
-                    switch(state.currentTab) {
-                        case 'history':
-                            loadHistory();
-                            break;
-                        case 'expenses':
-                            loadCategoryData();
-                            break;
-                    }
+                    loadTab(tab.dataset.tab);
                 });
             });
             
-            // Botones de acción rápida
-            document.querySelectorAll('[data-action]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const action = btn.dataset.action;
-                    
-                    switch(action) {
-                        case 'add-expense':
-                            showModal('transaction');
-                            document.getElementById('transaction-type').value = 'expense';
-                            document.getElementById('transaction-type').dispatchEvent(new Event('change'));
-                            break;
-                        case 'add-income':
-                            showModal('transaction');
-                            document.getElementById('transaction-type').value = 'income';
-                            document.getElementById('transaction-type').dispatchEvent(new Event('change'));
-                            break;
-                        case 'add-sale':
-                            showModal('transaction');
-                            document.getElementById('transaction-type').value = 'business_income';
-                            document.getElementById('transaction-type').dispatchEvent(new Event('change'));
-                            break;
-                        case 'transfer-funds':
-                            showModal('transaction');
-                            document.getElementById('transaction-type').value = 'fund_transfer';
-                            document.getElementById('transaction-type').dispatchEvent(new Event('change'));
-                            break;
-                    }
-                });
+            // Formulario de transacción
+            document.getElementById('transactionForm').addEventListener('submit', saveTransaction);
+            
+            // Fecha por defecto
+            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // ============================================
+        // AUTENTICACIÓN
+        // ============================================
+        function showAuth() {
+            document.getElementById('authScreen').classList.remove('d-none');
+            document.getElementById('appScreen').classList.add('d-none');
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').classList.add('d-none');
+            document.getElementById('appScreen').classList.remove('d-none');
+            updateGreeting();
+            loadTab('summary');
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('d-none');
+            document.getElementById('registerSection').classList.add('d-none');
+            document.getElementById('authError').classList.add('d-none');
+        }
+
+        function showRegister() {
+            document.getElementById('loginSection').classList.add('d-none');
+            document.getElementById('registerSection').classList.remove('d-none');
+            document.getElementById('authError').classList.add('d-none');
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password
             });
             
-            // Modal buttons
-            document.getElementById('modal-cancel').addEventListener('click', hideModal);
-            document.getElementById('modal-save').addEventListener('click', async (e) => {
-                e.preventDefault();
+            if (error) {
+                document.getElementById('authError').textContent = error.message;
+                document.getElementById('authError').classList.remove('d-none');
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                document.getElementById('authError').textContent = 'Las contraseñas no coinciden';
+                document.getElementById('authError').classList.remove('d-none');
+                return;
+            }
+            
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name
+                    }
+                }
+            });
+            
+            if (error) {
+                document.getElementById('authError').textContent = error.message;
+                document.getElementById('authError').classList.remove('d-none');
+            } else {
+                document.getElementById('authError').textContent = '¡Cuenta creada! Revisa tu email para confirmar.';
+                document.getElementById('authError').classList.remove('d-none');
+                document.getElementById('authError').classList.remove('text-danger');
+                document.getElementById('authError').classList.add('text-success');
+            }
+        }
+
+        async function logout() {
+            await supabase.auth.signOut();
+        }
+
+        // ============================================
+        // NAVEGACIÓN Y CARGA DE CONTENIDO
+        // ============================================
+        async function loadTab(tabName) {
+            const content = document.getElementById('contentArea');
+            content.innerHTML = '<div class="text-center"><div class="loading"></div></div>';
+            
+            switch(tabName) {
+                case 'summary':
+                    await loadSummary();
+                    break;
+                case 'balance':
+                    await loadBalance();
+                    break;
+                case 'expenses':
+                    await loadExpenses();
+                    break;
+                case 'business':
+                    await loadBusiness();
+                    break;
+                case 'funds':
+                    await loadFunds();
+                    break;
+                case 'savings':
+                    await loadSavings();
+                    break;
+                case 'history':
+                    await loadHistory();
+                    break;
+                case 'add':
+                    showTransactionModal();
+                    break;
+            }
+        }
+
+        // ============================================
+        // FUNCIONES DE DATOS
+        // ============================================
+        async function refreshData() {
+            const activeTab = document.querySelector('.nav-tab.active').dataset.tab;
+            loadTab(activeTab);
+        }
+
+        function updateGreeting() {
+            const now = new Date();
+            const hour = now.getHours();
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+            
+            let greeting = '';
+            if (hour < 12) greeting = 'Buenos días';
+            else if (hour < 19) greeting = 'Buenas tardes';
+            else greeting = 'Buenas noches';
+            
+            document.getElementById('greeting').textContent = greeting;
+        }
+
+        // ============================================
+        // RESUMEN MENSUAL
+        // ============================================
+        async function loadSummary() {
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            
+            // Obtener transacciones del mes
+            const { data: transactions, error } = await supabase
+                .from('transactions')
+                .select(`
+                    *,
+                    categories(name, type),
+                    persons(name),
+                    payment_methods(name)
+                `)
+                .eq('user_id', currentUser.id)
+                .gte('date', monthStart.toISOString().split('T')[0])
+                .lte('date', monthEnd.toISOString().split('T')[0])
+                .order('date', { ascending: false });
+            
+            if (error) {
+                showError(error.message);
+                return;
+            }
+            
+            // Calcular totales
+            let totalIncome = 0;
+            let totalHouseholdExpenses = 0;
+            let totalBusinessIncome = 0;
+            let totalBusinessExpenses = 0;
+            
+            transactions.forEach(t => {
+                if (t.transaction_type === 'household_income') totalIncome += parseFloat(t.amount);
+                if (t.transaction_type === 'household_expense') totalHouseholdExpenses += parseFloat(t.amount);
+                if (t.transaction_type === 'business_sale') totalBusinessIncome += parseFloat(t.amount);
+                if (t.transaction_type === 'business_expense') totalBusinessExpenses += parseFloat(t.amount);
+            });
+            
+            const businessProfit = totalBusinessIncome - totalBusinessExpenses;
+            const finalBalance = totalIncome + businessProfit - totalHouseholdExpenses;
+            
+            // Renderizar
+            const content = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Ingresos totales</div>
+                        <div class="stat-value">$${totalIncome.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Gastos hogar</div>
+                        <div class="stat-value">$${totalHouseholdExpenses.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Resultado postres</div>
+                        <div class="stat-value ${businessProfit >= 0 ? 'text-success' : 'text-danger'}">
+                            $${businessProfit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Balance final</div>
+                        <div class="stat-value ${finalBalance >= 0 ? 'text-success' : 'text-danger'}">
+                            $${finalBalance.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                </div>
                 
-                const form = document.getElementById('transaction-form');
-                if (!form.checkValidity()) {
-                    form.reportValidity();
+                <div class="card">
+                    <h3>Indicadores</h3>
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Ahorro mensual objetivo</span>
+                            <span>${Math.round((totalIncome > 0 ? (finalBalance / totalIncome) * 100 : 0))}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(Math.round((totalIncome > 0 ? (finalBalance / totalIncome) * 100 : 0)), 100)}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Gastos vs Ingresos</span>
+                            <span>${Math.round((totalIncome > 0 ? (totalHouseholdExpenses / totalIncome) * 100 : 0))}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(Math.round((totalIncome > 0 ? (totalHouseholdExpenses / totalIncome) * 100 : 0)), 100)}%; background: ${totalHouseholdExpenses > totalIncome ? 'var(--danger)' : 'var(--warning)'}"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Últimos movimientos</h3>
+                        <button onclick="showTransactionModal()" class="btn btn-primary btn-small">Nuevo</button>
+                    </div>
+                    <ul class="transaction-list">
+                        ${transactions.slice(0, 10).map(t => `
+                            <li class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="d-flex justify-between">
+                                        <strong>${t.categories?.name || t.transaction_type}</strong>
+                                        <span class="transaction-amount ${getAmountClass(t)}">
+                                            ${getAmountPrefix(t)}$${parseFloat(t.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">
+                                        ${new Date(t.date).toLocaleDateString('es-AR')} • 
+                                        ${t.persons?.name || ''} • 
+                                        ${t.payment_methods?.name || ''}
+                                        ${t.note ? '• ' + t.note : ''}
+                                    </small>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // SALDO DISPONIBLE
+        // ============================================
+        async function loadBalance() {
+            // Obtener todas las transacciones del usuario
+            const { data: transactions, error } = await supabase
+                .from('transactions')
+                .select('amount, transaction_type, payment_methods(name)')
+                .eq('user_id', currentUser.id);
+            
+            if (error) {
+                showError(error.message);
+                return;
+            }
+            
+            // Calcular saldos por medio de pago
+            const balances = {
+                'Efectivo': 0,
+                'Mercado Pago': 0
+            };
+            
+            transactions.forEach(t => {
+                const amount = parseFloat(t.amount);
+                const method = t.payment_methods?.name;
+                
+                if (!method) return;
+                
+                if (t.transaction_type === 'saving') {
+                    // Ahorros no se cuentan como disponible
                     return;
                 }
                 
-                const formData = {
-                    type: document.getElementById('transaction-type').value,
-                    date: document.getElementById('transaction-date').value,
-                    amount: parseFloat(document.getElementById('transaction-amount').value),
-                    note: document.getElementById('transaction-note').value
-                };
-                
-                // Campos específicos por tipo
-                const type = formData.type;
-                
-                switch(type) {
-                    case 'expense':
-                    case 'income':
-                        formData.category_id = document.getElementById('transaction-category').value;
-                        formData.person_id = document.getElementById('transaction-person').value;
-                        formData.payment_method_id = document.getElementById('transaction-payment-method').value;
-                        break;
-                    case 'business_expense':
-                        formData.category_id = state.categories.find(c => c.name === 'Insumos postres').id;
-                        formData.person_id = document.getElementById('transaction-person').value;
-                        formData.payment_method_id = document.getElementById('transaction-payment-method').value;
-                        break;
-                    case 'business_income':
-                        formData.category_id = state.categories.find(c => c.name === 'Ventas postres').id;
-                        formData.payment_method_id = document.getElementById('transaction-payment-method').value;
-                        break;
-                    case 'fund_transfer':
-                        formData.category_id = state.categories.find(c => c.name === 'Transferencia entre fondos').id;
-                        formData.fund_id = document.getElementById('transaction-fund').value;
-                        formData.to_fund_id = document.getElementById('transaction-to-fund').value;
-                        formData.payment_method_id = document.getElementById('transaction-payment-method').value;
-                        break;
-                }
-                
-                try {
-                    showLoading();
-                    await addTransaction(formData);
-                } catch (error) {
-                    console.error('Error agregando transacción:', error);
-                    alert('Error al guardar el movimiento');
-                } finally {
-                    hideLoading();
-                }
-            });
-            
-            // Auth buttons
-            document.getElementById('authBtn').addEventListener('click', () => {
-                if (state.user) {
-                    // Mostrar menu de usuario
-                    if (confirm('¿Cerrar sesión?')) {
-                        supabaseClient.auth.signOut();
-                        state.user = null;
-                        state.session = null;
-                        updateAuthUI();
-                        showModal('auth');
-                    }
+                if (t.transaction_type === 'fund') {
+                    // Fondos sí se cuentan como disponible (son dinero reservado)
+                    balances[method] -= amount;
+                } else if (t.transaction_type === 'business_sale' || t.transaction_type === 'household_income') {
+                    balances[method] += amount;
                 } else {
-                    showModal('auth');
+                    balances[method] -= amount;
                 }
             });
             
-            document.getElementById('auth-login').addEventListener('click', async () => {
-                const email = document.getElementById('auth-email').value;
-                const password = document.getElementById('auth-password').value;
+            const total = balances['Efectivo'] + balances['Mercado Pago'];
+            
+            // Renderizar
+            const content = `
+                <div class="card mb-3">
+                    <h2 class="text-center">Saldo Total Disponible</h2>
+                    <h1 class="text-center ${total >= 0 ? 'text-success' : 'text-danger'}" style="font-size: 3rem;">
+                        $${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </h1>
+                    <p class="text-center text-muted">Excluye ahorros</p>
+                </div>
                 
-                if (!email || !password) {
-                    alert('Por favor completa email y contraseña');
-                    return;
-                }
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Efectivo</div>
+                        <div class="stat-value ${balances['Efectivo'] >= 0 ? 'text-success' : 'text-danger'}">
+                            $${balances['Efectivo'].toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Mercado Pago</div>
+                        <div class="stat-value ${balances['Mercado Pago'] >= 0 ? 'text-success' : 'text-danger'}">
+                            $${balances['Mercado Pago'].toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                </div>
                 
-                try {
-                    showLoading();
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email,
-                        password
-                    });
+                <div class="card">
+                    <h3>Recomendaciones</h3>
+                    <ul style="padding-left: 20px;">
+                        <li class="mb-2">${total < 0 ? '⚠️ El saldo total es negativo. Revisar gastos.' : '✅ Saldo positivo. Buen trabajo!'}</li>
+                        <li class="mb-2">${balances['Efectivo'] < 0 ? '⚠️ Efectivo negativo. Considerar transferencia.' : '✅ Efectivo en orden.'}</li>
+                        <li>${balances['Mercado Pago'] < 0 ? '⚠️ Mercado Pago negativo. Revisar pagos.' : '✅ Mercado Pago en orden.'}</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // GASTOS POR CATEGORÍA
+        // ============================================
+        async function loadExpenses() {
+            const now = new Date();
+            const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+            
+            // Obtener gastos del mes actual
+            const { data: currentMonthExpenses, error: error1 } = await supabase
+                .from('transactions')
+                .select('amount, categories(name)')
+                .eq('user_id', currentUser.id)
+                .eq('transaction_type', 'household_expense')
+                .gte('date', currentMonthStart.toISOString().split('T')[0])
+                .lte('date', currentMonthEnd.toISOString().split('T')[0]);
+            
+            // Obtener gastos del mes anterior
+            const { data: lastMonthExpenses, error: error2 } = await supabase
+                .from('transactions')
+                .select('amount, categories(name)')
+                .eq('user_id', currentUser.id)
+                .eq('transaction_type', 'household_expense')
+                .gte('date', lastMonthStart.toISOString().split('T')[0])
+                .lte('date', lastMonthEnd.toISOString().split('T')[0]);
+            
+            if (error1 || error2) {
+                showError(error1?.message || error2?.message);
+                return;
+            }
+            
+            // Agrupar por categoría
+            const currentMonthTotals = {};
+            const lastMonthTotals = {};
+            
+            currentMonthExpenses?.forEach(e => {
+                const cat = e.categories?.name || 'Sin categoría';
+                currentMonthTotals[cat] = (currentMonthTotals[cat] || 0) + parseFloat(e.amount);
+            });
+            
+            lastMonthExpenses?.forEach(e => {
+                const cat = e.categories?.name || 'Sin categoría';
+                lastMonthTotals[cat] = (lastMonthTotals[cat] || 0) + parseFloat(e.amount);
+            });
+            
+            // Ordenar por monto descendente
+            const sortedCategories = Object.entries(currentMonthTotals)
+                .sort((a, b) => b[1] - a[1])
+                .map(([category, amount]) => {
+                    const lastMonthAmount = lastMonthTotals[category] || 0;
+                    const change = lastMonthAmount > 0 ? ((amount - lastMonthAmount) / lastMonthAmount) * 100 : 0;
                     
-                    if (error) throw error;
-                    
-                    state.user = data.user;
-                    state.session = data.session;
-                    updateAuthUI();
-                    hideModal();
-                    await initializeApp();
-                } catch (error) {
-                    alert('Error al iniciar sesión: ' + error.message);
-                } finally {
-                    hideLoading();
-                }
-            });
+                    return {
+                        category,
+                        amount,
+                        lastMonthAmount,
+                        change
+                    };
+                });
             
-            document.getElementById('auth-signup').addEventListener('click', async () => {
-                const email = document.getElementById('auth-email').value;
-                const password = document.getElementById('auth-password').value;
+            // Calcular totales
+            const currentMonthTotal = Object.values(currentMonthTotals).reduce((a, b) => a + b, 0);
+            const lastMonthTotal = Object.values(lastMonthTotals).reduce((a, b) => a + b, 0);
+            const totalChange = lastMonthTotal > 0 ? ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100 : 0;
+            
+            // Renderizar
+            const content = `
+                <div class="card mb-3">
+                    <h3>Resumen de gastos</h3>
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <h2>$${currentMonthTotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</h2>
+                            <p class="text-muted">Gastos este mes</p>
+                        </div>
+                        <div class="text-right">
+                            <h3 class="${totalChange <= 0 ? 'text-success' : 'text-danger'}">
+                                ${totalChange > 0 ? '+' : ''}${totalChange.toFixed(1)}%
+                            </h3>
+                            <p class="text-muted">vs mes anterior</p>
+                        </div>
+                    </div>
+                </div>
                 
-                if (!email || !password) {
-                    alert('Por favor completa email y contraseña');
-                    return;
-                }
+                <div class="card">
+                    <h3>Ranking por categoría</h3>
+                    ${sortedCategories.map(item => {
+                        const percentage = (item.amount / currentMonthTotal) * 100;
+                        return `
+                            <div class="mb-3">
+                                <div class="d-flex justify-between mb-1">
+                                    <span>${item.category}</span>
+                                    <span>
+                                        <strong>$${item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong>
+                                        <small class="${item.change <= 0 ? 'text-success' : 'text-danger'}">
+                                            ${item.change > 0 ? '+' : ''}${item.change.toFixed(1)}%
+                                        </small>
+                                    </span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // POSTRES (NEGOCIO)
+        // ============================================
+        async function loadBusiness() {
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            
+            // Obtener datos del mes
+            const { data: transactions, error } = await supabase
+                .from('transactions')
+                .select('amount, transaction_type, date')
+                .eq('user_id', currentUser.id)
+                .in('transaction_type', ['business_expense', 'business_sale', 'fund'])
+                .gte('date', monthStart.toISOString().split('T')[0])
+                .lte('date', monthEnd.toISOString().split('T')[0]);
+            
+            if (error) {
+                showError(error.message);
+                return;
+            }
+            
+            // Calcular totales
+            let totalSales = 0;
+            let totalSupplies = 0;
+            let totalFund = 0;
+            
+            transactions?.forEach(t => {
+                const amount = parseFloat(t.amount);
+                if (t.transaction_type === 'business_sale') totalSales += amount;
+                if (t.transaction_type === 'business_expense') totalSupplies += amount;
+                if (t.transaction_type === 'fund' && t.note?.includes('postres')) totalFund += amount;
+            });
+            
+            const profit = totalSales - totalSupplies;
+            const profitMargin = totalSales > 0 ? (profit / totalSales) * 100 : 0;
+            
+            // Obtener estado del fondo postres
+            const { data: fundData, error: fundError } = await supabase
+                .from('funds')
+                .select('target_amount')
+                .eq('name', 'Fondo fijo postres')
+                .single();
+            
+            const fundTarget = fundData?.target_amount || 0;
+            const fundProgress = fundTarget > 0 ? (totalFund / fundTarget) * 100 : 0;
+            
+            // Renderizar
+            const content = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Ventas postres</div>
+                        <div class="stat-value">$${totalSales.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Insumos postres</div>
+                        <div class="stat-value">$${totalSupplies.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ganancia</div>
+                        <div class="stat-value ${profit >= 0 ? 'text-success' : 'text-danger'}">
+                            $${profit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Margen</div>
+                        <div class="stat-value ${profitMargin >= 20 ? 'text-success' : profitMargin >= 0 ? 'text-warning' : 'text-danger'}">
+                            ${profitMargin.toFixed(1)}%
+                        </div>
+                    </div>
+                </div>
                 
-                if (password.length < 6) {
-                    alert('La contraseña debe tener al menos 6 caracteres');
-                    return;
-                }
+                <div class="card">
+                    <h3>Estado fondo postres</h3>
+                    <div class="progress-container mb-3">
+                        <div class="progress-label">
+                            <span>Recaudado: $${totalFund.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                            <span>${fundProgress.toFixed(1)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${fundProgress}%"></div>
+                        </div>
+                    </div>
+                    <p class="text-muted">
+                        Objetivo: $${fundTarget.toLocaleString('es-AR', { minimumFractionDigits: 2 })} | 
+                        Faltante: $${Math.max(0, fundTarget - totalFund).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </p>
+                </div>
                 
-                try {
-                    showLoading();
-                    const { data, error } = await supabaseClient.auth.signUp({
-                        email,
-                        password
-                    });
-                    
-                    if (error) throw error;
-                    
-                    alert('¡Cuenta creada! Revisa tu email para confirmar.');
-                    hideModal();
-                } catch (error) {
-                    alert('Error al crear cuenta: ' + error.message);
-                } finally {
-                    hideLoading();
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Análisis de rentabilidad</h3>
+                    </div>
+                    <ul style="padding-left: 20px;">
+                        <li class="mb-2">${profitMargin >= 30 ? '✅ Excelente rentabilidad' : profitMargin >= 15 ? '⚠️ Rentabilidad aceptable' : '❌ Rentabilidad baja'}</li>
+                        <li class="mb-2">${totalSales > totalSupplies * 3 ? '✅ Ventas saludables' : '⚠️ Ventas podrían mejorar'}</li>
+                        <li>${fundProgress >= 100 ? '✅ Fondo completo' : `⏳ Fondo al ${fundProgress.toFixed(1)}%`}</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // FONDOS
+        // ============================================
+        async function loadFunds() {
+            // Obtener fondos y sus transacciones
+            const { data: funds, error: fundsError } = await supabase
+                .from('funds')
+                .select('*');
+            
+            const { data: transactions, error: transError } = await supabase
+                .from('transactions')
+                .select('amount, fund_id')
+                .eq('user_id', currentUser.id)
+                .eq('transaction_type', 'fund');
+            
+            if (fundsError || transError) {
+                showError(fundsError?.message || transError?.message);
+                return;
+            }
+            
+            // Calcular totales por fondo
+            const fundTotals = {};
+            transactions?.forEach(t => {
+                const fundId = t.fund_id;
+                if (fundId) {
+                    fundTotals[fundId] = (fundTotals[fundId] || 0) + parseFloat(t.amount);
                 }
             });
             
-            // Install button
-            let deferredPrompt;
-            const installBtn = document.getElementById('installBtn');
+            // Renderizar cada fondo
+            const fundsContent = funds.map(fund => {
+                const current = fundTotals[fund.id] || 0;
+                const target = parseFloat(fund.target_amount) || 0;
+                const remaining = Math.max(0, target - current);
+                const progress = target > 0 ? (current / target) * 100 : 0;
+                
+                return `
+                    <div class="card mb-3">
+                        <h3>${fund.name}</h3>
+                        <div class="progress-container mb-3">
+                            <div class="progress-label">
+                                <span>Actual: $${current.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                                <span>${progress.toFixed(1)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-between">
+                            <div>
+                                <p class="text-muted">Objetivo</p>
+                                <p><strong>$${target.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-muted">Faltante</p>
+                                <p><strong>$${remaining.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                installBtn.style.display = 'flex';
-            });
+            const content = `
+                <div class="card mb-3">
+                    <h2>Fondos de la familia</h2>
+                    <p class="text-muted">Dinero reservado para objetivos específicos</p>
+                </div>
+                ${fundsContent}
+                <div class="card">
+                    <button onclick="showFundConfig()" class="btn btn-outline btn-full">
+                        Configurar objetivos de fondos
+                    </button>
+                </div>
+            `;
             
-            installBtn.addEventListener('click', () => {
-                if (deferredPrompt) {
-                    showModal('install');
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // AHORROS
+        // ============================================
+        async function loadSavings() {
+            // Obtener ahorros y transacciones
+            const { data: savings, error: savingsError } = await supabase
+                .from('savings')
+                .select('*');
+            
+            const { data: transactions, error: transError } = await supabase
+                .from('transactions')
+                .select('amount, saving_id, date, note')
+                .eq('user_id', currentUser.id)
+                .eq('transaction_type', 'saving')
+                .order('date', { ascending: false });
+            
+            if (savingsError || transError) {
+                showError(savingsError?.message || transError?.message);
+                return;
+            }
+            
+            // Calcular total ahorrado
+            const savingTotals = {};
+            transactions?.forEach(t => {
+                const savingId = t.saving_id;
+                if (savingId) {
+                    savingTotals[savingId] = (savingTotals[savingId] || 0) + parseFloat(t.amount);
                 }
             });
             
-            document.getElementById('install-confirm').addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        installBtn.style.display = 'none';
+            // Renderizar
+            const savingsContent = savings.map(saving => {
+                const current = savingTotals[saving.id] || 0;
+                const target = parseFloat(saving.target_amount) || 0;
+                const remaining = Math.max(0, target - current);
+                const progress = target > 0 ? (current / target) * 100 : 0;
+                
+                return `
+                    <div class="card mb-3">
+                        <h3>${saving.name}</h3>
+                        <div class="progress-container mb-3">
+                            <div class="progress-label">
+                                <span>Ahorrado: $${current.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                                <span>${progress.toFixed(1)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-between mb-3">
+                            <div>
+                                <p class="text-muted">Objetivo</p>
+                                <p><strong>$${target.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-muted">Faltante</p>
+                                <p><strong>$${remaining.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Historial de ahorros
+            const historyContent = transactions?.slice(0, 10).map(t => `
+                <li class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="d-flex justify-between">
+                            <strong>Ahorro</strong>
+                            <span class="transaction-amount text-success">
+                                +$${parseFloat(t.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                            </span>
+                        </div>
+                        <small class="text-muted">
+                            ${new Date(t.date).toLocaleDateString('es-AR')}
+                            ${t.note ? '• ' + t.note : ''}
+                        </small>
+                    </div>
+                </li>
+            `).join('') || '<li class="text-center text-muted">No hay historial de ahorros</li>';
+            
+            const content = `
+                <div class="card mb-3">
+                    <h2>Ahorros familiares</h2>
+                    <p class="text-muted">Dinero reservado para el futuro (no disponible)</p>
+                </div>
+                ${savingsContent}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Historial de ahorros</h3>
+                    </div>
+                    <ul class="transaction-list">
+                        ${historyContent}
+                    </ul>
+                </div>
+                <div class="card">
+                    <button onclick="showSavingConfig()" class="btn btn-outline btn-full">
+                        Configurar objetivos de ahorro
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // HISTORIAL GENERAL
+        // ============================================
+        async function loadHistory() {
+            // Obtener todas las transacciones con filtros
+            const { data: transactions, error } = await supabase
+                .from('transactions')
+                .select(`
+                    *,
+                    categories(name),
+                    persons(name),
+                    payment_methods(name),
+                    funds(name),
+                    savings(name)
+                `)
+                .eq('user_id', currentUser.id)
+                .order('date', { ascending: false })
+                .limit(50);
+            
+            if (error) {
+                showError(error.message);
+                return;
+            }
+            
+            // Renderizar
+            const content = `
+                <div class="card mb-3">
+                    <h3>Historial completo</h3>
+                    <div class="d-flex gap-2">
+                        <select id="filterPerson" class="form-control" onchange="filterHistory()">
+                            <option value="">Todas las personas</option>
+                            <option value="Sebastián">Sebastián</option>
+                            <option value="Ludmila">Ludmila</option>
+                        </select>
+                        <select id="filterCategory" class="form-control" onchange="filterHistory()">
+                            <option value="">Todas las categorías</option>
+                            <!-- Categorías se cargan dinámicamente -->
+                        </select>
+                        <select id="filterType" class="form-control" onchange="filterHistory()">
+                            <option value="">Todos los tipos</option>
+                            <option value="household_expense">Gasto hogar</option>
+                            <option value="household_income">Ingreso diario</option>
+                            <option value="business_expense">Insumos postres</option>
+                            <option value="business_sale">Venta postres</option>
+                            <option value="fund">Fondo</option>
+                            <option value="saving">Ahorro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Últimos 50 movimientos</h3>
+                        <button onclick="exportHistory()" class="btn btn-outline btn-small">Exportar</button>
+                    </div>
+                    <ul class="transaction-list" id="historyList">
+                        ${transactions.map(t => `
+                            <li class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="d-flex justify-between">
+                                        <strong>${getTransactionLabel(t)}</strong>
+                                        <span class="transaction-amount ${getAmountClass(t)}">
+                                            ${getAmountPrefix(t)}$${parseFloat(t.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">
+                                        ${new Date(t.date).toLocaleDateString('es-AR')} • 
+                                        ${t.persons?.name || ''} • 
+                                        ${t.payment_methods?.name || ''} •
+                                        ${t.transaction_type}
+                                        ${t.note ? '• ' + t.note : ''}
+                                    </small>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('contentArea').innerHTML = content;
+        }
+
+        // ============================================
+        // GESTIÓN DE TRANSACCIONES
+        // ============================================
+        function showTransactionModal(type = null) {
+            if (type) {
+                document.getElementById('transactionType').value = type;
+                updateFormFields();
+            }
+            
+            document.getElementById('transactionModal').classList.add('active');
+            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionNote').value = '';
+            document.getElementById('modalTitle').textContent = 'Nuevo Movimiento';
+        }
+
+        function closeModal() {
+            document.getElementById('transactionModal').classList.remove('active');
+        }
+
+        async function updateFormFields() {
+            const type = document.getElementById('transactionType').value;
+            
+            // Mostrar/ocultar campos según tipo
+            document.getElementById('categoryField').classList.toggle('d-none', 
+                !['household_expense', 'household_income', 'business_expense', 'business_sale'].includes(type));
+            document.getElementById('personField').classList.toggle('d-none',
+                type === 'business_sale');
+            document.getElementById('paymentMethodField').classList.toggle('d-none', false);
+            document.getElementById('fundField').classList.toggle('d-none', type !== 'fund');
+            document.getElementById('savingField').classList.toggle('d-none', type !== 'saving');
+            
+            // Cargar categorías si es necesario
+            if (['household_expense', 'household_income', 'business_expense', 'business_sale'].includes(type)) {
+                await loadCategories(type);
+            }
+        }
+
+        async function loadCategories(type) {
+            let categoryType = '';
+            if (type === 'household_expense') categoryType = 'household_expense';
+            else if (type === 'household_income') categoryType = 'household_income';
+            else if (type === 'business_expense') categoryType = 'business_expense';
+            else if (type === 'business_sale') categoryType = 'business_sale';
+            
+            const { data: categories, error } = await supabase
+                .from('categories')
+                .select('name')
+                .eq('type', categoryType);
+            
+            if (!error) {
+                const select = document.getElementById('transactionCategory');
+                select.innerHTML = '<option value="">Seleccionar categoría</option>' +
+                    categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+            }
+        }
+
+        async function saveTransaction(e) {
+            e.preventDefault();
+            
+            const type = document.getElementById('transactionType').value;
+            const date = document.getElementById('transactionDate').value;
+            const amount = parseFloat(document.getElementById('transactionAmount').value);
+            const note = document.getElementById('transactionNote').value;
+            
+            // Validaciones básicas
+            if (!type || !date || !amount || amount <= 0) {
+                showError('Complete todos los campos obligatorios');
+                return;
+            }
+            
+            // Construir objeto de transacción
+            const transaction = {
+                date,
+                amount,
+                note,
+                transaction_type: type,
+                user_id: currentUser.id
+            };
+            
+            // Obtener IDs de las entidades relacionadas
+            if (type !== 'fund' && type !== 'saving') {
+                const categoryName = document.getElementById('transactionCategory').value;
+                if (categoryName) {
+                    const { data: category } = await supabase
+                        .from('categories')
+                        .select('id')
+                        .eq('name', categoryName)
+                        .single();
+                    if (category) transaction.category_id = category.id;
+                }
+            }
+            
+            if (type !== 'business_sale') {
+                const personName = document.getElementById('transactionPerson').value;
+                if (personName) {
+                    const { data: person } = await supabase
+                        .from('persons')
+                        .select('id')
+                        .eq('name', personName)
+                        .single();
+                    if (person) transaction.person_id = person.id;
+                }
+            }
+            
+            const paymentMethodName = document.getElementById('transactionPaymentMethod').value;
+            if (paymentMethodName) {
+                const { data: paymentMethod } = await supabase
+                    .from('payment_methods')
+                    .select('id')
+                    .eq('name', paymentMethodName)
+                    .single();
+                if (paymentMethod) transaction.payment_method_id = paymentMethod.id;
+            }
+            
+            if (type === 'fund') {
+                const fundName = document.getElementById('transactionFund').value;
+                if (fundName) {
+                    const { data: fund } = await supabase
+                        .from('funds')
+                        .select('id')
+                        .eq('name', fundName)
+                        .single();
+                    if (fund) transaction.fund_id = fund.id;
+                }
+            }
+            
+            if (type === 'saving') {
+                const savingName = document.getElementById('transactionSaving').value;
+                if (savingName) {
+                    const { data: saving } = await supabase
+                        .from('savings')
+                        .select('id')
+                        .eq('name', savingName)
+                        .single();
+                    if (saving) transaction.saving_id = saving.id;
+                }
+            }
+            
+            // Insertar transacción
+            const { error } = await supabase
+                .from('transactions')
+                .insert([transaction]);
+            
+            if (error) {
+                showError(error.message);
+            } else {
+                closeModal();
+                refreshData();
+                showSuccess('Movimiento guardado exitosamente');
+            }
+        }
+
+        // ============================================
+        // FUNCIONES AUXILIARES
+        // ============================================
+        function getAmountClass(transaction) {
+            if (['household_income', 'business_sale'].includes(transaction.transaction_type)) {
+                return 'transaction-positive';
+            }
+            return 'transaction-negative';
+        }
+
+        function getAmountPrefix(transaction) {
+            if (['household_income', 'business_sale'].includes(transaction.transaction_type)) {
+                return '+';
+            }
+            return '-';
+        }
+
+        function getTransactionLabel(transaction) {
+            if (transaction.categories) return transaction.categories.name;
+            if (transaction.funds) return transaction.funds.name;
+            if (transaction.savings) return transaction.savings.name;
+            return transaction.transaction_type;
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            // Podría implementarse un toast notification
+            console.log('Éxito: ' + message);
+        }
+
+        // ============================================
+        // PWA FUNCTIONS
+        // ============================================
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó la instalación');
                     }
                     deferredPrompt = null;
-                }
-                hideModal();
-            });
-            
-            document.getElementById('install-cancel').addEventListener('click', hideModal);
-            
-            // Inicializar app
-            if (supabaseClient) {
-                initializeApp();
-            } else {
-                document.getElementById('loading').innerHTML = 
-                    '<div class="text-center p-8"><p class="text-danger">Error: Supabase no está configurado</p></div>';
+                    hidePWA();
+                });
             }
-        });
+        }
+
+        function hidePWA() {
+            document.getElementById('pwaPrompt').classList.remove('active');
+        }
     </script>
 </body>
 </html>
