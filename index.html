@@ -6,11 +6,14 @@
     <title>Familia Finanzas</title>
     <meta name="description" content="Gestión financiera familiar completa">
     <meta name="theme-color" content="#4f46e5">
-    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Manifest simplificado sin Service Worker -->
+    <link rel="manifest" id="manifest" href="data:application/json;charset=utf-8;base64,ewogICJuYW1lIjogIkZhbWlsaWEgRmluYW56YXMiLAogICJzaG9ydF9uYW1lIjogIkZpbmFuemFzIiwKICAiZGVzY3JpcHRpb24iOiAiR2VzdGnDs24gZmluYW5jaWVyYSBmYW1pbGlhciBjb21wbGV0YSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjhmYWZjIiwKICAidGhlbWVfY29sb3IiOiAiIzRmNDZlNSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCxhc3NlbWJseXN5bWJvbHM7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSEJ5WlhObGNuWmxRWE53WldOMFVtRjBhVzg5SW5oTmFXNVpUV2x1SUcxbFpYUWlJSFpwWlhkQ2IzZzlJakFnTUNBek5UQWdNelV3SWlCNVBTSXhNREFsSWlCb1pXbG5hSFE5SWpFd01DVWlJR1pwYkd3OUluVnliQ2dqWm1sc1pTOWtaV05sYVdOaGRHbHZiaTVqYjIwdklpQmhjM01nWTI5dWRHVnVkQzFpWVhObE5qUWdNQ0JwYmlCallXeGxibVZ6ZEhKaGRHbHZiajBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOWpiMjF0Wlc1MEwyWnBiR1V0ZDJsa2RHZ3VaR1YyWld3dVkyOXVJbjAiCiAgICB9CiAgXSwKICAiY2F0ZWdvcmllcyI6IFsiZmluYW5jZSIsICJwcm9kdWN0aXZpdHkiXSwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJzY29wZSI6ICIvIgp9"></link>
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
     
-    <!-- Incluir Supabase desde CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <!-- Supabase desde CDN oficial -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
         /* Reset y variables CSS */
@@ -1345,6 +1348,7 @@
         // =============================================
         // CONFIGURACIÓN SUPABASE (REEMPLAZAR ESTOS VALORES)
         // =============================================
+        // Obtener configuración de variables de entorno o usar valores predeterminados
         const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI';
         
@@ -1397,38 +1401,76 @@
         // =============================================
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Inicializar Supabase
-                if (typeof supabase === 'undefined') {
-                    console.error('Supabase no está cargado. Verifica la conexión a internet.');
-                    showAlert('Error: No se pudo cargar la aplicación. Recarga la página.', 'error');
-                    return;
+                // Configuración dinámica para diferentes entornos
+                let supabaseUrl = SUPABASE_URL;
+                let supabaseKey = SUPABASE_ANON_KEY;
+                
+                // Intentar obtener configuración de parámetros de URL o localStorage
+                const urlParams = new URLSearchParams(window.location.search);
+                const storedConfig = localStorage.getItem('familia-finanzas-config');
+                
+                if (urlParams.has('supabase_url') && urlParams.has('supabase_key')) {
+                    supabaseUrl = urlParams.get('supabase_url');
+                    supabaseKey = urlParams.get('supabase_key');
+                    
+                    // Guardar en localStorage para futuras sesiones
+                    localStorage.setItem('familia-finanzas-config', JSON.stringify({
+                        url: supabaseUrl,
+                        key: supabaseKey
+                    }));
+                } else if (storedConfig) {
+                    try {
+                        const config = JSON.parse(storedConfig);
+                        supabaseUrl = config.url;
+                        supabaseKey = config.key;
+                    } catch (e) {
+                        console.error('Error al cargar configuración:', e);
+                    }
                 }
                 
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                // Verificar sesión existente
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-                if (sessionError) {
-                    console.error('Error al verificar sesión:', sessionError);
-                    showAuthScreen();
+                // Verificar que Supabase está disponible
+                if (typeof supabase === 'undefined') {
+                    console.error('Supabase no está cargado. Verifica que el CDN esté accesible.');
+                    
+                    // Mostrar interfaz para configuración manual
+                    showConfigScreen();
                     hideLoading();
                     return;
                 }
                 
-                if (session) {
-                    currentUser = session.user;
-                    await loadUserData();
-                    showMainApp();
-                    setupPWA();
-                } else {
-                    showAuthScreen();
+                // Inicializar cliente Supabase
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                
+                // Verificar conexión a Supabase
+                try {
+                    const { data, error } = await supabase.auth.getSession();
+                    
+                    if (error) {
+                        console.warn('Error al verificar sesión:', error.message);
+                        // Continuar, puede ser un problema temporal
+                    }
+                    
+                    if (data?.session) {
+                        currentUser = data.session.user;
+                        await loadUserData();
+                        showMainApp();
+                    } else {
+                        showAuthScreen();
+                    }
+                } catch (connectionError) {
+                    console.error('Error de conexión a Supabase:', connectionError);
+                    showAlert(
+                        'No se pudo conectar con el servidor. Verifica tu conexión a internet y la configuración de Supabase.',
+                        'error'
+                    );
+                    showConfigScreen();
                 }
                 
                 hideLoading();
                 setupEventListeners();
                 updateCurrentMonth();
                 setupMonthSelectors();
+                setupPWA();
                 
             } catch (error) {
                 console.error('Error inicializando la aplicación:', error);
@@ -1437,6 +1479,90 @@
                 showAuthScreen();
             }
         });
+
+        // =============================================
+        // PANTALLA DE CONFIGURACIÓN (para configurar Supabase manualmente)
+        // =============================================
+        function showConfigScreen() {
+            // Ocultar todas las pantallas
+            document.getElementById('auth-nav').classList.add('hidden');
+            document.getElementById('auth-content').classList.add('hidden');
+            document.getElementById('main-nav').classList.add('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.add('hidden');
+            
+            // Crear pantalla de configuración si no existe
+            let configScreen = document.getElementById('config-screen');
+            if (!configScreen) {
+                configScreen = document.createElement('div');
+                configScreen.id = 'config-screen';
+                configScreen.className = 'container';
+                configScreen.innerHTML = `
+                    <div class="card" style="max-width: 500px; margin: 2rem auto;">
+                        <div class="card-header">
+                            <h2 class="card-title">Configuración de Supabase</h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="alert alert-warning mb-6">
+                                <span class="icon-warning alert-icon"></span>
+                                <div>
+                                    <strong>Configuración requerida:</strong> Para usar esta aplicación, necesitas configurar tu proyecto de Supabase.
+                                </div>
+                            </div>
+                            
+                            <form id="config-form">
+                                <div class="form-group">
+                                    <label class="form-label">URL de Supabase</label>
+                                    <input type="url" id="config-url" class="form-control" 
+                                           placeholder="https://tu-proyecto.supabase.co" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Clave Anónima</label>
+                                    <input type="text" id="config-key" class="form-control" 
+                                           placeholder="tu-clave-anon-publica" required>
+                                </div>
+                                
+                                <div class="text-muted mb-6">
+                                    <small>
+                                        💡 Puedes encontrar estos valores en tu proyecto de Supabase:<br>
+                                        Dashboard → Settings → API
+                                    </small>
+                                </div>
+                                
+                                <div class="flex gap-4">
+                                    <button type="button" onclick="location.reload()" class="btn btn-outline flex-1">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary flex-1">
+                                        Guardar y Continuar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(configScreen);
+                
+                // Configurar evento del formulario
+                document.getElementById('config-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const url = document.getElementById('config-url').value;
+                    const key = document.getElementById('config-key').value;
+                    
+                    // Guardar configuración
+                    localStorage.setItem('familia-finanzas-config', JSON.stringify({
+                        url: url,
+                        key: key
+                    }));
+                    
+                    // Recargar para aplicar cambios
+                    location.reload();
+                });
+            }
+            
+            configScreen.classList.remove('hidden');
+        }
 
         // =============================================
         // FUNCIONES DE AUTENTICACIÓN
@@ -1453,6 +1579,8 @@
                 if (error) {
                     if (error.message.includes('Invalid login credentials')) {
                         throw new Error('Email o contraseña incorrectos');
+                    } else if (error.message.includes('Email not confirmed')) {
+                        throw new Error('Confirma tu email antes de iniciar sesión');
                     }
                     throw error;
                 }
@@ -1490,15 +1618,19 @@
                 if (error) {
                     if (error.message.includes('already registered')) {
                         throw new Error('Este email ya está registrado');
+                    } else if (error.message.includes('password')) {
+                        throw new Error('La contraseña es muy débil. Usa al menos 6 caracteres');
                     }
                     throw error;
                 }
 
-                showAlert('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.', 'success');
-                showAuthTab('login');
+                showAlert('¡Cuenta creada exitosamente! Revisa tu email para confirmar.', 'success');
                 
                 // Autocompletar el email en el login
                 document.getElementById('login-email').value = email;
+                
+                // Cambiar a pestaña de login
+                showAuthTab('login');
                 
             } catch (error) {
                 showAlert(error.message, 'error');
@@ -1528,17 +1660,20 @@
             if (!currentUser) return;
 
             try {
-                // Cargar balances
-                await loadBalances();
+                showLoading();
                 
-                // Cargar fondos
-                await loadFunds();
+                // Cargar en paralelo para mejor performance
+                const [balancesData, fundsData, savingsData, movementsData] = await Promise.all([
+                    loadBalances(),
+                    loadFunds(),
+                    loadSavings(),
+                    loadMonthlyMovements()
+                ]);
                 
-                // Cargar ahorros
-                await loadSavings();
-                
-                // Cargar movimientos del mes actual
-                await loadMonthlyMovements();
+                balances = balancesData;
+                funds = fundsData;
+                savings = savingsData;
+                movements = movementsData;
                 
                 // Actualizar UI
                 updateSummary();
@@ -1550,29 +1685,37 @@
             } catch (error) {
                 console.error('Error cargando datos:', error);
                 showAlert('Error al cargar los datos. Intenta recargar la página.', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
         async function loadBalances() {
-            const { data, error } = await supabase
-                .from('balances')
-                .select('*')
-                .eq('user_id', currentUser.id);
+            try {
+                const { data, error } = await supabase
+                    .from('balances')
+                    .select('*')
+                    .eq('user_id', currentUser.id);
 
-            if (error) {
+                if (error) throw error;
+
+                let balancesData = data || [];
+                
+                // Si no hay balances, crear iniciales
+                if (balancesData.length === 0) {
+                    await initializeUserBalances();
+                    return await loadBalances();
+                }
+
+                return balancesData;
+            } catch (error) {
                 console.error('Error cargando balances:', error);
-                throw error;
+                // Devolver valores por defecto
+                return [
+                    { user_id: currentUser.id, payment_method: 'efectivo', balance: 0 },
+                    { user_id: currentUser.id, payment_method: 'mercado_pago', balance: 0 }
+                ];
             }
-
-            balances = data || [];
-            
-            // Si no hay balances, crear iniciales
-            if (balances.length === 0) {
-                await initializeUserBalances();
-                return await loadBalances();
-            }
-
-            return balances;
         }
 
         async function initializeUserBalances() {
@@ -1590,26 +1733,28 @@
         }
 
         async function loadFunds() {
-            const { data, error } = await supabase
-                .from('funds')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .eq('is_active', true);
+            try {
+                const { data, error } = await supabase
+                    .from('funds')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('is_active', true);
 
-            if (error) {
+                if (error) throw error;
+
+                let fundsData = data || [];
+                
+                // Si no hay fondos, crear iniciales
+                if (fundsData.length === 0) {
+                    await initializeUserFunds();
+                    return await loadFunds();
+                }
+
+                return fundsData;
+            } catch (error) {
                 console.error('Error cargando fondos:', error);
-                throw error;
+                return [];
             }
-
-            funds = data || [];
-            
-            // Si no hay fondos, crear iniciales
-            if (funds.length === 0) {
-                await initializeUserFunds();
-                return await loadFunds();
-            }
-
-            return funds;
         }
 
         async function initializeUserFunds() {
@@ -1627,26 +1772,28 @@
         }
 
         async function loadSavings() {
-            const { data, error } = await supabase
-                .from('savings')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .eq('is_active', true);
+            try {
+                const { data, error } = await supabase
+                    .from('savings')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('is_active', true);
 
-            if (error) {
+                if (error) throw error;
+
+                let savingsData = data || [];
+                
+                // Si no hay ahorros, crear inicial
+                if (savingsData.length === 0) {
+                    await initializeUserSavings();
+                    return await loadSavings();
+                }
+
+                return savingsData;
+            } catch (error) {
                 console.error('Error cargando ahorros:', error);
-                throw error;
+                return [];
             }
-
-            savings = data || [];
-            
-            // Si no hay ahorros, crear inicial
-            if (savings.length === 0) {
-                await initializeUserSavings();
-                return await loadSavings();
-            }
-
-            return savings;
         }
 
         async function initializeUserSavings() {
@@ -1663,25 +1810,26 @@
         }
 
         async function loadMonthlyMovements(month = currentMonth) {
-            const startDate = `${month}-01`;
-            const endDate = getLastDayOfMonth(month);
+            try {
+                const startDate = `${month}-01`;
+                const endDate = getLastDayOfMonth(month);
 
-            const { data, error } = await supabase
-                .from('movements')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .gte('movement_date', startDate)
-                .lte('movement_date', endDate)
-                .order('movement_date', { ascending: false })
-                .order('created_at', { ascending: false });
+                const { data, error } = await supabase
+                    .from('movements')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .gte('movement_date', startDate)
+                    .lte('movement_date', endDate)
+                    .order('movement_date', { ascending: false })
+                    .order('created_at', { ascending: false });
 
-            if (error) {
+                if (error) throw error;
+
+                return data || [];
+            } catch (error) {
                 console.error('Error cargando movimientos:', error);
-                throw error;
+                return [];
             }
-
-            movements = data || [];
-            return movements;
         }
 
         // =============================================
@@ -1866,6 +2014,8 @@
         function showMainApp() {
             document.getElementById('auth-nav').classList.add('hidden');
             document.getElementById('auth-content').classList.add('hidden');
+            const configScreen = document.getElementById('config-screen');
+            if (configScreen) configScreen.classList.add('hidden');
             document.getElementById('main-nav').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
@@ -1874,6 +2024,8 @@
         function showAuthScreen() {
             document.getElementById('auth-nav').classList.remove('hidden');
             document.getElementById('auth-content').classList.remove('hidden');
+            const configScreen = document.getElementById('config-screen');
+            if (configScreen) configScreen.classList.add('hidden');
             document.getElementById('main-nav').classList.add('hidden');
             document.getElementById('main-content').classList.add('hidden');
             document.getElementById('bottom-nav').classList.add('hidden');
@@ -2491,6 +2643,66 @@
         }
 
         // =============================================
+        // PWA FUNCTIONS - SIN SERVICE WORKER
+        // =============================================
+        function setupPWA() {
+            // Mostrar prompt de instalación sin Service Worker
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Mostrar botón de instalación después de 5 segundos si el usuario no ha instalado
+                setTimeout(() => {
+                    if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+                        const installBtn = document.createElement('button');
+                        installBtn.className = 'btn btn-primary btn-sm';
+                        installBtn.innerHTML = '📱 Instalar App';
+                        installBtn.style.position = 'fixed';
+                        installBtn.style.bottom = '80px';
+                        installBtn.style.right = '20px';
+                        installBtn.style.zIndex = '1000';
+                        installBtn.onclick = async () => {
+                            if (deferredPrompt) {
+                                deferredPrompt.prompt();
+                                const { outcome } = await deferredPrompt.userChoice;
+                                if (outcome === 'accepted') {
+                                    console.log('Usuario aceptó la instalación');
+                                }
+                                deferredPrompt = null;
+                                installBtn.remove();
+                            }
+                        };
+                        
+                        document.body.appendChild(installBtn);
+                        
+                        // Auto-remove después de 30 segundos
+                        setTimeout(() => {
+                            if (installBtn.parentNode) {
+                                installBtn.remove();
+                            }
+                        }, 30000);
+                    }
+                }, 5000);
+            });
+            
+            // Detectar si la app está instalada
+            window.addEventListener('appinstalled', () => {
+                console.log('App instalada exitosamente');
+                deferredPrompt = null;
+                
+                // Mostrar mensaje de éxito
+                showAlert('¡App instalada correctamente! Ahora puedes acceder desde tu pantalla de inicio.', 'success');
+            });
+            
+            // Detectar modo standalone (app instalada)
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('La app se está ejecutando en modo standalone (instalada)');
+            }
+        }
+
+        // =============================================
         // EVENT LISTENERS
         // =============================================
         function setupEventListeners() {
@@ -2642,105 +2854,22 @@
                     }
                 }
             });
-        }
-
-        // =============================================
-        // PWA FUNCTIONS
-        // =============================================
-        function setupPWA() {
-            // Registrar Service Worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registrado con éxito:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Service Worker no registrado (puede ser normal):', error);
-                    });
-            }
             
-            // Mostrar prompt de instalación
-            let deferredPrompt;
-            
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                
-                // Mostrar botón de instalación después de 5 segundos
-                setTimeout(() => {
-                    if (deferredPrompt) {
-                        showAlert(
-                            '📱 ¿Quieres instalar la app para acceder más rápido?',
-                            'success'
-                        );
-                        
-                        // Opcional: agregar botón de instalación en la interfaz
-                        const installBtn = document.createElement('button');
-                        installBtn.className = 'btn btn-primary btn-sm mt-2';
-                        installBtn.innerHTML = '📥 Instalar App';
-                        installBtn.onclick = async () => {
-                            if (deferredPrompt) {
-                                deferredPrompt.prompt();
-                                const { outcome } = await deferredPrompt.userChoice;
-                                if (outcome === 'accepted') {
-                                    console.log('Usuario aceptó la instalación');
-                                }
-                                deferredPrompt = null;
-                            }
-                        };
-                        
-                        // Agregar al contenedor de alertas temporalmente
-                        const alertContainer = document.getElementById('alert-container');
-                        const lastAlert = alertContainer.lastElementChild;
-                        if (lastAlert) {
-                            lastAlert.appendChild(installBtn);
-                        }
-                    }
-                }, 5000);
+            // Guardar datos antes de cerrar la página
+            window.addEventListener('beforeunload', () => {
+                // Puedes agregar lógica para guardar datos pendientes aquí
+                console.log('Guardando datos antes de salir...');
             });
             
-            // Detectar si la app está instalada
-            window.addEventListener('appinstalled', () => {
-                console.log('App instalada');
-                deferredPrompt = null;
+            // Detectar cuando la app vuelve a estar activa
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && currentUser) {
+                    // Recargar datos si el usuario vuelve a la app
+                    console.log('App activa, recargando datos...');
+                    loadUserData();
+                }
             });
         }
-
-        // =============================================
-        // SERVICE WORKER EN LÍNEA
-        // =============================================
-        function createServiceWorker() {
-            const swCode = `
-                self.addEventListener('install', (event) => {
-                    console.log('Service Worker instalando...');
-                    self.skipWaiting();
-                });
-                
-                self.addEventListener('activate', (event) => {
-                    console.log('Service Worker activado');
-                });
-                
-                self.addEventListener('fetch', (event) => {
-                    // Puedes agregar lógica de cache aquí si es necesario
-                    event.respondWith(fetch(event.request));
-                });
-            `;
-            
-            // Crear un Service Worker en línea
-            if ('serviceWorker' in navigator) {
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swURL = URL.createObjectURL(blob);
-                
-                navigator.serviceWorker.register(swURL)
-                    .then(() => console.log('Service Worker registrado desde blob'))
-                    .catch(err => console.log('Error registrando Service Worker:', err));
-            }
-        }
-        
-        // Llamar a createServiceWorker después de cargar la página
-        window.addEventListener('load', () => {
-            setTimeout(createServiceWorker, 1000);
-        });
     </script>
 </body>
 </html>
