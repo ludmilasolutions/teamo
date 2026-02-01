@@ -1,48 +1,71 @@
 {
-  "name": "Familia Unida - Finanzas",
-  "short_name": "FamiliaUnida",
-  "description": "Aplicación para ordenar las finanzas familiares juntos",
-  "start_url": "/",
+  "name": "Economía Familiar - Juntos",
+  "short_name": "EcoFamilia",
+  "description": "Aplicación para organizar la economía familiar y reducir discusiones por dinero",
+  "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#F9FAFB",
-  "theme_color": "#4F46E5",
+  "background_color": "#4361ee",
+  "theme_color": "#4361ee",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMTQzXzU4NDcpIi8+CjxwYXRoIGQ9Ik0xMDMuNzk0IDY3LjI1ODZDMTEwLjA4MSA2Mi4zODM5IDExOC41MzggNjIuODA2OCAxMjQuMzU0IDY4LjM3MDZMMTg1LjE5MiAxMjIuNjY5QzE5MS43MzUgMTI4Ljg4NSAxOTEuMTY1IDEzOS4wMjkgMTgzLjk3MiAxNDQuNTY3TDEyOS43MDYgMTgzLjA4NEMxMjMuNDM5IDE4OC4xMjMgMTE0LjU2MSAxODguMTIzIDEwOC4yOTQgMTgzLjA4NEw1NC4wMjgxIDE0NC41NjdDNDYuODM1NSAxMzkuMDI5IDQ2LjI2NDkgMTI4Ljg4NSA1Mi44MDgzIDEyMi42NjlMMTEzLjY0NiA2OC4zNzA2QzExNC4xNDkgNjcuOTIyOSAxMTQuNjgxIDY3LjUyNTIgMTE1LjIzNiA2Ny4xNzc0QzExNC42ODEgNjcuNTI1MiAxMTQuMTQ5IDY3LjkyMjkgMTEzLjY0NiA2OC4zNzA2TDEwMy43OTQgNjcuMjU4NloiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOCIvPgo8cGF0aCBkPSJNMTE0LjQxNSA5Ny4xMjAxQzExNC40MTUgOTIuMTgxOSAxMTguNDU2IDg4LjEyMDEgMTIzLjM3MyA4OC4xMjAxSDEzMi42MjZDMTM3LjU0MyA4OC4xMjAxIDE0MS41ODQgOTIuMTgxOSAxNDEuNTg0IDk3LjEyMDFWMTQ1LjEyQzE0MS41ODQgMTUwLjA1OCAxMzcuNTQzIDE1NC4xMiAxMzIuNjI2IDE1NC4xMkgxMjMuMzczQzExOC40NTYgMTU0LjEyIDExNC40MTUgMTUwLjA1OCAxMTQuNDE1IDE0NS4xMlY5Ny4xMjAxWiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8xNDNfNTg0NyIgeDE9IjEyOCIgeTE9IjAiIHgyPSIxMjgiIHkyPSIyNTYiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzRGNDZFNSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MTgzRjgiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%234361ee%22>💰</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMTQzXzU4NDcpIi8+CjxwYXRoIGQ9Ik0xMDMuNzk0IDY3LjI1ODZDMTEwLjA4MSA2Mi4zODM5IDExOC41MzggNjIuODA2OCAxMjQuMzU0IDY4LjM3MDZMMTg1LjE5MiAxMjIuNjY5QzE5MS43MzUgMTI4Ljg4NSAxOTEuMTY1IDEzOS4wMjkgMTgzLjk3MiAxNDQuNTY3TDEyOS43MDYgMTgzLjA4NEMxMjMuNDM5IDE4OC4xMjMgMTE0LjU2MSAxODguMTIzIDEwOC4yOTQgMTgzLjA4NEw1NC4wMjgxIDE0NC41NjdDNDYuODM1NSAxMzkuMDI5IDQ2LjI2NDkgMTI4Ljg4NSA1Mi44MDgzIDEyMi42NjlMMTEzLjY0NiA2OC4zNzA2QzExNC4xNDkgNjcuOTIyOSAxMTQuNjgxIDY3LjUyNTIgMTE1LjIzNiA2Ny4xNzc0QzExNC42ODEgNjcuNTI1MiAxMTQuMTQ5IDY3LjkyMjkgMTEzLjY0NiA2OC4zNzA2TDEwMy43OTQgNjcuMjU4NloiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOCIvPgo8cGF0aCBkPSJNMTE0LjQxNSA5Ny4xMjAxQzExNC40MTUgOTIuMTgxOSAxMTguNDU2IDg4LjEyMDEgMTIzLjM3MyA4OC4xMjAxSDEzMi42MjZDMTM3LjU0MyA4OC4xMjAxIDE0MS41ODQgOTIuMTgxOSAxNDEuNTg0IDk3LjEyMDFWMTQ1LjEyQzE0MS41ODQgMTUwLjA1OCAxMzcuNTQzIDE1NC4xMiAxMzIuNjI2IDE1NC4xMkgxMjMuMzczQzExOC40NTYgMTU0LjEyIDExNC40MTUgMTUwLjA1OCAxMTQuNDE1IDE0NS4xMlY5Ny4xMjAxWiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8xNDNfNTg0NyIgeDE9IjEyOCIgeTE9IjAiIHgyPSIxMjgiIHkyPSIyNTYiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzRGNDZFNSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MTgzRjgiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K",
+      "src": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/1f4b0.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/128/1f4b0.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/192/1f4b0.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/512/1f4b0.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ],
-  "categories": ["finance", "productivity"],
+  "categories": ["finance", "productivity", "lifestyle"],
   "shortcuts": [
     {
-      "name": "Agregar movimiento",
-      "short_name": "Agregar",
-      "description": "Agregar nuevo movimiento",
-      "url": "/?tab=add-transaction",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+      "name": "Nuevo Gasto",
+      "short_name": "Gasto",
+      "description": "Registrar un nuevo gasto",
+      "url": "/index.html?screen=nuevo&type=expense",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23f72585%22>💸</text></svg>" }]
     },
     {
-      "name": "Ver resumen",
+      "name": "Nuevo Ingreso",
+      "short_name": "Ingreso",
+      "description": "Registrar un nuevo ingreso",
+      "url": "/index.html?screen=nuevo&type=income",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%234cc9f0%22>💰</text></svg>" }]
+    },
+    {
+      "name": "Ver Resumen",
       "short_name": "Resumen",
       "description": "Ver resumen mensual",
-      "url": "/?tab=dashboard",
-      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+      "url": "/index.html?screen=resumen",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%234361ee%22>📊</text></svg>" }]
     }
   ],
   "screenshots": [
     {
-      "src": "screenshots/dashboard.png",
-      "sizes": "1280x720",
+      "src": "https://via.placeholder.com/540x720/4361ee/ffffff?text=EcoFamilia+App",
+      "sizes": "540x720",
       "type": "image/png",
-      "form_factor": "wide",
-      "label": "Dashboard de finanzas familiares"
+      "form_factor": "narrow",
+      "label": "Pantalla principal de la aplicación"
     }
   ]
 }
