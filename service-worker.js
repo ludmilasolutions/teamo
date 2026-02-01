@@ -1,10 +1,9 @@
-const CACHE_NAME = 'finanzas-familiares-v1';
+const CACHE_NAME = 'economia-familiar-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/styles.css',
-  '/app.js',
   '/manifest.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 
@@ -19,14 +18,14 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activar y limpiar cachés antiguas
+// Activar Service Worker
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Eliminando cache antigua:', cacheName);
+            console.log('Eliminando cache viejo:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -35,83 +34,55 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Estrategia: Cache First, luego Network
+// Interceptar solicitudes
 self.addEventListener('fetch', event => {
-  // Ignorar solicitudes no GET
-  if (event.request.method !== 'GET') return;
-  
-  // Ignorar solicitudes a Supabase (manejar en línea)
-  if (event.request.url.includes('supabase.co')) {
+  // Evitar caching para Supabase y APIs
+  if (event.request.url.includes('supabase.co') || 
+      event.request.url.includes('/rest/') ||
+      event.request.url.includes('/realtime/')) {
     return;
   }
-  
+
   event.respondWith(
     caches.match(event.request)
-      .then(cachedResponse => {
-        // Si existe en caché, devolverlo
-        if (cachedResponse) {
-          return cachedResponse;
+      .then(response => {
+        // Cache hit - devolver respuesta
+        if (response) {
+          return response;
         }
-        
-        // Si no, obtener de red
-        return fetch(event.request)
-          .then(response => {
-            // Verificar respuesta válida
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            
-            // Clonar respuesta para almacenar en caché
-            const responseToCache = response.clone();
-            
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-            
+
+        // Clonar la solicitud
+        const fetchRequest = event.request.clone();
+
+        return fetch(fetchRequest).then(response => {
+          // Verificar si la respuesta es válida
+          if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
-          })
-          .catch(error => {
-            console.log('Error en fetch:', error);
-            // Podrías devolver una página offline personalizada aquí
-          });
-      })
-  );
-});
-
-// Manejar notificaciones push (opcional para futuras funcionalidades)
-self.addEventListener('push', event => {
-  const options = {
-    body: event.data ? event.data.text() : 'Nuevo movimiento registrado',
-    icon: 'icons/icon-192x192.png',
-    badge: 'icons/icon-96x96.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: '2'
-    }
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification('Finanzas Familiares', options)
-  );
-});
-
-// Manejar clics en notificaciones
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.matchAll({ type: 'window' })
-      .then(clientList => {
-        for (const client of clientList) {
-          if (client.url === '/' && 'focus' in client) {
-            return client.focus();
           }
-        }
-        if (clients.openWindow) {
-          return clients.openWindow('/');
+
+          // Clonar la respuesta
+          const responseToCache = response.clone();
+
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+
+          return response;
+        });
+      })
+      .catch(() => {
+        // Solo para HTML, mostrar página offline
+        if (event.request.headers.get('accept').includes('text/html')) {
+          return caches.match('/');
         }
       })
   );
+});
+
+// Manejar mensajes desde la app
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
