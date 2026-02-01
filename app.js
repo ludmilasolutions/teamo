@@ -261,7 +261,7 @@ async function createNewFamily() {
             throw familyError;
         }
         
-        // Actualizar usuario con familia
+        // Crear o actualizar usuario con familia
         const { error: userError } = await supabaseClient
             .from('users')
             .upsert({
@@ -771,6 +771,8 @@ async function loadInitialData() {
 async function loadFamilyData() {
     if (!AppState.currentFamily) return;
     
+    console.log('🔍 Cargando datos familiares...');
+    
     try {
         const [personsRes, paymentsRes, categoriesRes, fundsRes] = await Promise.all([
             supabaseClient.from('persons').select('*').eq('family_id', AppState.currentFamily.id),
@@ -779,15 +781,48 @@ async function loadFamilyData() {
             supabaseClient.from('funds').select('*').eq('family_id', AppState.currentFamily.id)
         ]);
         
+        console.log('✅ Resultados de carga:');
+        console.log('- Personas:', personsRes.data?.length || 0);
+        console.log('- Métodos de pago:', paymentsRes.data?.length || 0);
+        console.log('- Categorías:', categoriesRes.data?.length || 0);
+        console.log('- Fondos:', fundsRes.data?.length || 0);
+        
         AppState.familyData.persons = personsRes.data || [];
         AppState.familyData.paymentMethods = paymentsRes.data || [];
         AppState.familyData.categories = categoriesRes.data || [];
         AppState.familyData.funds = fundsRes.data || [];
         
+        // Si no hay métodos de pago, crear unos por defecto
+        if (AppState.familyData.paymentMethods.length === 0 && AppState.currentFamily) {
+            console.log('⚠️ No hay métodos de pago, creando por defecto...');
+            await createDefaultPaymentMethods();
+        }
+        
         console.log(`📋 Datos familiares cargados: ${AppState.familyData.persons.length} personas, ${AppState.familyData.categories.length} categorías`);
         
     } catch (error) {
         console.error('❌ Error cargando datos familiares:', error);
+    }
+}
+
+async function createDefaultPaymentMethods() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('payment_methods')
+            .insert([
+                { family_id: AppState.currentFamily.id, name: 'Efectivo', icon: '💰' },
+                { family_id: AppState.currentFamily.id, name: 'Mercado Pago', icon: '📱' },
+                { family_id: AppState.currentFamily.id, name: 'Tarjeta de crédito', icon: '💳' }
+            ])
+            .select();
+        
+        if (error) throw error;
+        
+        AppState.familyData.paymentMethods = data || [];
+        console.log('✅ Métodos de pago por defecto creados');
+        
+    } catch (error) {
+        console.error('❌ Error creando métodos de pago por defecto:', error);
     }
 }
 
@@ -961,6 +996,25 @@ function initUI() {
     document.getElementById('filterPerson')?.addEventListener('change', updateHistory);
     document.getElementById('filterPayment')?.addEventListener('change', updateHistory);
     document.getElementById('filterDate')?.addEventListener('change', updateHistory);
+    
+    // Botón para recargar datos
+    const reloadDataBtn = document.getElementById('reloadDataBtn');
+    if (reloadDataBtn) {
+        reloadDataBtn.addEventListener('click', async () => {
+            setLoading(true);
+            await loadFamilyData();
+            await loadTransactions();
+            updateUI();
+            showNotification('Datos recargados', 'success');
+            setLoading(false);
+        });
+    }
+    
+    // Botón para seleccionar persona
+    const selectPersonBtn = document.getElementById('selectPersonBtn');
+    if (selectPersonBtn) {
+        selectPersonBtn.addEventListener('click', linkUserToPerson);
+    }
     
     console.log('✅ Interfaz de usuario inicializada');
 }
@@ -1629,31 +1683,115 @@ function updateSettings() {
 }
 
 // ============================================
+// FUNCIONES DE ASIGNACIÓN DE PERSONA
+// ============================================
+async function linkUserToPerson() {
+    if (!AppState.currentFamily || !AppState.currentUser) return;
+    
+    const personas = AppState.familyData.persons;
+    if (personas.length === 0) {
+        showNotification('No hay personas configuradas en la familia', 'warning');
+        return;
+    }
+    
+    const options = personas.map(p => p.name).join(', ');
+    const personaElegida = prompt(`¿A qué persona te correspondes? Opciones: ${options}`, personas[0].name);
+    
+    if (!personaElegida) return;
+    
+    const persona = personas.find(p => p.name.toLowerCase() === personaElegida.toLowerCase());
+    if (!persona) {
+        showNotification('Persona no encontrada', 'error');
+        return;
+    }
+    
+    // Guardar preferencia en localStorage
+    localStorage.setItem(`user_person_${AppState.currentUser.id}`, persona.id);
+    showNotification(`Asociado a: ${persona.name}`, 'success');
+}
+
+function getAssignedPersonId() {
+    if (!AppState.currentUser) return null;
+    
+    // 1. Intentar obtener de localStorage
+    const storedPersonId = localStorage.getItem(`user_person_${AppState.currentUser.id}`);
+    if (storedPersonId) {
+        return storedPersonId;
+    }
+    
+    // 2. Si no hay en localStorage, buscar por nombre de usuario
+    const userName = AppState.currentUser.email?.split('@')[0] || '';
+    const userPerson = AppState.familyData.persons.find(person => 
+        person.name.toLowerCase().includes(userName.toLowerCase()) ||
+        userName.toLowerCase().includes(person.name.toLowerCase())
+    );
+    
+    if (userPerson) {
+        // Guardar para futuro uso
+        localStorage.setItem(`user_person_${AppState.currentUser.id}`, userPerson.id);
+        return userPerson.id;
+    }
+    
+    // 3. Si aún no hay, usar la primera persona
+    if (AppState.familyData.persons.length > 0) {
+        const firstPersonId = AppState.familyData.persons[0].id;
+        localStorage.setItem(`user_person_${AppState.currentUser.id}`, firstPersonId);
+        return firstPersonId;
+    }
+    
+    return null;
+}
+
+// ============================================
 // FORMULARIO DE TRANSACCIONES
 // ============================================
 function setupTransactionForm() {
-    // Personas
+    // Ocultar selector de persona (no se usa más)
+    const personField = document.getElementById('personField');
+    if (personField) {
+        personField.style.display = 'none';
+    }
+    
     const personSelect = document.getElementById('transactionPerson');
     if (personSelect) {
-        personSelect.innerHTML = '<option value="">Seleccionar persona</option>';
-        AppState.familyData.persons.forEach(person => {
-            const option = document.createElement('option');
-            option.value = person.id;
-            option.textContent = person.name;
-            personSelect.appendChild(option);
-        });
+        personSelect.style.display = 'none';
+        personSelect.removeAttribute('required');
     }
     
     // Medios de pago
     const paymentSelect = document.getElementById('transactionPayment');
     if (paymentSelect) {
+        console.log('Cargando métodos de pago:', AppState.familyData.paymentMethods);
         paymentSelect.innerHTML = '<option value="">Seleccionar medio</option>';
-        AppState.familyData.paymentMethods.forEach(method => {
-            const option = document.createElement('option');
-            option.value = method.id;
-            option.textContent = `${method.icon} ${method.name}`;
-            paymentSelect.appendChild(option);
-        });
+        
+        if (AppState.familyData.paymentMethods.length === 0) {
+            console.log('No hay métodos de pago cargados, intentando recargar...');
+            loadFamilyData().then(() => {
+                // Llenar después de cargar
+                AppState.familyData.paymentMethods.forEach(method => {
+                    const option = document.createElement('option');
+                    option.value = method.id;
+                    option.textContent = `${method.icon} ${method.name}`;
+                    paymentSelect.appendChild(option);
+                });
+                
+                // Si aún no hay, mostrar mensaje
+                if (AppState.familyData.paymentMethods.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No hay métodos de pago configurados';
+                    option.disabled = true;
+                    paymentSelect.appendChild(option);
+                }
+            });
+        } else {
+            AppState.familyData.paymentMethods.forEach(method => {
+                const option = document.createElement('option');
+                option.value = method.id;
+                option.textContent = `${method.icon} ${method.name}`;
+                paymentSelect.appendChild(option);
+            });
+        }
     }
     
     // Fondos
@@ -1699,8 +1837,8 @@ function updateTransactionForm() {
             case 'fund_deposit': 
             case 'fund_withdrawal': 
                 // No mostrar categorías para transacciones de fondo
-                categoryField.style.display = 'none';
-                fundField.style.display = 'block';
+                if (categoryField) categoryField.style.display = 'none';
+                if (fundField) fundField.style.display = 'block';
                 return;
         }
         
@@ -1734,13 +1872,12 @@ async function handleTransactionSubmit(e) {
     const amount = parseFloat(document.getElementById('transactionAmount').value);
     const date = document.getElementById('transactionDate').value;
     const categoryId = document.getElementById('transactionCategory').value;
-    const personId = document.getElementById('transactionPerson').value;
     const paymentMethodId = document.getElementById('transactionPayment').value;
     const fundId = document.getElementById('transactionFund').value;
     const note = document.getElementById('transactionNote').value;
     
     // Validaciones
-    if (!type || !amount || !date || !personId || !paymentMethodId) {
+    if (!type || !amount || !date || !paymentMethodId) {
         showNotification('Por favor completa todos los campos requeridos', 'warning');
         return;
     }
@@ -1760,12 +1897,19 @@ async function handleTransactionSubmit(e) {
         return;
     }
     
+    // ASIGNAR PERSONA AUTOMÁTICAMENTE
+    const personId = getAssignedPersonId();
+    if (!personId) {
+        showNotification('No se pudo determinar la persona asociada. Por favor selecciona tu persona en Configuración.', 'error');
+        return;
+    }
+    
     const transactionData = {
         family_id: AppState.currentFamily.id,
         transaction_type: type,
         amount: amount,
         date: date,
-        person_id: personId,
+        person_id: personId, // Usamos el ID asignado automáticamente
         payment_method_id: paymentMethodId,
         description: note || null
     };
