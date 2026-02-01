@@ -3,8 +3,8 @@
 // ============================================
 
 // ¡IMPORTANTE! REEMPLAZAR CON TUS DATOS REALES
-const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Tu URL de Supabase
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Tu Anon Key
+const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI';
 
 // Crear cliente Supabase globalmente
 let supabaseClient = null;
@@ -209,15 +209,18 @@ async function loadUserProfile() {
             .single();
         
         if (userError) {
-            // Usuario no existe en tabla users, crearlo
-            console.log('👤 Usuario no encontrado en tabla users, creando...');
-            await createUserProfile();
+            console.log('👤 Usuario no encontrado en tabla users:', userError.message);
+            // Usuario no existe en tabla users, redirigir a creación de familia
+            await createNewFamily();
             return;
         }
         
         if (userData && userData.families) {
             AppState.currentFamily = userData.families;
-            updateUserUI(userData);
+            updateUserUI({
+                full_name: userData.full_name || AppState.currentUser.email.split('@')[0],
+                email: AppState.currentUser.email
+            });
             await loadInitialData();
             updateUI();
             startEmotionalMessagesRotation();
@@ -228,28 +231,40 @@ async function loadUserProfile() {
         }
     } catch (error) {
         console.error('❌ Error cargando perfil:', error);
-        showNotification('Error cargando datos del usuario', 'error');
+        showNotification('Error cargando datos del usuario. Creando nueva familia...', 'warning');
+        await createNewFamily();
     } finally {
         setLoading(false);
     }
 }
 
-async function createUserProfile() {
+async function createNewFamily() {
+    const familyName = prompt('🏠 ¿Cómo quieres llamar a tu familia?', `Familia de ${AppState.currentUser.email.split('@')[0]}`);
+    if (!familyName) {
+        showNotification('Se necesita un nombre para la familia', 'warning');
+        await loadUserProfile();
+        return;
+    }
+    
+    setLoading(true);
+    
     try {
-        // Crear familia primero
-        const familyName = `Familia de ${AppState.currentUser.email.split('@')[0]}`;
+        // Crear familia
         const { data: family, error: familyError } = await supabaseClient
             .from('families')
             .insert({ name: familyName })
             .select()
             .single();
         
-        if (familyError) throw familyError;
+        if (familyError) {
+            console.error('❌ Error creando familia:', familyError);
+            throw familyError;
+        }
         
-        // Crear usuario en tabla users
+        // Actualizar usuario con familia
         const { error: userError } = await supabaseClient
             .from('users')
-            .insert({
+            .upsert({
                 id: AppState.currentUser.id,
                 family_id: family.id,
                 full_name: AppState.currentUser.user_metadata?.full_name || 'Usuario'
@@ -261,20 +276,27 @@ async function createUserProfile() {
         await initializeFamilyData(family.id);
         
         AppState.currentFamily = family;
-        updateUserUI({ 
+        updateUserUI({
             full_name: AppState.currentUser.user_metadata?.full_name || 'Usuario',
-            email: AppState.currentUser.email 
+            email: AppState.currentUser.email
         });
         
         await loadInitialData();
         updateUI();
         startEmotionalMessagesRotation();
         
-        showNotification('¡Perfil creado exitosamente!', 'success');
+        showNotification(`¡Familia "${familyName}" creada exitosamente!`, 'success');
         
     } catch (error) {
-        console.error('❌ Error creando perfil:', error);
-        showNotification('Error creando perfil de usuario', 'error');
+        console.error('❌ Error creando familia:', error);
+        showNotification('Error creando familia: ' + error.message, 'error');
+        
+        // Intentar modo demo
+        showNotification('Usando modo demo temporal...', 'warning');
+        initializeDemoData();
+        updateUI();
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -318,8 +340,8 @@ async function initializeFamilyData(familyId) {
         
         // Insertar fondos
         await supabaseClient.from('funds').insert([
-            { family_id: familyId, name: 'Fondo fijo hogar', monthly_goal: 0, color: '#10B981', icon: '🏠' },
-            { family_id: familyId, name: 'Fondo fijo postres', monthly_goal: 0, color: '#8B5CF6', icon: '🧁' }
+            { family_id: familyId, name: 'Fondo fijo hogar', monthly_goal: 0, current_amount: 0, color: '#10B981', icon: '🏠' },
+            { family_id: familyId, name: 'Fondo fijo postres', monthly_goal: 0, current_amount: 0, color: '#8B5CF6', icon: '🧁' }
         ]);
         
         console.log('✅ Datos de familia inicializados');
@@ -330,48 +352,36 @@ async function initializeFamilyData(familyId) {
     }
 }
 
-async function createNewFamily() {
-    const familyName = prompt('🏠 ¿Cómo quieres llamar a tu familia?', 'Nuestra Familia');
-    if (!familyName) {
-        showNotification('Se necesita un nombre para la familia', 'warning');
-        return;
-    }
+function initializeDemoData() {
+    console.log('🎮 Inicializando datos demo...');
     
-    setLoading(true);
+    AppState.currentFamily = {
+        id: 'demo-family-' + Date.now(),
+        name: 'Familia Demo',
+        created_at: new Date().toISOString()
+    };
     
-    try {
-        // Crear familia
-        const { data: family, error: familyError } = await supabaseClient
-            .from('families')
-            .insert({ name: familyName })
-            .select()
-            .single();
-        
-        if (familyError) throw familyError;
-        
-        // Actualizar usuario con familia
-        const { error: userError } = await supabaseClient
-            .from('users')
-            .update({ family_id: family.id })
-            .eq('id', AppState.currentUser.id);
-        
-        if (userError) throw userError;
-        
-        // Inicializar datos
-        await initializeFamilyData(family.id);
-        
-        AppState.currentFamily = family;
-        await loadFamilyData();
-        
-        showNotification(`¡Familia "${familyName}" creada exitosamente!`, 'success');
-        updateUI();
-        
-    } catch (error) {
-        console.error('❌ Error creando familia:', error);
-        showNotification('Error creando familia: ' + error.message, 'error');
-    } finally {
-        setLoading(false);
-    }
+    AppState.familyData = {
+        persons: [
+            { id: 'demo-1', name: 'Sebastián', avatar_color: '#4F46E5', is_active: true },
+            { id: 'demo-2', name: 'Ludmila', avatar_color: '#EC4899', is_active: true }
+        ],
+        paymentMethods: [
+            { id: 'demo-1', name: 'Efectivo', icon: '💰', current_balance: 0 },
+            { id: 'demo-2', name: 'Mercado Pago', icon: '📱', current_balance: 0 }
+        ],
+        categories: [
+            { id: 'demo-1', name: 'Alquiler', type: 'household_expense', color: '#EF4444', icon: '🏠' },
+            { id: 'demo-2', name: 'Comida hogar', type: 'household_expense', color: '#10B981', icon: '🛒' },
+            { id: 'demo-3', name: 'Ingreso diario Sebastián', type: 'personal_income', color: '#4F46E5', icon: '💼' },
+            { id: 'demo-4', name: 'Ingreso diario Ludmila', type: 'personal_income', color: '#EC4899', icon: '💼' }
+        ],
+        funds: [
+            { id: 'demo-1', name: 'Fondo fijo hogar', monthly_goal: 0, current_amount: 0, color: '#10B981', icon: '🏠' }
+        ]
+    };
+    
+    AppState.transactions = [];
 }
 
 // ============================================
@@ -1057,7 +1067,7 @@ function updateDashboard() {
     if (monthlySavingsEl) monthlySavingsEl.textContent = formatCurrency(monthlySavings);
     
     // Balance final
-    const finalBalance = totalIncome - totalExpenses + businessResult;
+    const finalBalance = totalIncome - totalExpenses + businessResult - monthlySavings;
     const balanceEl = document.getElementById('finalBalance');
     if (balanceEl) {
         balanceEl.textContent = formatCurrency(finalBalance);
@@ -1083,8 +1093,25 @@ function updateBalance() {
     
     balanceCards.innerHTML = '';
     
+    // Calcular saldos de métodos de pago basados en transacciones
     AppState.familyData.paymentMethods.forEach(method => {
-        const balance = parseFloat(method.current_balance) || 0;
+        // Calcular saldo basado en transacciones
+        const income = AppState.transactions
+            .filter(t => t.payment_method_id === method.id && 
+                        (t.transaction_type === 'personal_income' || 
+                         t.transaction_type === 'business_income' ||
+                         t.transaction_type === 'fund_withdrawal'))
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const expenses = AppState.transactions
+            .filter(t => t.payment_method_id === method.id && 
+                        (t.transaction_type === 'household_expense' || 
+                         t.transaction_type === 'business_expense' ||
+                         t.transaction_type === 'fund_deposit'))
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const balance = income - expenses;
+        
         const card = document.createElement('div');
         card.className = 'summary-card';
         card.innerHTML = `
@@ -1092,17 +1119,35 @@ function updateBalance() {
                 <span class="card-icon">${method.icon}</span>
                 <h3>${method.name}</h3>
             </div>
-            <div class="card-value">${formatCurrency(balance)}</div>
+            <div class="card-value ${balance >= 0 ? 'positive' : 'negative'}">${formatCurrency(balance)}</div>
         `;
         balanceCards.appendChild(card);
     });
     
     // Total combinado
-    const total = AppState.familyData.paymentMethods.reduce((sum, method) => 
-        sum + parseFloat(method.current_balance || 0), 0);
+    const total = AppState.familyData.paymentMethods.reduce((sum, method) => {
+        const income = AppState.transactions
+            .filter(t => t.payment_method_id === method.id && 
+                        (t.transaction_type === 'personal_income' || 
+                         t.transaction_type === 'business_income' ||
+                         t.transaction_type === 'fund_withdrawal'))
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const expenses = AppState.transactions
+            .filter(t => t.payment_method_id === method.id && 
+                        (t.transaction_type === 'household_expense' || 
+                         t.transaction_type === 'business_expense' ||
+                         t.transaction_type === 'fund_deposit'))
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        return sum + (income - expenses);
+    }, 0);
     
     const totalBalanceEl = document.getElementById('totalBalance');
-    if (totalBalanceEl) totalBalanceEl.textContent = formatCurrency(total);
+    if (totalBalanceEl) {
+        totalBalanceEl.textContent = formatCurrency(total);
+        totalBalanceEl.className = total >= 0 ? 'positive' : 'negative';
+    }
 }
 
 function updateExpenses() {
@@ -1188,7 +1233,15 @@ function updateBusiness() {
     // Fondo postres
     const dessertFund = AppState.familyData.funds.find(f => f.name === 'Fondo fijo postres');
     if (dessertFund) {
-        const current = parseFloat(dessertFund.current_amount) || 0;
+        const deposits = transactions
+            .filter(t => t.fund_id === dessertFund.id && t.transaction_type === 'fund_deposit')
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const withdrawals = transactions
+            .filter(t => t.fund_id === dessertFund.id && t.transaction_type === 'fund_withdrawal')
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const current = parseFloat(dessertFund.current_amount) || 0 + deposits - withdrawals;
         const goal = parseFloat(dessertFund.monthly_goal) || 0;
         const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
         const missing = Math.max(goal - current, 0);
@@ -1219,7 +1272,16 @@ function updateFundsPreview() {
     }
     
     AppState.familyData.funds.forEach(fund => {
-        const current = parseFloat(fund.current_amount) || 0;
+        // Calcular saldo actual basado en transacciones
+        const deposits = AppState.transactions
+            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_deposit')
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const withdrawals = AppState.transactions
+            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_withdrawal')
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const current = parseFloat(fund.current_amount) || 0 + deposits - withdrawals;
         const goal = parseFloat(fund.monthly_goal) || 0;
         const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
         
@@ -1258,7 +1320,16 @@ function updateFunds() {
     }
     
     AppState.familyData.funds.forEach(fund => {
-        const current = parseFloat(fund.current_amount) || 0;
+        // Calcular saldo actual basado en transacciones
+        const deposits = AppState.transactions
+            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_deposit')
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const withdrawals = AppState.transactions
+            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_withdrawal')
+            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+        
+        const current = parseFloat(fund.current_amount) || 0 + deposits - withdrawals;
         const goal = parseFloat(fund.monthly_goal) || 0;
         const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
         const missing = Math.max(goal - current, 0);
@@ -1627,8 +1698,10 @@ function updateTransactionForm() {
             case 'business_income': categoryType = 'business_income'; break;
             case 'fund_deposit': 
             case 'fund_withdrawal': 
-                categoryType = 'fund'; 
-                break;
+                // No mostrar categorías para transacciones de fondo
+                categoryField.style.display = 'none';
+                fundField.style.display = 'block';
+                return;
         }
         
         const categories = AppState.familyData.categories.filter(c => c.type === categoryType);
@@ -1682,7 +1755,7 @@ async function handleTransactionSubmit(e) {
         return;
     }
     
-    if ((type === 'household_expense' || type === 'business_expense' || type === 'business_income') && !categoryId) {
+    if ((type === 'household_expense' || type === 'business_expense' || type === 'business_income' || type === 'personal_income') && !categoryId) {
         showNotification('Por favor selecciona una categoría', 'warning');
         return;
     }
