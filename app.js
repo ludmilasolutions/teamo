@@ -909,6 +909,241 @@ async function editFundGoal(fundId) {
     }
 }
 
+// ============================================
+// FUNCIONES PARA HISTORIAL
+// ============================================
+function updateHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList || !AppState.currentFamily) return;
+    
+    let filtered = [...AppState.transactions];
+    
+    // Aplicar filtros
+    const typeFilter = document.getElementById('filterType')?.value;
+    const personFilter = document.getElementById('filterPerson')?.value;
+    const paymentFilter = document.getElementById('filterPayment')?.value;
+    const dateFilter = document.getElementById('filterDate')?.value;
+    
+    if (typeFilter && typeFilter !== 'all') {
+        if (typeFilter === 'business') {
+            filtered = filtered.filter(t => 
+                t.transaction_type === 'business_expense' || 
+                t.transaction_type === 'business_income'
+            );
+        } else if (typeFilter === 'fund') {
+            filtered = filtered.filter(t => 
+                t.transaction_type === 'fund_deposit' || 
+                t.transaction_type === 'fund_withdrawal'
+            );
+        } else {
+            filtered = filtered.filter(t => t.transaction_type === typeFilter);
+        }
+    }
+    
+    if (personFilter && personFilter !== 'all') {
+        filtered = filtered.filter(t => t.person_id === personFilter);
+    }
+    
+    if (paymentFilter && paymentFilter !== 'all') {
+        filtered = filtered.filter(t => t.payment_method_id === paymentFilter);
+    }
+    
+    if (dateFilter) {
+        filtered = filtered.filter(t => t.date === dateFilter);
+    }
+    
+    // Renderizar historial
+    historyList.innerHTML = '';
+    
+    if (filtered.length === 0) {
+        historyList.innerHTML = '<div class="empty-state">No hay movimientos para mostrar con estos filtros</div>';
+        return;
+    }
+    
+    filtered.forEach(transaction => {
+        const item = document.createElement('div');
+        item.className = `history-item ${getTransactionTypeClass(transaction.transaction_type)}`;
+        
+        const person = AppState.familyData.persons.find(p => p.id === transaction.person_id);
+        const category = AppState.familyData.categories.find(c => c.id === transaction.category_id);
+        const payment = AppState.familyData.paymentMethods.find(p => p.id === transaction.payment_method_id);
+        const fund = AppState.familyData.funds.find(f => f.id === transaction.fund_id);
+        
+        let description = getTransactionDescription(transaction, category, fund);
+        let details = [];
+        
+        if (person) details.push(`<span class="person-${person.name.toLowerCase()}">${person.name}</span>`);
+        if (payment) details.push(payment.name);
+        
+        item.innerHTML = `
+            <div class="history-info">
+                <div class="history-date">${formatDate(transaction.date)}</div>
+                <div class="history-description">${description}</div>
+                <div class="history-details">${details.join(' • ')}</div>
+                ${transaction.description ? `<div class="history-note">${transaction.description}</div>` : ''}
+            </div>
+            <div class="history-amount ${transaction.transaction_type.includes('income') || transaction.transaction_type === 'fund_withdrawal' ? 'positive' : 'negative'}">
+                ${transaction.transaction_type.includes('income') || transaction.transaction_type === 'fund_withdrawal' ? '+' : '-'}${formatCurrency(transaction.amount)}
+            </div>
+        `;
+        
+        historyList.appendChild(item);
+    });
+    
+    // Poblar filtros si no están poblados
+    populateHistoryFilters();
+}
+
+function populateHistoryFilters() {
+    const personFilter = document.getElementById('filterPerson');
+    const paymentFilter = document.getElementById('filterPayment');
+    
+    if (personFilter && personFilter.children.length <= 1) {
+        personFilter.innerHTML = '<option value="all">Todas las personas</option>';
+        AppState.familyData.persons.forEach(person => {
+            const option = document.createElement('option');
+            option.value = person.id;
+            option.textContent = person.name;
+            personFilter.appendChild(option);
+        });
+    }
+    
+    if (paymentFilter && paymentFilter.children.length <= 1) {
+        paymentFilter.innerHTML = '<option value="all">Todos los medios</option>';
+        AppState.familyData.paymentMethods.forEach(method => {
+            const option = document.createElement('option');
+            option.value = method.id;
+            option.textContent = method.name;
+            paymentFilter.appendChild(option);
+        });
+    }
+}
+
+function getTransactionDescription(transaction, category, fund) {
+    switch(transaction.transaction_type) {
+        case 'household_expense':
+            return `🏠 ${category?.name || 'Gasto del hogar'}`;
+        case 'personal_income':
+            return `💼 ${category?.name || 'Ingreso diario'}`;
+        case 'business_expense':
+            return `🧁 ${category?.name || 'Insumos postres'}`;
+        case 'business_income':
+            return `💰 ${category?.name || 'Ventas postres'}`;
+        case 'fund_deposit':
+            return `🏦 Ingreso a ${fund?.name || 'fondo'}`;
+        case 'fund_withdrawal':
+            return `🏦 Uso de ${fund?.name || 'fondo'}`;
+        default:
+            return 'Movimiento';
+    }
+}
+
+// ============================================
+// FUNCIONES PARA CONFIGURACIÓN
+// ============================================
+function updateSettings() {
+    const familyMembers = document.getElementById('familyMembers');
+    const goalSettings = document.getElementById('goalSettings');
+    
+    // Configurar lista de personas
+    if (familyMembers) {
+        familyMembers.innerHTML = '';
+        AppState.familyData.persons.forEach(person => {
+            const memberEl = document.createElement('div');
+            memberEl.className = 'family-member';
+            memberEl.innerHTML = `
+                <div class="member-info">
+                    <div class="member-avatar" style="background: ${person.avatar_color}">
+                        ${person.name.charAt(0)}
+                    </div>
+                    <div class="member-name ${person.name === 'Sebastián' ? 'person-sebastian' : 'person-ludmila'}">
+                        ${person.name}
+                    </div>
+                </div>
+                <div class="member-status">
+                    ${person.is_active ? '✅ Activo' : '⏸️ Inactivo'}
+                </div>
+            `;
+            familyMembers.appendChild(memberEl);
+        });
+    }
+    
+    // Configurar objetivos de fondos
+    if (goalSettings) {
+        goalSettings.innerHTML = '';
+        AppState.familyData.funds.forEach(fund => {
+            const settingEl = document.createElement('div');
+            settingEl.className = 'goal-setting';
+            settingEl.innerHTML = `
+                <div class="goal-info">
+                    <div class="goal-name">${fund.icon} ${fund.name}</div>
+                    <div class="goal-current">Actual: ${formatCurrency(fund.current_amount)}</div>
+                </div>
+                <div class="goal-input">
+                    <input type="number" 
+                           min="0" 
+                           step="0.01" 
+                           value="${fund.monthly_goal || 0}" 
+                           data-fund-id="${fund.id}"
+                           class="goal-input-field"
+                           placeholder="Objetivo mensual">
+                </div>
+                <button class="save-goal" data-fund-id="${fund.id}">💾 Guardar</button>
+            `;
+            goalSettings.appendChild(settingEl);
+        });
+        
+        // Event listeners para guardar objetivos
+        document.querySelectorAll('.save-goal').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const fundId = e.target.dataset.fundId;
+                const input = document.querySelector(`.goal-input-field[data-fund-id="${fundId}"]`);
+                const goal = parseFloat(input.value);
+                
+                if (isNaN(goal) || goal < 0) {
+                    showNotification('Por favor ingresa un objetivo válido', 'warning');
+                    return;
+                }
+                
+                try {
+                    const { error } = await supabaseClient
+                        .from('funds')
+                        .update({ monthly_goal: goal })
+                        .eq('id', fundId);
+                    
+                    if (error) throw error;
+                    
+                    showNotification('Objetivo actualizado correctamente', 'success');
+                    
+                    // Actualizar datos locales
+                    const fund = AppState.familyData.funds.find(f => f.id === fundId);
+                    if (fund) fund.monthly_goal = goal;
+                    
+                    updateFunds();
+                    updateFundsPreview();
+                    
+                } catch (error) {
+                    console.error('Error actualizando objetivo:', error);
+                    showNotification('Error actualizando objetivo', 'error');
+                }
+            });
+        });
+    }
+    
+    // Configurar botón de instalación PWA
+    const installButton = document.getElementById('installButton');
+    if (installButton && AppState.deferredInstallPrompt) {
+        installButton.style.display = 'flex';
+    } else if (installButton) {
+        // Verificar si ya está instalado
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            installButton.textContent = '📱 Ya instalada';
+            installButton.disabled = true;
+        }
+    }
+}
+
 function setupTransactionForm() {
     // Personas
     const personSelect = document.getElementById('transactionPerson');
@@ -1128,6 +1363,9 @@ async function registerServiceWorker() {
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Aplicación cargando...');
+    
+    // Configurar PWA
+    setupPWAInstall();
     
     // Inicializar UI
     initUI();
