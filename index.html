@@ -3,340 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Familia Unida - Finanzas</title>
+    <title>Economía Familiar - Juntos</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACYSURBVHgB7ZLBCcAgDEWzQXfqEp2pO3WljuALRYNgiFIg6c+9B9+HhocWQJtMm5mOiJgc8JdYqTg5UBFOBqw4GfAL0AaUKpQQFRPhdMBeRJYcCBGPBl5ltoDcYzBgBT6Z8GAFTKDHCrR0IOshqDXwFY9HDEZPZriqEwMV4WTAipMBVxC9gBfQug3sYODtqAAAAABJRU5ErkJggg==">
-    <meta name="theme-color" content="#4F46E5">
-    <meta name="description" content="Aplicación para ordenar las finanzas familiares juntos">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
 </head>
 <body>
-    <!-- Header con mensaje emocional -->
-    <header class="app-header">
-        <div class="header-content">
-            <h1 class="app-title">Familia Unida</h1>
-            <p class="emotional-message" id="emotionalMessage">Esto lo estamos ordenando juntos</p>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span class="navbar-icon">💰</span>
+            <span class="navbar-title">Economía Familiar</span>
         </div>
-        <button class="menu-button" id="menuButton" aria-label="Menú">
-            <span></span><span></span><span></span>
-        </button>
-    </header>
-
-    <!-- Menú lateral -->
-    <aside class="side-menu" id="sideMenu">
-        <div class="menu-header">
-            <h2>Menú</h2>
-            <button class="close-menu" id="closeMenu">&times;</button>
+        <div class="navbar-user">
+            <span id="userEmail"></span>
+            <button class="btn-logout" onclick="logout()">Salir</button>
         </div>
-        <nav class="menu-nav">
-            <button class="menu-item active" data-tab="dashboard">
-                <span class="menu-icon">📊</span>
-                <span>Resumen</span>
-            </button>
-            <button class="menu-item" data-tab="balance">
-                <span class="menu-icon">💰</span>
-                <span>Saldo disponible</span>
-            </button>
-            <button class="menu-item" data-tab="expenses">
-                <span class="menu-icon">📈</span>
-                <span>Gastos por categoría</span>
-            </button>
-            <button class="menu-item" data-tab="business">
-                <span class="menu-icon">🧁</span>
-                <span>Postres</span>
-            </button>
-            <button class="menu-item" data-tab="funds">
-                <span class="menu-icon">🏦</span>
-                <span>Fondos / Ahorros</span>
-            </button>
-            <button class="menu-item" data-tab="history">
-                <span class="menu-icon">📋</span>
-                <span>Historial</span>
-            </button>
-            <div class="menu-divider"></div>
-            <button class="menu-item" data-tab="add-transaction">
-                <span class="menu-icon">➕</span>
-                <span>Agregar movimiento</span>
-            </button>
-            <button class="menu-item" data-tab="settings">
-                <span class="menu-icon">⚙️</span>
-                <span>Configuración</span>
-            </button>
+    </nav>
+    
+    <!-- Emotional Component -->
+    <div class="emotional-banner" id="emotionalBanner">
+        <p>"Esto lo estamos ordenando juntos"</p>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item active" data-screen="resumen">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Resumen Mensual</span>
+                </li>
+                <li class="nav-item" data-screen="saldo">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-text">Saldo por Medio</span>
+                </li>
+                <li class="nav-item" data-screen="gastos">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Gastos por Categoría</span>
+                </li>
+                <li class="nav-item" data-screen="postres">
+                    <span class="nav-icon">🍰</span>
+                    <span class="nav-text">Postres</span>
+                </li>
+                <li class="nav-item" data-screen="fondos">
+                    <span class="nav-icon">🏦</span>
+                    <span class="nav-text">Fondos / Ahorros</span>
+                </li>
+                <li class="nav-item" data-screen="historial">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Historial</span>
+                </li>
+                <li class="nav-item" data-screen="nuevo">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">Nuevo Movimiento</span>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="balance-summary">
+                    <p class="balance-label">Balance del mes</p>
+                    <p class="balance-amount" id="balanceAmount">$0</p>
+                </div>
+                <p class="emotional-quote">"Construyendo tranquilidad juntos"</p>
+            </div>
         </nav>
-        <div class="menu-footer">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">FU</div>
-                <div class="user-details">
-                    <span id="userName">Familia</span>
-                    <small id="userEmail">Cargando...</small>
+        
+        <!-- Content Area -->
+        <main class="content">
+            <!-- Resumen Mensual Screen -->
+            <div class="screen active" id="resumen">
+                <div class="screen-header">
+                    <h1>📊 Resumen Mensual</h1>
+                    <div class="month-selector">
+                        <button class="btn-icon" onclick="changeMonth(-1)">←</button>
+                        <span id="currentMonth">Mayo 2024</span>
+                        <button class="btn-icon" onclick="changeMonth(1)">→</button>
+                    </div>
+                </div>
+                
+                <div class="summary-cards">
+                    <div class="summary-card income">
+                        <h3>Ingresos Totales</h3>
+                        <p class="amount" id="totalIncome">$0</p>
+                        <div class="person-breakdown">
+                            <span>Sebastián: <span id="incomeSebastian">$0</span></span>
+                            <span>Ludmila: <span id="incomeLudmila">$0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card expense">
+                        <h3>Gastos Totales</h3>
+                        <p class="amount" id="totalExpense">$0</p>
+                        <div class="category-preview" id="topCategories"></div>
+                    </div>
+                    
+                    <div class="summary-card balance">
+                        <h3>Balance del Mes</h3>
+                        <p class="amount" id="monthBalance">$0</p>
+                        <div class="emotional-message" id="balanceMessage">
+                            "No es culpa, es equipo"
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="funds-overview">
+                    <h2>🏦 Estado de Fondos</h2>
+                    <div class="funds-container" id="fundsContainer"></div>
+                </div>
+                
+                <div class="postres-summary">
+                    <h2>🍰 Balance Postres</h2>
+                    <div class="postres-card">
+                        <div class="postres-item">
+                            <span>Ventas:</span>
+                            <span class="positive" id="postresSales">$0</span>
+                        </div>
+                        <div class="postres-item">
+                            <span>Insumos:</span>
+                            <span class="negative" id="postresSupplies">$0</span>
+                        </div>
+                        <div class="postres-item total">
+                            <span>Resultado:</span>
+                            <span id="postresResult">$0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button class="logout-button" id="logoutButton">Cerrar sesión</button>
+            
+            <!-- Saldo por Medio Screen -->
+            <div class="screen" id="saldo">
+                <div class="screen-header">
+                    <h1>💳 Saldo por Medio</h1>
+                </div>
+                
+                <div class="medium-cards">
+                    <div class="medium-card">
+                        <h3>💵 Efectivo</h3>
+                        <p class="amount" id="cashBalance">$0</p>
+                        <div class="medium-breakdown">
+                            <p>Ingresos: <span id="cashIncome">$0</span></p>
+                            <p>Gastos: <span id="cashExpense">$0</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="medium-card">
+                        <h3>📱 Mercado Pago</h3>
+                        <p class="amount" id="mpBalance">$0</p>
+                        <div class="medium-breakdown">
+                            <p>Ingresos: <span id="mpIncome">$0</span></p>
+                            <p>Gastos: <span id="mpExpense">$0</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="transfer-section">
+                    <h3>Transferir entre Medios</h3>
+                    <div class="transfer-form">
+                        <select id="transferFrom">
+                            <option value="efectivo">De: Efectivo</option>
+                            <option value="mercadopago">De: Mercado Pago</option>
+                        </select>
+                        <select id="transferTo">
+                            <option value="mercadopago">A: Mercado Pago</option>
+                            <option value="efectivo">A: Efectivo</option>
+                        </select>
+                        <input type="number" id="transferAmount" placeholder="Monto">
+                        <button class="btn-primary" onclick="makeTransfer()">Transferir</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gastos por Categoría Screen -->
+            <div class="screen" id="gastos">
+                <div class="screen-header">
+                    <h1>📈 Gastos por Categoría</h1>
+                </div>
+                
+                <div class="category-chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                
+                <div class="category-list" id="categoryList"></div>
+            </div>
+            
+            <!-- Postres Screen -->
+            <div class="screen" id="postres">
+                <div class="screen-header">
+                    <h1>🍰 Postres - Resultado Real</h1>
+                </div>
+                
+                <div class="postres-actions">
+                    <button class="btn-primary" onclick="showModal('insumo')">
+                        ➕ Agregar Insumo
+                    </button>
+                    <button class="btn-success" onclick="showModal('venta')">
+                        💰 Registrar Venta
+                    </button>
+                </div>
+                
+                <div class="postres-stats">
+                    <div class="stat-card">
+                        <h3>Inversión Total</h3>
+                        <p id="totalInsumos">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ventas Totales</h3>
+                        <p id="totalVentas">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ganancia Neta</h3>
+                        <p id="gananciaNeta">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Margen %</h3>
+                        <p id="margen">0%</p>
+                    </div>
+                </div>
+                
+                <div class="postres-history">
+                    <h3>Últimos Movimientos</h3>
+                    <div class="history-table" id="postresHistory"></div>
+                </div>
+            </div>
+            
+            <!-- Fondos / Ahorros Screen -->
+            <div class="screen" id="fondos">
+                <div class="screen-header">
+                    <h1>🏦 Fondos / Ahorros</h1>
+                    <button class="btn-primary" onclick="showModal('fondo')">
+                        ➕ Movimiento en Fondo
+                    </button>
+                </div>
+                
+                <div class="funds-management">
+                    <div class="fund-card" id="fundHogar">
+                        <div class="fund-header">
+                            <h3>Fondo Fijo Hogar</h3>
+                            <span class="fund-status ok">OK</span>
+                        </div>
+                        <div class="fund-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="hogarProgress"></div>
+                            </div>
+                            <div class="fund-numbers">
+                                <span class="current" id="hogarCurrent">$0</span>
+                                <span class="target" id="hogarTarget">/$0</span>
+                            </div>
+                        </div>
+                        <div class="fund-actions">
+                            <button class="btn-success" onclick="addToFund('hogar')">➕ Agregar</button>
+                            <button class="btn-warning" onclick="useFromFund('hogar')">➖ Usar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="fund-card" id="fundPostres">
+                        <div class="fund-header">
+                            <h3>Fondo Fijo Postres</h3>
+                            <span class="fund-status ok">OK</span>
+                        </div>
+                        <div class="fund-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="postresFundProgress"></div>
+                            </div>
+                            <div class="fund-numbers">
+                                <span class="current" id="postresFundCurrent">$0</span>
+                                <span class="target" id="postresFundTarget">/$0</span>
+                            </div>
+                        </div>
+                        <div class="fund-actions">
+                            <button class="btn-success" onclick="addToFund('postres')">➕ Agregar</button>
+                            <button class="btn-warning" onclick="useFromFund('postres')">➖ Usar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fund-history">
+                    <h3>Historial de Movimientos</h3>
+                    <div class="history-table" id="fundHistory"></div>
+                </div>
+            </div>
+            
+            <!-- Historial Screen -->
+            <div class="screen" id="historial">
+                <div class="screen-header">
+                    <h1>📋 Historial Completo</h1>
+                    <div class="filters">
+                        <select id="filterType">
+                            <option value="">Todos los tipos</option>
+                            <option value="income">Ingresos</option>
+                            <option value="expense">Gastos</option>
+                            <option value="fund_transfer">Fondos</option>
+                            <option value="postre">Postres</option>
+                        </select>
+                        <select id="filterPerson">
+                            <option value="">Todas las personas</option>
+                            <option value="sebastian">Sebastián</option>
+                            <option value="ludmila">Ludmila</option>
+                            <option value="joint">Conjunto</option>
+                        </select>
+                        <input type="date" id="filterDateFrom">
+                        <input type="date" id="filterDateTo">
+                        <button class="btn-primary" onclick="applyFilters()">Filtrar</button>
+                    </div>
+                </div>
+                
+                <div class="history-container">
+                    <div class="history-table-container">
+                        <table class="history-table-full">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Persona</th>
+                                    <th>Medio</th>
+                                    <th>Monto</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nuevo Movimiento Screen -->
+            <div class="screen" id="nuevo">
+                <div class="screen-header">
+                    <h1>➕ Nuevo Movimiento</h1>
+                </div>
+                
+                <div class="movement-type-selector">
+                    <button class="movement-type-btn active" data-type="expense">
+                        💸 Gasto
+                    </button>
+                    <button class="movement-type-btn" data-type="income">
+                        💰 Ingreso
+                    </button>
+                    <button class="movement-type-btn" data-type="fund">
+                        🏦 Fondo
+                    </button>
+                    <button class="movement-type-btn" data-type="postre">
+                        🍰 Postre
+                    </button>
+                </div>
+                
+                <!-- Expense Form -->
+                <form id="expenseForm" class="movement-form active">
+                    <div class="form-group">
+                        <label>Categoría *</label>
+                        <select id="expenseCategory" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="alquiler">Alquiler</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="comida_hogar">Comida hogar</option>
+                            <option value="transporte">Transporte</option>
+                            <option value="bebe">Bebé</option>
+                            <option value="mascotas">Mascotas</option>
+                            <option value="salud">Salud</option>
+                            <option value="ropa">Ropa</option>
+                            <option value="imprevistos">Imprevistos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="expenseAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Persona *</label>
+                        <select id="expensePerson" required>
+                            <option value="sebastian">Sebastián</option>
+                            <option value="ludmila">Ludmila</option>
+                            <option value="joint">Ambos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="expenseMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="expenseDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nota (opcional)</label>
+                        <textarea id="expenseNote" rows="2"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="saveExpense()">
+                        Guardar Gasto
+                    </button>
+                </form>
+                
+                <!-- Income Form -->
+                <form id="incomeForm" class="movement-form">
+                    <div class="form-group">
+                        <label>Tipo de ingreso *</label>
+                        <select id="incomeCategory" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="ingreso_diario_sebastian">Ingreso diario Sebastián</option>
+                            <option value="ingreso_diario_ludmila">Ingreso diario Ludmila</option>
+                            <option value="otro">Otro ingreso</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="incomeAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="incomeMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="incomeDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nota (opcional)</label>
+                        <textarea id="incomeNote" rows="2"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="saveIncome()">
+                        Guardar Ingreso
+                    </button>
+                </form>
+                
+                <!-- Fund Form -->
+                <form id="fundForm" class="movement-form">
+                    <div class="form-group">
+                        <label>Fondo *</label>
+                        <select id="fundSelect" required>
+                            <option value="">Seleccionar fondo</option>
+                            <option value="hogar">Fondo fijo hogar</option>
+                            <option value="postres">Fondo fijo postres</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tipo de operación *</label>
+                        <select id="fundOperation" required>
+                            <option value="ingreso">Agregar dinero (ahorro)</option>
+                            <option value="uso">Usar dinero</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="fundAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Persona *</label>
+                        <select id="fundPerson" required>
+                            <option value="sebastian">Sebastián</option>
+                            <option value="ludmila">Ludmila</option>
+                            <option value="joint">Ambos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="fundMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="saveFundMovement()">
+                        Guardar Movimiento
+                    </button>
+                </form>
+                
+                <!-- Postre Form -->
+                <form id="postreForm" class="movement-form">
+                    <div class="form-group">
+                        <label>Tipo de movimiento *</label>
+                        <select id="postreType" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="insumo">Compra de insumos</option>
+                            <option value="venta">Venta de postres</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="postreAmount" required min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="postreMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="postreDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descripción (opcional)</label>
+                        <textarea id="postreDescription" rows="2"></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-primary" onclick="savePostreMovement()">
+                        Guardar Movimiento
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
         </div>
-    </aside>
-    <div class="menu-overlay" id="menuOverlay"></div>
-
-    <!-- Contenido principal -->
-    <main class="main-content">
-        <!-- Pantalla: Resumen -->
-        <section id="dashboard" class="tab-content active">
-            <div class="month-selector">
-                <button class="month-nav" id="prevMonth">←</button>
-                <h2 class="current-month" id="currentMonth">Febrero 2024</h2>
-                <button class="month-nav" id="nextMonth">→</button>
-            </div>
+    </div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('firebase-messaging-sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Error registrando Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Sugerencia de instalación PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
             
-            <div class="summary-cards">
-                <div class="summary-card income">
-                    <div class="card-header">
-                        <span class="card-icon">💵</span>
-                        <h3>Ingresos totales</h3>
-                    </div>
-                    <div class="card-value" id="totalIncome">$0</div>
-                    <div class="card-trend">vs mes anterior: <span id="incomeTrend">0%</span></div>
-                </div>
-                
-                <div class="summary-card expense">
-                    <div class="card-header">
-                        <span class="card-icon">🛒</span>
-                        <h3>Gastos del hogar</h3>
-                    </div>
-                    <div class="card-value" id="totalExpenses">$0</div>
-                    <div class="card-trend">vs mes anterior: <span id="expenseTrend">0%</span></div>
-                </div>
-                
-                <div class="summary-card business">
-                    <div class="card-header">
-                        <span class="card-icon">🧁</span>
-                        <h3>Resultado postres</h3>
-                    </div>
-                    <div class="card-value" id="businessResult">$0</div>
-                    <div class="card-subtitle">Ventas - Insumos</div>
-                </div>
-                
-                <div class="summary-card savings">
-                    <div class="card-header">
-                        <span class="card-icon">🏦</span>
-                        <h3>Ahorro del mes</h3>
-                    </div>
-                    <div class="card-value" id="monthlySavings">$0</div>
-                    <div class="card-subtitle">Total en fondos</div>
-                </div>
-            </div>
-            
-            <div class="balance-card final-balance">
-                <h3>Balance final del mes</h3>
-                <div class="balance-value" id="finalBalance">$0</div>
-                <div class="balance-message" id="balanceMessage"></div>
-            </div>
-            
-            <div class="funds-preview">
-                <h3>Estado de fondos</h3>
-                <div class="funds-list" id="fundsList">
-                    <!-- Los fondos se cargarán aquí -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Pantalla: Saldo disponible -->
-        <section id="balance" class="tab-content">
-            <h2>Saldo disponible</h2>
-            <div class="balance-cards" id="balanceCards">
-                <!-- Los saldos se cargarán aquí -->
-            </div>
-            <div class="total-balance-card">
-                <h3>Total combinado</h3>
-                <div class="total-balance" id="totalBalance">$0</div>
-            </div>
-        </section>
-
-        <!-- Pantalla: Gastos por categoría -->
-        <section id="expenses" class="tab-content">
-            <h2>Gastos por categoría</h2>
-            <div class="category-filter">
-                <select id="expenseMonthFilter">
-                    <option value="current">Este mes</option>
-                    <option value="previous">Mes anterior</option>
-                </select>
-            </div>
-            <div class="category-chart" id="categoryChart">
-                <!-- Gráfico de gastos -->
-            </div>
-            <div class="category-ranking" id="categoryRanking">
-                <!-- Ranking se cargará aquí -->
-            </div>
-        </section>
-
-        <!-- Pantalla: Postres -->
-        <section id="business" class="tab-content">
-            <h2>Emprendimiento Postres</h2>
-            <div class="business-cards">
-                <div class="business-card sales">
-                    <h3>Ventas</h3>
-                    <div class="business-value" id="totalSales">$0</div>
-                    <div class="business-subtitle">Este mes</div>
-                </div>
-                <div class="business-card expenses">
-                    <h3>Insumos</h3>
-                    <div class="business-value" id="totalSupplies">$0</div>
-                    <div class="business-subtitle">Este mes</div>
-                </div>
-                <div class="business-card profit">
-                    <h3>Ganancia</h3>
-                    <div class="business-value" id="businessProfit">$0</div>
-                    <div class="business-subtitle">Ventas - Insumos</div>
-                </div>
-            </div>
-            
-            <div class="fund-status">
-                <h3>Fondo fijo postres</h3>
-                <div class="fund-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="dessertFundProgress" style="width: 0%"></div>
-                    </div>
-                    <div class="fund-stats">
-                        <span id="dessertFundCurrent">$0</span>
-                        <span>/</span>
-                        <span id="dessertFundGoal">$0</span>
-                    </div>
-                </div>
-                <div class="fund-missing" id="dessertFundMissing">Faltan $0 para el objetivo</div>
-            </div>
-        </section>
-
-        <!-- Pantalla: Fondos / Ahorros -->
-        <section id="funds" class="tab-content">
-            <h2>Fondos / Ahorros</h2>
-            <div class="funds-management">
-                <div class="funds-list" id="fullFundsList">
-                    <!-- Lista completa de fondos -->
-                </div>
-                <button class="add-fund-button" id="addFundButton">+ Configurar nuevo fondo</button>
-            </div>
-        </section>
-
-        <!-- Pantalla: Historial -->
-        <section id="history" class="tab-content">
-            <h2>Historial de movimientos</h2>
-            <div class="history-filters">
-                <select id="filterType">
-                    <option value="all">Todos los tipos</option>
-                    <option value="household_expense">Gastos hogar</option>
-                    <option value="personal_income">Ingresos</option>
-                    <option value="business">Postres</option>
-                    <option value="fund">Fondos</option>
-                </select>
-                <select id="filterPerson">
-                    <option value="all">Todas las personas</option>
-                </select>
-                <select id="filterPayment">
-                    <option value="all">Todos los medios</option>
-                </select>
-                <input type="date" id="filterDate" placeholder="Fecha específica">
-            </div>
-            <div class="history-list" id="historyList">
-                <!-- Historial se cargará aquí -->
-            </div>
-        </section>
-
-        <!-- Pantalla: Agregar movimiento -->
-        <section id="add-transaction" class="tab-content">
-            <h2>Agregar movimiento</h2>
-            <form class="transaction-form" id="transactionForm">
-                <div class="form-group">
-                    <label for="transactionType">Tipo de movimiento</label>
-                    <select id="transactionType" required>
-                        <option value="">Seleccionar tipo</option>
-                        <option value="household_expense">Gasto del hogar</option>
-                        <option value="personal_income">Ingreso diario</option>
-                        <option value="business_expense">Insumos postres</option>
-                        <option value="business_income">Ventas postres</option>
-                        <option value="fund_deposit">Ingreso a fondo</option>
-                        <option value="fund_withdrawal">Uso de fondo</option>
-                    </select>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="transactionDate">Fecha</label>
-                        <input type="date" id="transactionDate" required value="">
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionAmount">Monto ($)</label>
-                        <input type="number" id="transactionAmount" min="0.01" step="0.01" required placeholder="0.00">
-                    </div>
-                </div>
-
-                <div class="form-group" id="categoryField">
-                    <label for="transactionCategory">Categoría</label>
-                    <select id="transactionCategory">
-                        <!-- Se llenará dinámicamente -->
-                    </select>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="transactionPerson">Persona</label>
-                        <select id="transactionPerson" required>
-                            <!-- Se llenará dinámicamente -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionPayment">Medio</label>
-                        <select id="transactionPayment" required>
-                            <!-- Se llenará dinámicamente -->
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" id="fundField" style="display: none;">
-                    <label for="transactionFund">Fondo</label>
-                    <select id="transactionFund">
-                        <!-- Se llenará dinámicamente -->
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="transactionNote">Nota (opcional)</label>
-                    <textarea id="transactionNote" rows="2" placeholder="Descripción breve..."></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="cancel-button" data-tab="dashboard">Cancelar</button>
-                    <button type="submit" class="submit-button">Guardar movimiento</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- Pantalla: Configuración -->
-        <section id="settings" class="tab-content">
-            <h2>Configuración</h2>
-            <div class="settings-section">
-                <h3>Objetivos mensuales</h3>
-                <div class="goal-settings" id="goalSettings">
-                    <!-- Configuración de objetivos -->
-                </div>
-            </div>
-            <div class="settings-section">
-                <h3>Instalar aplicación</h3>
-                <p>Para una mejor experiencia, instala esta aplicación en tu dispositivo:</p>
-                <button class="install-button" id="installButton">📲 Instalar app</button>
-                <p class="install-hint">La app funcionará offline y tendrá acceso directo desde tu pantalla principal.</p>
-            </div>
-            <div class="settings-section">
-                <h3>Familia</h3>
-                <div class="family-members" id="familyMembers">
-                    <!-- Miembros de la familia -->
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Notificaciones -->
-    <div class="notification-container" id="notificationContainer"></div>
-
-    <!-- Scripts -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+            // Mostrar sugerencia después de 30 segundos
+            setTimeout(() => {
+                if (deferredPrompt && confirm('¿Quieres instalar la aplicación para acceso rápido?')) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        deferredPrompt = null;
+                    });
+                }
+            }, 30000);
+        });
+    </script>
+    
+    <!-- Firebase and Chart.js -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Main App -->
     <script src="app.js"></script>
 </body>
 </html>
