@@ -3,312 +3,2497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanzas Familiares</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
-    <!-- Supabase SDK -->
+    <title>Economía Familiar | Sebastián & Ludmila</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💸</text></svg>">
+    
+    <!-- Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* RESET Y VARIABLES */
+        :root {
+            --color-primary: #4F46E5;
+            --color-primary-light: #818CF8;
+            --color-secondary: #EC4899;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            --color-info: #3B82F6;
+            --color-gray-50: #F9FAFB;
+            --color-gray-100: #F3F4F6;
+            --color-gray-200: #E5E7EB;
+            --color-gray-300: #D1D5DB;
+            --color-gray-400: #9CA3AF;
+            --color-gray-500: #6B7280;
+            --color-gray-600: #4B5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1F2937;
+            --color-gray-900: #111827;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-full: 9999px;
+            
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-gray-50);
+            color: var(--color-gray-800);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: 80px; /* Espacio para navegación inferior */
+        }
+        
+        /* TYPOGRAPHY */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.25;
+            margin-bottom: 0.75rem;
+        }
+        
+        h1 { font-size: 1.875rem; }
+        h2 { font-size: 1.5rem; }
+        h3 { font-size: 1.25rem; }
+        h4 { font-size: 1.125rem; }
+        
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        
+        /* LAYOUT */
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            color: white;
+            padding: 1.25rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--color-primary);
+            cursor: pointer;
+        }
+        
+        /* NAVEGACIÓN INFERIOR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            color: var(--color-gray-500);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            border-radius: var(--radius-md);
+        }
+        
+        .nav-item.active {
+            color: var(--color-primary);
+            background-color: var(--color-gray-100);
+        }
+        
+        .nav-item i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* TARJETAS */
+        .card {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        /* ESTADOS Y COLORES */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-warning {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-danger {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .status-info {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        /* BOTONES */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--color-primary-light);
+        }
+        
+        .btn-success {
+            background-color: var(--color-success);
+            color: white;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--color-gray-300);
+            color: var(--color-gray-700);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--color-gray-50);
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--radius-full);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* FORMULARIOS */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--color-gray-700);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .select-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        
+        /* LISTAS */
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+            transition: background-color 0.2s;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-item:hover {
+            background-color: var(--color-gray-50);
+        }
+        
+        .list-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .list-content {
+            flex: 1;
+        }
+        
+        .list-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .list-subtitle {
+            font-size: 0.875rem;
+            color: var(--color-gray-600);
+        }
+        
+        .list-amount {
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        .amount-positive {
+            color: var(--color-success);
+        }
+        
+        .amount-negative {
+            color: var(--color-danger);
+        }
+        
+        /* BARRAS DE PROGRESO */
+        .progress-container {
+            margin: 1rem 0;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--color-gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 0.3s ease;
+        }
+        
+        .progress-success {
+            background-color: var(--color-success);
+        }
+        
+        .progress-warning {
+            background-color: var(--color-warning);
+        }
+        
+        .progress-danger {
+            background-color: var(--color-danger);
+        }
+        
+        /* MENSAJES EMPÁTICOS */
+        .empathy-message {
+            background-color: #F0F9FF;
+            border-left: 4px solid var(--color-primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-style: italic;
+            color: var(--color-gray-700);
+        }
+        
+        /* MODALES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--color-gray-200);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--color-gray-500);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        /* UTILITIES */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        
+        .w-full { width: 100%; }
+        
+        /* ANIMACIONES */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* RESPONSIVE */
+        @media (min-width: 640px) {
+            .container {
+                max-width: 640px;
+            }
+        }
+        
+        /* ESTILOS ESPECÍFICOS PARA PANTALLAS */
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+            padding: 1rem 0;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* INSTALL PROMPT */
+        .install-prompt {
+            position: fixed;
+            bottom: 90px;
+            left: 1rem;
+            right: 1rem;
+            background-color: white;
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .install-prompt.hidden {
+            display: none;
+        }
+        
+        .install-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .install-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--color-gray-500);
+            cursor: pointer;
+        }
+        
+        /* LOADING */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--color-gray-500);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-gray-200);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--color-gray-500);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
 </head>
 <body>
-    <!-- Pantalla de Login -->
-    <div id="login-screen" class="screen active">
-        <div class="auth-container">
-            <div class="app-header">
-                <h1>🏠 Finanzas Familiares</h1>
-                <p>Gestiona tu economía familiar sin complicaciones</p>
+    <!-- INSTALL PROMPT -->
+    <div id="installPrompt" class="install-prompt hidden">
+        <div class="install-icon">
+            <i class="fas fa-piggy-bank"></i>
+        </div>
+        <div>
+            <div class="font-semibold">Instalar Economía Familiar</div>
+            <div class="text-sm text-gray-600">Para mejor experiencia, instala la app en tu dispositivo</div>
+        </div>
+        <button id="installClose" class="install-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <button id="installButton" class="btn btn-primary btn-sm">
+            Instalar
+        </button>
+    </div>
+    
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <h1 id="currentScreenTitle" class="text-xl font-bold">Resumen Mensual</h1>
+                <div id="currentDate" class="text-sm opacity-90"></div>
             </div>
-            
-            <div class="auth-form">
-                <h2>Iniciar Sesión</h2>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" required placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" id="password" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn-primary">Ingresar</button>
-                </form>
-                <p class="auth-switch">¿Primera vez? <a href="#" id="show-register">Regístrate</a></p>
-            </div>
-
-            <div class="auth-form hidden" id="register-form">
-                <h2>Crear Cuenta</h2>
-                <form id="signup-form">
-                    <div class="form-group">
-                        <label for="reg-name">Nombre completo</label>
-                        <input type="text" id="reg-name" required placeholder="Sebastián">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-email">Email</label>
-                        <input type="email" id="reg-email" required placeholder="sebastian@familia.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Contraseña</label>
-                        <input type="password" id="reg-password" required placeholder="••••••••">
-                        <small>Mínimo 6 caracteres</small>
-                    </div>
-                    <button type="submit" class="btn-primary">Crear Cuenta</button>
-                </form>
-                <p class="auth-switch">¿Ya tienes cuenta? <a href="#" id="show-login">Inicia sesión</a></p>
+            <div class="flex items-center gap-2">
+                <div id="empathyMessage" class="text-sm hidden md:block"></div>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Pantalla Principal -->
-    <div id="main-screen" class="screen">
-        <!-- Header -->
-        <header class="main-header">
-            <div class="header-content">
-                <button id="menu-toggle" class="icon-btn">☰</button>
-                <h2 id="current-screen">Resumen</h2>
-                <button id="add-movement" class="icon-btn">+</button>
+    </header>
+    
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+        <!-- PANTALLA 1: RESUMEN MENSUAL -->
+        <div id="screenResumen" class="screen active">
+            <div class="empathy-message mb-4">
+                <i class="fas fa-heart mr-2"></i>
+                <span id="rotatingMessage">Esto lo estamos ordenando juntos</span>
             </div>
             
-            <!-- Saldo Disponible -->
-            <div class="balance-header">
-                <div class="balance-item">
-                    <span>Efectivo</span>
-                    <strong id="cash-balance">$0</strong>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Balance del Mes</h3>
+                    <select id="monthSelector" class="select-control" style="width: auto; padding: 0.25rem 0.5rem;">
+                        <!-- Opciones se llenan con JS -->
+                    </select>
                 </div>
-                <div class="balance-item">
-                    <span>Mercado Pago</span>
-                    <strong id="mp-balance">$0</strong>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="text-center p-3 bg-blue-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Ingresos Totales</div>
+                        <div id="ingresosTotales" class="text-xl font-bold text-green-600">$0</div>
+                    </div>
+                    <div class="text-center p-3 bg-red-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Gastos Hogar</div>
+                        <div id="gastosHogar" class="text-xl font-bold text-red-600">$0</div>
+                    </div>
                 </div>
-                <div class="balance-item total">
-                    <span>Total</span>
-                    <strong id="total-balance">$0</strong>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="text-center p-3 bg-purple-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Resultado Postres</div>
+                        <div id="resultadoPostres" class="text-xl font-bold text-purple-600">$0</div>
+                    </div>
+                    <div class="text-center p-3 bg-green-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Ahorro Total</div>
+                        <div id="ahorroTotal" class="text-xl font-bold text-green-700">$0</div>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-gray-100 rounded-lg">
+                    <div class="flex justify-between mb-2">
+                        <span class="font-semibold">Balance Final</span>
+                        <span id="balanceFinal" class="text-lg font-bold">$0</span>
+                    </div>
+                    <div id="balanceStatus" class="text-sm">
+                        <!-- Mensaje dinámico según balance -->
+                    </div>
                 </div>
             </div>
-        </header>
-
-        <!-- Navegación Lateral -->
-        <nav id="side-nav" class="side-nav">
-            <div class="user-info">
-                <div class="avatar">👤</div>
+            
+            <div class="card">
+                <h3 class="mb-4">Indicadores Rápidos</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span>Días restantes en el mes</span>
+                        <span id="diasRestantes" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Promedio diario gastado</span>
+                        <span id="promedioDiario" class="font-semibold">$0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Movimientos hoy</span>
+                        <span id="movimientosHoy" class="font-semibold">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANTALLA 2: SALDO DISPONIBLE -->
+        <div id="screenSaldos" class="screen">
+            <div class="card mb-4">
+                <h3 class="mb-4">Saldo Disponible</h3>
+                <div id="saldosContainer">
+                    <!-- Los saldos se cargan con JavaScript -->
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Cargando saldos...</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 bg-gray-100 rounded-lg">
+                    <div class="flex justify-between">
+                        <span class="font-semibold">Total Combinado</span>
+                        <span id="totalCombinado" class="text-lg font-bold">$0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="mb-4">Movimientos Recientes</h3>
+                <div id="movimientosRecientes">
+                    <!-- Los movimientos se cargan con JavaScript -->
+                    <div class="empty-state">
+                        <i class="fas fa-exchange-alt"></i>
+                        <div>No hay movimientos recientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANTALLA 3: GASTOS POR CATEGORÍA -->
+        <div id="screenGastos" class="screen">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Gastos por Categoría</h3>
+                    <div class="text-sm text-gray-600" id="currentMonthLabel"></div>
+                </div>
+                
+                <div id="gastosCategoriaContainer">
+                    <!-- Los gastos por categoría se cargan con JavaScript -->
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Cargando categorías...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="mb-4">Comparación Mensual</h3>
+                <div id="comparacionMensual">
+                    <!-- Gráfico/comparación se carga con JavaScript -->
+                    <div class="empty-state">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>No hay datos para comparar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANTALLA 4: POSTRES -->
+        <div id="screenPostres" class="screen">
+            <div class="card mb-4">
+                <h3 class="mb-4">Emprendimiento Postres</h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="text-center p-3 bg-green-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Ventas del Mes</div>
+                        <div id="ventasPostres" class="text-xl font-bold text-green-600">$0</div>
+                    </div>
+                    <div class="text-center p-3 bg-purple-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Insumos del Mes</div>
+                        <div id="insumosPostres" class="text-xl font-bold text-purple-600">$0</div>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-gray-100 rounded-lg mb-6">
+                    <div class="flex justify-between mb-2">
+                        <span class="font-semibold">Ganancia Neta</span>
+                        <span id="gananciaPostres" class="text-lg font-bold">$0</span>
+                    </div>
+                    <div class="text-sm" id="estadoPostres">
+                        <!-- Estado del emprendimiento -->
+                    </div>
+                </div>
+                
                 <div>
-                    <strong id="user-name">Usuario</strong>
-                    <small id="user-email">email@ejemplo.com</small>
+                    <h4 class="mb-3">Fondo Postres</h4>
+                    <div id="estadoFondoPostres">
+                        <!-- Estado del fondo de postres -->
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <div>Cargando fondo...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <ul class="nav-menu">
-                <li><a href="#" data-screen="summary" class="nav-item active">📊 Resumen</a></li>
-                <li><a href="#" data-screen="balance" class="nav-item">💰 Saldo</a></li>
-                <li><a href="#" data-screen="expenses" class="nav-item">📈 Gastos</a></li>
-                <li><a href="#" data-screen="desserts" class="nav-item">🍰 Postres</a></li>
-                <li><a href="#" data-screen="funds" class="nav-item">🏦 Fondos</a></li>
-                <li><a href="#" data-screen="savings" class="nav-item">💎 Ahorros</a></li>
-                <li><a href="#" data-screen="history" class="nav-item">📋 Historial</a></li>
-                <li class="divider"></li>
-                <li><a href="#" id="logout-btn" class="nav-item">🚪 Cerrar Sesión</a></li>
-            </ul>
-        </nav>
-
-        <!-- Contenido Principal -->
-        <main class="main-content">
-            <!-- Resumen Mensual -->
-            <section id="summary-screen" class="content-screen active">
-                <div class="month-header">
-                    <button id="prev-month">←</button>
-                    <h3 id="current-month">Febrero 2024</h3>
-                    <button id="next-month">→</button>
+            <div class="card">
+                <h3 class="mb-4">Registrar Movimiento</h3>
+                <div class="flex gap-2 mb-4">
+                    <button id="btnRegistrarVenta" class="btn btn-success flex-1">
+                        <i class="fas fa-plus"></i> Venta
+                    </button>
+                    <button id="btnRegistrarInsumo" class="btn btn-outline flex-1">
+                        <i class="fas fa-shopping-cart"></i> Insumo
+                    </button>
                 </div>
-
-                <div class="summary-cards">
-                    <div class="summary-card income">
-                        <h4>Ingresos</h4>
-                        <div class="amount" id="monthly-income">$0</div>
-                        <small>Total del mes</small>
-                    </div>
-                    <div class="summary-card expense">
-                        <h4>Gastos</h4>
-                        <div class="amount" id="monthly-expenses">$0</div>
-                        <small>Total del mes</small>
-                    </div>
-                    <div class="summary-card balance">
-                        <h4>Disponible</h4>
-                        <div class="amount" id="monthly-balance">$0</div>
-                        <small>Para gastar</small>
-                    </div>
-                </div>
-
-                <div class="category-breakdown">
-                    <h4>Gastos por Categoría</h4>
-                    <div id="expenses-chart"></div>
-                </div>
-
-                <div class="recent-activity">
-                    <h4>Últimos Movimientos</h4>
-                    <div id="recent-movements"></div>
-                </div>
-            </section>
-
-            <!-- Saldo Disponible -->
-            <section id="balance-screen" class="content-screen">
-                <h3>Saldo por Medio</h3>
-                <div class="money-sources">
-                    <div class="money-source-card">
-                        <div class="source-icon">💵</div>
-                        <div class="source-info">
-                            <h4>Efectivo</h4>
-                            <div class="source-amount" id="cash-detail">$0</div>
-                        </div>
-                        <button class="source-action" data-source="1">+/-</button>
-                    </div>
-                    <div class="money-source-card">
-                        <div class="source-icon">📱</div>
-                        <div class="source-info">
-                            <h4>Mercado Pago</h4>
-                            <div class="source-amount" id="mp-detail">$0</div>
-                        </div>
-                        <button class="source-action" data-source="2">+/-</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Gastos por Categoría -->
-            <section id="expenses-screen" class="content-screen">
-                <h3>Gastos del Hogar</h3>
-                <div class="expenses-list" id="expenses-list"></div>
-            </section>
-
-            <!-- Postres -->
-            <section id="desserts-screen" class="content-screen">
-                <h3>Emprendimiento Postres</h3>
-                <div class="desserts-stats">
-                    <div class="stat-card">
-                        <h4>Ventas Totales</h4>
-                        <div class="amount positive" id="total-sales">$0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Insumos</h4>
-                        <div class="amount negative" id="total-supplies">$0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Ganancia Neta</h4>
-                        <div class="amount" id="desserts-profit">$0</div>
-                    </div>
-                </div>
-                <div class="desserts-movements" id="desserts-movements"></div>
-            </section>
-
-            <!-- Fondos -->
-            <section id="funds-screen" class="content-screen">
-                <h3>Fondos Fijos</h3>
-                <div class="funds-list">
-                    <div class="fund-card">
-                        <h4>Fondo Hogar</h4>
-                        <div class="fund-amount" id="home-fund">$0</div>
-                        <button class="fund-action" data-fund="15">+/-</button>
-                    </div>
-                    <div class="fund-card">
-                        <h4>Fondo Postres</h4>
-                        <div class="fund-amount" id="desserts-fund">$0</div>
-                        <button class="fund-action" data-fund="16">+/-</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Ahorros -->
-            <section id="savings-screen" class="content-screen">
-                <h3>Ahorros Generales</h3>
-                <div class="savings-card">
-                    <div class="savings-icon">💰</div>
-                    <div class="savings-info">
-                        <h4>Ahorro General</h4>
-                        <div class="savings-amount" id="general-savings">$0</div>
-                    </div>
-                    <button class="savings-action" data-savings="17">+/-</button>
-                </div>
-            </section>
-
-            <!-- Historial -->
-            <section id="history-screen" class="content-screen">
-                <h3>Historial Completo</h3>
-                <div class="filters">
-                    <select id="type-filter">
-                        <option value="all">Todos los tipos</option>
-                        <option value="gasto_hogar">Gastos Hogar</option>
-                        <option value="ingreso">Ingresos</option>
-                        <option value="insumos_postres">Insumos Postres</option>
-                        <option value="ventas_postres">Ventas Postres</option>
-                        <option value="fondos">Fondos</option>
-                        <option value="ahorros">Ahorros</option>
-                    </select>
-                    <input type="date" id="date-filter">
-                </div>
-                <div class="history-list" id="history-list"></div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modal para agregar movimiento -->
-    <div id="movement-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Nuevo Movimiento</h3>
-                <button class="close-modal">&times;</button>
+                <button id="btnRegistrarFondoPostres" class="btn btn-primary w-full">
+                    <i class="fas fa-piggy-bank"></i> Mover a Fondo Postres
+                </button>
             </div>
-            <form id="movement-form">
-                <div class="form-group">
-                    <label for="movement-type">Tipo de Movimiento</label>
-                    <select id="movement-type" required>
-                        <option value="">Seleccionar tipo</option>
-                        <option value="gasto_hogar">Gasto Hogar</option>
-                        <option value="ingreso">Ingreso Diario</option>
-                        <option value="insumos_postres">Insumos Postres</option>
-                        <option value="ventas_postres">Venta Postres</option>
-                        <option value="fondos">Fondos</option>
-                        <option value="ahorros">Ahorros</option>
-                    </select>
+        </div>
+        
+        <!-- PANTALLA 5: FONDOS / AHORROS -->
+        <div id="screenFondos" class="screen">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Fondos de Ahorro</h3>
+                    <button id="btnConfigurarFondos" class="btn btn-outline btn-sm">
+                        <i class="fas fa-cog"></i>
+                    </button>
                 </div>
-
-                <div class="form-group">
-                    <label for="movement-category">Categoría</label>
-                    <select id="movement-category" required>
-                        <!-- Se llena dinámicamente -->
-                    </select>
+                
+                <div id="fondosContainer">
+                    <!-- Los fondos se cargan con JavaScript -->
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Cargando fondos...</div>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="movement-amount">Monto ($)</label>
-                    <input type="number" id="movement-amount" min="0.01" step="0.01" required placeholder="0.00">
+            </div>
+            
+            <div class="card">
+                <h3 class="mb-4">Movimientos de Fondos</h3>
+                <div id="movimientosFondos">
+                    <!-- Los movimientos de fondos se cargan con JavaScript -->
+                    <div class="empty-state">
+                        <i class="fas fa-piggy-bank"></i>
+                        <div>No hay movimientos de fondos</div>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="movement-source">Medio de Dinero</label>
-                    <select id="movement-source" required>
-                        <option value="1">Efectivo</option>
-                        <option value="2">Mercado Pago</option>
-                    </select>
+            </div>
+        </div>
+        
+        <!-- PANTALLA 6: HISTORIAL -->
+        <div id="screenHistorial" class="screen">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Historial Completo</h3>
+                    <div class="flex gap-2">
+                        <button id="btnFiltrarHistorial" class="btn btn-outline btn-sm">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                        <button id="btnExportarHistorial" class="btn btn-outline btn-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="movement-description">Descripción (opcional)</label>
-                    <input type="text" id="movement-description" placeholder="Ej: Compra en supermercado">
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="date" id="fechaDesde" class="form-control">
+                    <input type="date" id="fechaHasta" class="form-control" value="<?php echo date('Y-m-d'); ?>">
                 </div>
-
-                <div class="form-group">
-                    <label for="movement-date">Fecha</label>
-                    <input type="date" id="movement-date" required>
+                
+                <div class="flex flex-wrap gap-2 mb-4" id="filtrosActivos">
+                    <!-- Filtros activos se muestran aquí -->
                 </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary close-modal">Cancelar</button>
-                    <button type="submit" class="btn-primary">Guardar Movimiento</button>
+                
+                <div id="historialContainer">
+                    <!-- El historial se carga con JavaScript -->
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Cargando historial...</div>
+                    </div>
                 </div>
-            </form>
+                
+                <div class="mt-4 text-center">
+                    <button id="btnCargarMas" class="btn btn-outline">
+                        <i class="fas fa-redo"></i> Cargar más
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- NAVEGACIÓN INFERIOR -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-screen="resumen">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="saldos">
+            <i class="fas fa-wallet"></i>
+            <span>Saldo</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="gastos">
+            <i class="fas fa-chart-pie"></i>
+            <span>Gastos</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="postres">
+            <i class="fas fa-cake"></i>
+            <span>Postres</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="fondos">
+            <i class="fas fa-piggy-bank"></i>
+            <span>Fondos</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="historial">
+            <i class="fas fa-history"></i>
+            <span>Historial</span>
+        </a>
+    </nav>
+    
+    <!-- MODAL PARA REGISTRAR MOVIMIENTO -->
+    <div id="modalMovimiento" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalMovimientoTitle">Registrar Movimiento</h3>
+                <button class="close-btn" id="closeModalMovimiento">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formMovimiento">
+                    <div class="form-group">
+                        <label class="form-label" for="tipoMovimiento">Tipo</label>
+                        <select class="select-control" id="tipoMovimiento" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="gasto">Gasto del Hogar</option>
+                            <option value="ingreso">Ingreso Diario</option>
+                            <option value="insumo_postres">Insumo Postres</option>
+                            <option value="venta_postres">Venta Postres</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="monto">Monto ($)</label>
+                        <input type="number" class="form-control" id="monto" min="0" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="fechaMovimiento">Fecha</label>
+                        <input type="date" class="form-control" id="fechaMovimiento" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="personaMovimiento">Persona</label>
+                        <select class="select-control" id="personaMovimiento" required>
+                            <option value="">Seleccionar persona</option>
+                            <!-- Opciones se llenan con JS -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="medioMovimiento">Medio de Pago</label>
+                        <select class="select-control" id="medioMovimiento" required>
+                            <option value="">Seleccionar medio</option>
+                            <!-- Opciones se llenan con JS -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="categoriaGroup">
+                        <label class="form-label" for="categoriaMovimiento">Categoría</label>
+                        <select class="select-control" id="categoriaMovimiento">
+                            <!-- Opciones se llenan dinámicamente según tipo -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="notaMovimiento">Nota (opcional)</label>
+                        <textarea class="form-control" id="notaMovimiento" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelModalMovimiento">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveMovimiento">Guardar</button>
+            </div>
         </div>
     </div>
-
-    <!-- Overlay para modal -->
-    <div id="modal-overlay" class="modal-overlay"></div>
-
-    <!-- Script principal -->
-    <script src="app.js"></script>
+    
+    <!-- MODAL PARA MOVIMIENTO DE FONDOS -->
+    <div id="modalFondo" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalFondoTitle">Movimiento de Fondo</h3>
+                <button class="close-btn" id="closeModalFondo">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formFondo">
+                    <div class="form-group">
+                        <label class="form-label" for="tipoFondo">Tipo</label>
+                        <select class="select-control" id="tipoFondo" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="ingreso">Ingreso al Fondo (Ahorrar)</option>
+                            <option value="uso">Uso del Fondo (Retirar)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="fondoSeleccionado">Fondo</label>
+                        <select class="select-control" id="fondoSeleccionado" required>
+                            <option value="">Seleccionar fondo</option>
+                            <!-- Opciones se llenan con JS -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="montoFondo">Monto ($)</label>
+                        <input type="number" class="form-control" id="montoFondo" min="0" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="fechaFondo">Fecha</label>
+                        <input type="date" class="form-control" id="fechaFondo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="personaFondo">Persona</label>
+                        <select class="select-control" id="personaFondo" required>
+                            <option value="">Seleccionar persona</option>
+                            <!-- Opciones se llenan con JS -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="medioFondo">Medio de Pago</label>
+                        <select class="select-control" id="medioFondo" required>
+                            <option value="">Seleccionar medio</option>
+                            <!-- Opciones se llenan con JS -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="notaFondo">Nota (opcional)</label>
+                        <textarea class="form-control" id="notaFondo" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelModalFondo">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveFondo">Guardar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div id="modalConfirmacion" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalConfirmacionTitle">Confirmar</h3>
+                <button class="close-btn" id="closeModalConfirmacion">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalConfirmacionMensaje">¿Estás seguro?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelModalConfirmacion">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmModalConfirmacion">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ============================================
+        // CONFIGURACIÓN INICIAL
+        // ============================================
+        
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co'; // Reemplazar con tu URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI'; // Reemplazar con tu clave
+        
+        // Inicializar Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Estado de la aplicación
+        const appState = {
+            currentUser: null,
+            currentScreen: 'resumen',
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            personas: [],
+            medios: [],
+            categorias: [],
+            fondos: [],
+            mensajesEmpatia: [],
+            movimientos: [],
+            movimientosFondos: [],
+            filters: {
+                tipo: null,
+                persona: null,
+                categoria: null,
+                medio: null,
+                fechaDesde: null,
+                fechaHasta: null
+            }
+        };
+        
+        // ============================================
+        // FUNCIONES DE INICIALIZACIÓN
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Inicializar fecha actual
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Inicializar selector de mes
+            initializeMonthSelector();
+            
+            // Configurar navegación
+            setupNavigation();
+            
+            // Configurar eventos de botones
+            setupEventListeners();
+            
+            // Configurar PWA
+            setupPWA();
+            
+            // Cargar datos iniciales
+            await loadInitialData();
+            
+            // Mostrar pantalla inicial
+            showScreen('resumen');
+            
+            // Rotar mensajes empáticos
+            rotateEmpathyMessages();
+            
+            // Inicializar fecha en formularios
+            document.getElementById('fechaMovimiento').value = now.toISOString().split('T')[0];
+            document.getElementById('fechaFondo').value = now.toISOString().split('T')[0];
+            document.getElementById('fechaHasta').value = now.toISOString().split('T')[0];
+            
+            // Configurar fecha desde (hace 30 días)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            document.getElementById('fechaDesde').value = thirtyDaysAgo.toISOString().split('T')[0];
+            
+            // Verificar si hay un usuario logueado
+            await checkAuth();
+        });
+        
+        async function checkAuth() {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                appState.currentUser = user;
+                document.getElementById('userAvatar').innerHTML = `<i class="fas fa-user-check"></i>`;
+            } else {
+                // Redirigir a login si no está autenticado
+                window.location.href = '/login.html';
+            }
+        }
+        
+        function initializeMonthSelector() {
+            const selector = document.getElementById('monthSelector');
+            const now = new Date();
+            
+            // Agregar opciones para los últimos 6 meses
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const option = document.createElement('option');
+                option.value = `${date.getFullYear()}-${date.getMonth()}`;
+                option.textContent = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                
+                if (i === 0) {
+                    option.selected = true;
+                }
+                
+                selector.appendChild(option);
+            }
+            
+            selector.addEventListener('change', function() {
+                const [year, month] = this.value.split('-').map(Number);
+                appState.currentYear = year;
+                appState.currentMonth = month;
+                updateResumenMensual();
+            });
+        }
+        
+        function setupNavigation() {
+            // Navegación inferior
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remover clase active de todos
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Agregar clase active al seleccionado
+                    this.classList.add('active');
+                    
+                    // Mostrar pantalla correspondiente
+                    const screen = this.dataset.screen;
+                    showScreen(screen);
+                });
+            });
+        }
+        
+        function setupEventListeners() {
+            // Botones para registrar movimientos
+            document.getElementById('btnRegistrarVenta').addEventListener('click', () => showMovimientoModal('venta_postres'));
+            document.getElementById('btnRegistrarInsumo').addEventListener('click', () => showMovimientoModal('insumo_postres'));
+            document.getElementById('btnRegistrarFondoPostres').addEventListener('click', () => showFondoModal('postres'));
+            
+            // Botón para configurar fondos
+            document.getElementById('btnConfigurarFondos').addEventListener('click', showConfigurarFondos);
+            
+            // Botones de filtro y exportación
+            document.getElementById('btnFiltrarHistorial').addEventListener('click', showFiltrosHistorial);
+            document.getElementById('btnExportarHistorial').addEventListener('click', exportarHistorial);
+            document.getElementById('btnCargarMas').addEventListener('click', cargarMasHistorial);
+            
+            // Eventos de fecha en historial
+            document.getElementById('fechaDesde').addEventListener('change', updateHistorial);
+            document.getElementById('fechaHasta').addEventListener('change', updateHistorial);
+            
+            // Modales
+            document.getElementById('closeModalMovimiento').addEventListener('click', () => hideModal('modalMovimiento'));
+            document.getElementById('cancelModalMovimiento').addEventListener('click', () => hideModal('modalMovimiento'));
+            document.getElementById('saveMovimiento').addEventListener('click', saveMovimiento);
+            
+            document.getElementById('closeModalFondo').addEventListener('click', () => hideModal('modalFondo'));
+            document.getElementById('cancelModalFondo').addEventListener('click', () => hideModal('modalFondo'));
+            document.getElementById('saveFondo').addEventListener('click', saveMovimientoFondo);
+            
+            document.getElementById('closeModalConfirmacion').addEventListener('click', () => hideModal('modalConfirmacion'));
+            document.getElementById('cancelModalConfirmacion').addEventListener('click', () => hideModal('modalConfirmacion'));
+            
+            // Cambio de tipo en formulario de movimiento
+            document.getElementById('tipoMovimiento').addEventListener('change', updateCategoriasPorTipo);
+            
+            // PWA install prompt
+            document.getElementById('installButton').addEventListener('click', installPWA);
+            document.getElementById('installClose').addEventListener('click', () => {
+                document.getElementById('installPrompt').classList.add('hidden');
+            });
+        }
+        
+        function setupPWA() {
+            // Detectar si es compatible
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('Service Worker registrado'))
+                    .catch(err => console.log('Error registrando Service Worker:', err));
+            }
+            
+            // Mostrar prompt de instalación
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Mostrar prompt después de 5 segundos
+                setTimeout(() => {
+                    if (deferredPrompt && !isAppInstalled()) {
+                        document.getElementById('installPrompt').classList.remove('hidden');
+                    }
+                }, 5000);
+            });
+            
+            // Detectar si la app está instalada
+            window.addEventListener('appinstalled', () => {
+                document.getElementById('installPrompt').classList.add('hidden');
+                deferredPrompt = null;
+            });
+        }
+        
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone ||
+                   document.referrer.includes('android-app://');
+        }
+        
+        function installPWA() {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                window.deferredPrompt.userChoice.then(() => {
+                    window.deferredPrompt = null;
+                });
+            }
+        }
+        
+        // ============================================
+        // FUNCIONES DE CARGA DE DATOS
+        // ============================================
+        
+        async function loadInitialData() {
+            try {
+                // Cargar datos maestros en paralelo
+                await Promise.all([
+                    loadPersonas(),
+                    loadMedios(),
+                    loadCategorias(),
+                    loadFondos(),
+                    loadMensajesEmpatia()
+                ]);
+                
+                // Actualizar todas las pantallas
+                updateResumenMensual();
+                updateSaldosDisponibles();
+                updateGastosCategoria();
+                updatePostres();
+                updateFondos();
+                updateHistorial();
+                
+            } catch (error) {
+                console.error('Error cargando datos iniciales:', error);
+                showError('Error al cargar datos. Por favor, recarga la página.');
+            }
+        }
+        
+        async function loadPersonas() {
+            const { data, error } = await supabase
+                .from('personas')
+                .select('*')
+                .eq('activo', true)
+                .order('nombre');
+            
+            if (error) throw error;
+            
+            appState.personas = data;
+            
+            // Actualizar selects de formularios
+            const selects = ['personaMovimiento', 'personaFondo'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Seleccionar persona</option>';
+                
+                data.forEach(persona => {
+                    const option = document.createElement('option');
+                    option.value = persona.id;
+                    option.textContent = persona.nombre;
+                    select.appendChild(option);
+                });
+            });
+        }
+        
+        async function loadMedios() {
+            const { data, error } = await supabase
+                .from('medios_pago')
+                .select('*')
+                .eq('activo', true)
+                .order('nombre');
+            
+            if (error) throw error;
+            
+            appState.medios = data;
+            
+            // Actualizar selects de formularios
+            const selects = ['medioMovimiento', 'medioFondo'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Seleccionar medio</option>';
+                
+                data.forEach(medio => {
+                    const option = document.createElement('option');
+                    option.value = medio.id;
+                    option.textContent = medio.nombre;
+                    select.appendChild(option);
+                });
+            });
+        }
+        
+        async function loadCategorias() {
+            const { data, error } = await supabase
+                .from('categorias')
+                .select('*')
+                .order('orden');
+            
+            if (error) throw error;
+            
+            appState.categorias = data;
+        }
+        
+        async function loadFondos() {
+            const { data, error } = await supabase
+                .from('fondos')
+                .select('*')
+                .eq('activo', true);
+            
+            if (error) throw error;
+            
+            appState.fondos = data;
+            
+            // Actualizar select de fondos
+            const select = document.getElementById('fondoSeleccionado');
+            select.innerHTML = '<option value="">Seleccionar fondo</option>';
+            
+            data.forEach(fondo => {
+                const option = document.createElement('option');
+                option.value = fondo.id;
+                option.textContent = fondo.nombre;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadMensajesEmpatia() {
+            const { data, error } = await supabase
+                .from('mensajes_empatia')
+                .select('*')
+                .eq('activo', true)
+                .order('orden');
+            
+            if (error) throw error;
+            
+            appState.mensajesEmpatia = data;
+        }
+        
+        // ============================================
+        // FUNCIONES DE PANTALLAS
+        // ============================================
+        
+        function showScreen(screenName) {
+            // Actualizar título
+            const titles = {
+                resumen: 'Resumen Mensual',
+                saldos: 'Saldo Disponible',
+                gastos: 'Gastos por Categoría',
+                postres: 'Postres',
+                fondos: 'Fondos / Ahorros',
+                historial: 'Historial'
+            };
+            
+            document.getElementById('currentScreenTitle').textContent = titles[screenName];
+            appState.currentScreen = screenName;
+            
+            // Ocultar todas las pantallas
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Mostrar pantalla seleccionada
+            document.getElementById(`screen${screenName.charAt(0).toUpperCase() + screenName.slice(1)}`).classList.add('active');
+            
+            // Actualizar datos específicos de la pantalla
+            switch(screenName) {
+                case 'resumen':
+                    updateResumenMensual();
+                    break;
+                case 'saldos':
+                    updateSaldosDisponibles();
+                    break;
+                case 'gastos':
+                    updateGastosCategoria();
+                    break;
+                case 'postres':
+                    updatePostres();
+                    break;
+                case 'fondos':
+                    updateFondos();
+                    break;
+                case 'historial':
+                    updateHistorial();
+                    break;
+            }
+        }
+        
+        async function updateResumenMensual() {
+            const year = appState.currentYear;
+            const month = appState.currentMonth + 1; // JavaScript months are 0-indexed
+            
+            try {
+                // Usar la función de PostgreSQL para obtener el balance
+                const { data, error } = await supabase.rpc('obtener_balance_mensual', {
+                    p_año: year,
+                    p_mes: month
+                });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    const balance = data[0];
+                    
+                    // Actualizar UI
+                    document.getElementById('ingresosTotales').textContent = formatCurrency(balance.ingresos_totales);
+                    document.getElementById('gastosHogar').textContent = formatCurrency(balance.gastos_hogar);
+                    document.getElementById('resultadoPostres').textContent = formatCurrency(balance.resultado_postres);
+                    document.getElementById('ahorroTotal').textContent = formatCurrency(balance.ahorro_mensual);
+                    document.getElementById('balanceFinal').textContent = formatCurrency(balance.balance_final);
+                    
+                    // Actualizar estado del balance
+                    const balanceStatus = document.getElementById('balanceStatus');
+                    if (balance.balance_final >= 0) {
+                        balanceStatus.innerHTML = `<span class="status-success">✓ Estamos en buen camino este mes</span>`;
+                    } else {
+                        balanceStatus.innerHTML = `<span class="status-warning">⚠️ Atención: necesitamos ajustar gastos</span>`;
+                    }
+                }
+                
+                // Calcular días restantes
+                const today = new Date();
+                const lastDay = new Date(year, month, 0).getDate();
+                const daysLeft = lastDay - today.getDate();
+                document.getElementById('diasRestantes').textContent = daysLeft > 0 ? daysLeft : 0;
+                
+                // Obtener promedio diario
+                const daysPassed = today.getDate();
+                const promedio = balance.gastos_hogar / daysPassed;
+                document.getElementById('promedioDiario').textContent = formatCurrency(promedio);
+                
+                // Obtener movimientos de hoy
+                const { count, error: countError } = await supabase
+                    .from('movimientos')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('fecha', today.toISOString().split('T')[0]);
+                
+                if (!countError) {
+                    document.getElementById('movimientosHoy').textContent = count || 0;
+                }
+                
+            } catch (error) {
+                console.error('Error actualizando resumen:', error);
+                showError('Error al cargar el resumen mensual');
+            }
+        }
+        
+        async function updateSaldosDisponibles() {
+            const container = document.getElementById('saldosContainer');
+            
+            try {
+                // Usar la vista de saldos disponibles
+                const { data, error } = await supabase
+                    .from('vista_saldos_disponibles')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    let total = 0;
+                    let html = '';
+                    
+                    data.forEach(saldo => {
+                        total += saldo.saldo_actual;
+                        
+                        html += `
+                            <div class="list-item">
+                                <div class="list-icon" style="background-color: ${saldo.color}20; color: ${saldo.color};">
+                                    <i class="fas fa-${saldo.icono}"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">${saldo.medio}</div>
+                                    <div class="list-subtitle">
+                                        ${saldo.variacion_hoy >= 0 ? '+' : ''}${formatCurrency(saldo.variacion_hoy)} hoy
+                                    </div>
+                                </div>
+                                <div class="list-amount ${saldo.saldo_actual >= 0 ? 'amount-positive' : 'amount-negative'}">
+                                    ${formatCurrency(saldo.saldo_actual)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                    document.getElementById('totalCombinado').textContent = formatCurrency(total);
+                    
+                    // Actualizar movimientos recientes
+                    updateMovimientosRecientes();
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-wallet"></i><div>No hay saldos disponibles</div></div>';
+                }
+            } catch (error) {
+                console.error('Error actualizando saldos:', error);
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div>Error al cargar saldos</div></div>';
+            }
+        }
+        
+        async function updateMovimientosRecientes() {
+            const container = document.getElementById('movimientosRecientes');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('vista_historial_completo')
+                    .select('*')
+                    .order('fecha', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    let html = '';
+                    
+                    data.forEach(mov => {
+                        const isPositive = mov.tipo === 'ingreso' || mov.tipo === 'venta_postres' || (mov.origen === 'fondo' && mov.tipo === 'ingreso');
+                        
+                        html += `
+                            <div class="list-item">
+                                <div class="list-icon" style="background-color: ${mov.categoria_color}20; color: ${mov.categoria_color};">
+                                    <i class="fas fa-${mov.categoria_icono}"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">${mov.categoria}</div>
+                                    <div class="list-subtitle">
+                                        ${mov.persona || ''} • ${mov.medio_pago} • ${formatDate(mov.fecha)}
+                                        ${mov.fondo_nombre ? ` • ${mov.fondo_nombre}` : ''}
+                                    </div>
+                                </div>
+                                <div class="list-amount ${isPositive ? 'amount-positive' : 'amount-negative'}">
+                                    ${isPositive ? '+' : '-'}${formatCurrency(mov.monto)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-exchange-alt"></i><div>No hay movimientos recientes</div></div>';
+                }
+            } catch (error) {
+                console.error('Error actualizando movimientos recientes:', error);
+            }
+        }
+        
+        async function updateGastosCategoria() {
+            const container = document.getElementById('gastosCategoriaContainer');
+            const monthLabel = document.getElementById('currentMonthLabel');
+            
+            // Actualizar etiqueta del mes actual
+            const now = new Date();
+            monthLabel.textContent = now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            
+            try {
+                // Usar la vista de gastos por categoría
+                const { data, error } = await supabase
+                    .from('vista_gastos_categoria')
+                    .select('*')
+                    .order('total_mes_actual', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    let html = '';
+                    let total = 0;
+                    
+                    data.forEach(gasto => {
+                        total += gasto.total_mes_actual;
+                        
+                        const variacionClass = gasto.variacion_porcentual > 0 ? 'amount-negative' : 
+                                             gasto.variacion_porcentual < 0 ? 'amount-positive' : '';
+                        
+                        const variacionIcon = gasto.variacion_porcentual > 0 ? 'arrow-up' :
+                                            gasto.variacion_porcentual < 0 ? 'arrow-down' : '';
+                        
+                        const variacionText = gasto.variacion_porcentual !== 0 ? 
+                            `${Math.abs(gasto.variacion_porcentual)}% vs anterior` : 'Sin cambio';
+                        
+                        html += `
+                            <div class="list-item">
+                                <div class="list-icon" style="background-color: ${gasto.color}20; color: ${gasto.color};">
+                                    <i class="fas fa-${gasto.icono}"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">${gasto.categoria}</div>
+                                    <div class="list-subtitle">
+                                        ${gasto.cantidad_movimientos} movimientos
+                                        ${gasto.variacion_porcentual !== 0 ? 
+                                            `<span class="${variacionClass}">
+                                                <i class="fas fa-${variacionIcon}"></i> ${variacionText}
+                                            </span>` : ''
+                                        }
+                                    </div>
+                                </div>
+                                <div class="list-amount amount-negative">
+                                    ${formatCurrency(gasto.total_mes_actual)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    // Agregar total
+                    html += `
+                        <div class="mt-4 p-3 bg-gray-100 rounded-lg">
+                            <div class="flex justify-between">
+                                <span class="font-semibold">Total Gastos del Mes</span>
+                                <span class="text-lg font-bold amount-negative">${formatCurrency(total)}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                    
+                    // Actualizar comparación mensual
+                    updateComparacionMensual(data);
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-chart-pie"></i><div>No hay gastos este mes</div></div>';
+                }
+            } catch (error) {
+                console.error('Error actualizando gastos por categoría:', error);
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div>Error al cargar gastos</div></div>';
+            }
+        }
+        
+        async function updateComparacionMensual(gastosActuales) {
+            const container = document.getElementById('comparacionMensual');
+            
+            // Calcular total del mes anterior
+            const mesAnteriorTotal = gastosActuales.reduce((sum, gasto) => sum + gasto.total_mes_anterior, 0);
+            const mesActualTotal = gastosActuales.reduce((sum, gasto) => sum + gasto.total_mes_actual, 0);
+            
+            const variacion = mesAnteriorTotal > 0 ? 
+                ((mesActualTotal - mesAnteriorTotal) / mesAnteriorTotal * 100) : 0;
+            
+            let html = '';
+            
+            if (mesAnteriorTotal > 0) {
+                html = `
+                    <div class="text-center p-4">
+                        <div class="text-sm text-gray-600 mb-2">Variación vs mes anterior</div>
+                        <div class="text-2xl font-bold ${variacion > 0 ? 'amount-negative' : 'amount-positive'}">
+                            ${variacion > 0 ? '+' : ''}${variacion.toFixed(1)}%
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-gray-100 rounded-lg">
+                                <div class="text-sm text-gray-600">Mes anterior</div>
+                                <div class="font-semibold">${formatCurrency(mesAnteriorTotal)}</div>
+                            </div>
+                            <div class="p-3 bg-gray-100 rounded-lg">
+                                <div class="text-sm text-gray-600">Este mes</div>
+                                <div class="font-semibold">${formatCurrency(mesActualTotal)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <div>No hay datos del mes anterior para comparar</div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        async function updatePostres() {
+            try {
+                // Usar la vista de estado de postres
+                const { data, error } = await supabase
+                    .from('vista_estado_postres')
+                    .select('*')
+                    .order('año', { ascending: false })
+                    .order('mes', { ascending: false })
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    const postres = data[0];
+                    
+                    document.getElementById('ventasPostres').textContent = formatCurrency(postres.ventas);
+                    document.getElementById('insumosPostres').textContent = formatCurrency(postres.insumos);
+                    document.getElementById('gananciaPostres').textContent = formatCurrency(postres.ganancia);
+                    
+                    // Actualizar estado
+                    const estado = document.getElementById('estadoPostres');
+                    if (postres.ganancia > 0) {
+                        estado.innerHTML = `<span class="status-success">✓ Ganancia positiva este mes</span>`;
+                    } else if (postres.ganancia < 0) {
+                        estado.innerHTML = `<span class="status-danger">⚠️ Pérdida este mes</span>`;
+                    } else {
+                        estado.innerHTML = `<span class="status-info">⏸️ Sin ganancia ni pérdida</span>`;
+                    }
+                }
+                
+                // Actualizar estado del fondo de postres
+                updateEstadoFondoPostres();
+                
+            } catch (error) {
+                console.error('Error actualizando postres:', error);
+                showError('Error al cargar datos de postres');
+            }
+        }
+        
+        async function updateEstadoFondoPostres() {
+            const container = document.getElementById('estadoFondoPostres');
+            
+            try {
+                // Buscar el fondo de postres
+                const { data, error } = await supabase
+                    .from('fondos')
+                    .select('*')
+                    .ilike('nombre', '%postres%')
+                    .single();
+                
+                if (error) throw error;
+                
+                if (data) {
+                    const faltante = Math.max(data.objetivo_mensual - data.monto_actual, 0);
+                    const porcentaje = data.objetivo_mensual > 0 ? 
+                        Math.min((data.monto_actual / data.objetivo_mensual) * 100, 100) : 0;
+                    
+                    let estadoClass, estadoText;
+                    
+                    if (data.objetivo_mensual === 0) {
+                        estadoClass = 'status-info';
+                        estadoText = 'Sin objetivo configurado';
+                    } else if (porcentaje >= 100) {
+                        estadoClass = 'status-success';
+                        estadoText = '✅ Objetivo cumplido';
+                    } else if (porcentaje >= 70) {
+                        estadoClass = 'status-success';
+                        estadoText = '✓ Cerca del objetivo';
+                    } else if (porcentaje >= 40) {
+                        estadoClass = 'status-warning';
+                        estadoText = '⚠️ A mitad de camino';
+                    } else {
+                        estadoClass = 'status-danger';
+                        estadoText = '❌ Necesita atención';
+                    }
+                    
+                    const html = `
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span>${formatCurrency(data.monto_actual)} / ${formatCurrency(data.objetivo_mensual)}</span>
+                                <span class="${estadoClass}">${estadoText}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${getProgressBarClass(porcentaje)}" style="width: ${porcentaje}%"></div>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-600">
+                                ${faltante > 0 ? `Faltan ${formatCurrency(faltante)} para el objetivo` : 'Objetivo alcanzado'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error actualizando fondo postres:', error);
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div>Error al cargar fondo</div></div>';
+            }
+        }
+        
+        async function updateFondos() {
+            const container = document.getElementById('fondosContainer');
+            
+            try {
+                // Usar la vista de estado de fondos
+                const { data, error } = await supabase
+                    .from('vista_estado_fondos')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    let html = '';
+                    
+                    data.forEach(fondo => {
+                        const porcentaje = fondo.porcentaje_completado;
+                        
+                        html += `
+                            <div class="mb-6 last:mb-0">
+                                <div class="flex items-center mb-3">
+                                    <div class="list-icon" style="background-color: ${fondo.color}20; color: ${fondo.color};">
+                                        <i class="fas fa-${fondo.icono}"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <div class="font-semibold">${fondo.nombre}</div>
+                                        <div class="text-sm text-gray-600">
+                                            ${formatCurrency(fondo.monto_actual)} / ${formatCurrency(fondo.objetivo_mensual)}
+                                        </div>
+                                    </div>
+                                    <div class="ml-auto">
+                                        <span class="status-badge ${getStatusClass(fondo.estado)}">
+                                            ${getStatusText(fondo.estado)}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill ${getProgressBarClass(porcentaje)}" style="width: ${Math.min(porcentaje, 100)}%"></div>
+                                    </div>
+                                    <div class="mt-2 flex justify-between text-sm">
+                                        <span class="text-gray-600">Faltante: ${formatCurrency(fondo.faltante)}</span>
+                                        <span class="font-medium">${porcentaje.toFixed(1)}%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 flex gap-2">
+                                    <button class="btn btn-outline btn-sm flex-1" data-fondo-id="${fondo.id}" data-action="ingreso">
+                                        <i class="fas fa-plus"></i> Ingresar
+                                    </button>
+                                    <button class="btn btn-outline btn-sm flex-1" data-fondo-id="${fondo.id}" data-action="uso" ${fondo.monto_actual <= 0 ? 'disabled' : ''}>
+                                        <i class="fas fa-minus"></i> Usar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                    
+                    // Agregar eventos a los botones
+                    container.querySelectorAll('button[data-fondo-id]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const fondoId = this.dataset.fondoId;
+                            const action = this.dataset.action;
+                            showFondoModal(null, fondoId, action);
+                        });
+                    });
+                    
+                    // Actualizar movimientos de fondos
+                    updateMovimientosFondos();
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-piggy-bank"></i><div>No hay fondos configurados</div></div>';
+                }
+            } catch (error) {
+                console.error('Error actualizando fondos:', error);
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div>Error al cargar fondos</div></div>';
+            }
+        }
+        
+        async function updateMovimientosFondos() {
+            const container = document.getElementById('movimientosFondos');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('movimientos_fondos')
+                    .select(`
+                        *,
+                        personas(nombre),
+                        medios_pago(nombre),
+                        fondos(nombre, color)
+                    `)
+                    .order('fecha', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    let html = '';
+                    
+                    data.forEach(mov => {
+                        const isIngreso = mov.tipo === 'ingreso';
+                        const fondo = mov.fondos;
+                        const persona = mov.personas;
+                        const medio = mov.medios_pago;
+                        
+                        html += `
+                            <div class="list-item">
+                                <div class="list-icon" style="background-color: ${fondo.color}20; color: ${fondo.color};">
+                                    <i class="fas fa-${isIngreso ? 'arrow-down-circle' : 'arrow-up-circle'}"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">${fondo.nombre}</div>
+                                    <div class="list-subtitle">
+                                        ${persona.nombre} • ${medio.nombre} • ${formatDate(mov.fecha)}
+                                        ${mov.nota ? `<br><em>${mov.nota}</em>` : ''}
+                                    </div>
+                                </div>
+                                <div class="list-amount ${isIngreso ? 'amount-positive' : 'amount-negative'}">
+                                    ${isIngreso ? '+' : '-'}${formatCurrency(mov.monto)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-piggy-bank"></i><div>No hay movimientos de fondos</div></div>';
+                }
+            } catch (error) {
+                console.error('Error actualizando movimientos de fondos:', error);
+            }
+        }
+        
+        async function updateHistorial() {
+            const container = document.getElementById('historialContainer');
+            
+            // Obtener filtros
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+            
+            try {
+                // Construir consulta base
+                let query = supabase
+                    .from('vista_historial_completo')
+                    .select('*')
+                    .order('fecha', { ascending: false })
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                // Aplicar filtros de fecha
+                if (fechaDesde) {
+                    query = query.gte('fecha', fechaDesde);
+                }
+                
+                if (fechaHasta) {
+                    query = query.lte('fecha', fechaHasta);
+                }
+                
+                // Aplicar otros filtros
+                if (appState.filters.tipo) {
+                    query = query.eq('tipo', appState.filters.tipo);
+                }
+                
+                if (appState.filters.persona) {
+                    query = query.eq('persona', appState.filters.persona);
+                }
+                
+                const { data, error } = await query;
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    let html = '';
+                    
+                    data.forEach(mov => {
+                        const isPositive = mov.tipo === 'ingreso' || mov.tipo === 'venta_postres' || 
+                                         (mov.origen === 'fondo' && mov.tipo === 'ingreso');
+                        
+                        html += `
+                            <div class="list-item">
+                                <div class="list-icon" style="background-color: ${mov.categoria_color}20; color: ${mov.categoria_color};">
+                                    <i class="fas fa-${mov.categoria_icono}"></i>
+                                </div>
+                                <div class="list-content">
+                                    <div class="list-title">${mov.categoria}</div>
+                                    <div class="list-subtitle">
+                                        ${mov.persona || ''} • ${mov.medio_pago} • ${formatDate(mov.fecha)}
+                                        ${mov.fondo_nombre ? ` • ${mov.fondo_nombre}` : ''}
+                                        ${mov.nota ? `<br><em>${mov.nota}</em>` : ''}
+                                    </div>
+                                </div>
+                                <div class="list-amount ${isPositive ? 'amount-positive' : 'amount-negative'}">
+                                    ${isPositive ? '+' : '-'}${formatCurrency(mov.monto)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                    
+                    // Actualizar filtros activos
+                    updateFiltrosActivos();
+                } else {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><div>No hay movimientos en el período seleccionado</div></div>';
+                }
+            } catch (error) {
+                console.error('Error actualizando historial:', error);
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><div>Error al cargar historial</div></div>';
+            }
+        }
+        
+        // ============================================
+        // FUNCIONES DE FORMULARIOS Y MODALES
+        // ============================================
+        
+        function showMovimientoModal(tipoPredefinido = null) {
+            const modal = document.getElementById('modalMovimiento');
+            const title = document.getElementById('modalMovimientoTitle');
+            
+            if (tipoPredefinido) {
+                document.getElementById('tipoMovimiento').value = tipoPredefinido;
+                updateCategoriasPorTipo();
+                
+                switch(tipoPredefinido) {
+                    case 'venta_postres':
+                        title.textContent = 'Registrar Venta de Postres';
+                        break;
+                    case 'insumo_postres':
+                        title.textContent = 'Registrar Insumo para Postres';
+                        break;
+                }
+            } else {
+                title.textContent = 'Registrar Movimiento';
+            }
+            
+            showModal('modalMovimiento');
+        }
+        
+        function showFondoModal(fondoNombre = null, fondoId = null, tipo = null) {
+            const modal = document.getElementById('modalFondo');
+            const title = document.getElementById('modalFondoTitle');
+            
+            if (fondoNombre) {
+                // Buscar el fondo por nombre
+                const fondo = appState.fondos.find(f => f.nombre.toLowerCase().includes(fondoNombre.toLowerCase()));
+                if (fondo) {
+                    document.getElementById('fondoSeleccionado').value = fondo.id;
+                }
+            }
+            
+            if (fondoId) {
+                document.getElementById('fondoSeleccionado').value = fondoId;
+            }
+            
+            if (tipo) {
+                document.getElementById('tipoFondo').value = tipo;
+                
+                title.textContent = tipo === 'ingreso' ? 'Ingresar al Fondo' : 'Usar del Fondo';
+            } else {
+                title.textContent = 'Movimiento de Fondo';
+            }
+            
+            showModal('modalFondo');
+        }
+        
+        function showConfigurarFondos() {
+            // En una versión completa, esto abriría un modal para configurar fondos
+            showModal('modalConfiguracionFondos');
+        }
+        
+        function showFiltrosHistorial() {
+            // En una versión completa, esto abriría un modal con filtros avanzados
+            showModal('modalFiltrosHistorial');
+        }
+        
+        function updateCategoriasPorTipo() {
+            const tipo = document.getElementById('tipoMovimiento').value;
+            const categoriaGroup = document.getElementById('categoriaGroup');
+            const categoriaSelect = document.getElementById('categoriaMovimiento');
+            
+            // Mostrar/ocultar grupo de categoría según el tipo
+            if (tipo === 'venta_postres') {
+                categoriaGroup.style.display = 'none';
+                categoriaSelect.required = false;
+            } else {
+                categoriaGroup.style.display = 'block';
+                categoriaSelect.required = true;
+                
+                // Filtrar categorías por tipo
+                let tipoCategoria;
+                
+                switch(tipo) {
+                    case 'gasto':
+                        tipoCategoria = 'gasto_hogar';
+                        break;
+                    case 'ingreso':
+                        tipoCategoria = 'ingreso_hogar';
+                        break;
+                    case 'insumo_postres':
+                        tipoCategoria = 'postres';
+                        break;
+                    default:
+                        tipoCategoria = '';
+                }
+                
+                const categoriasFiltradas = appState.categorias.filter(c => c.tipo === tipoCategoria);
+                
+                // Actualizar opciones
+                categoriaSelect.innerHTML = '<option value="">Seleccionar categoría</option>';
+                
+                categoriasFiltradas.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = categoria.nombre;
+                    categoriaSelect.appendChild(option);
+                });
+            }
+        }
+        
+        async function saveMovimiento() {
+            const form = document.getElementById('formMovimiento');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            try {
+                const movimiento = {
+                    tipo: document.getElementById('tipoMovimiento').value,
+                    monto: parseFloat(document.getElementById('monto').value),
+                    fecha: document.getElementById('fechaMovimiento').value,
+                    persona_id: document.getElementById('personaMovimiento').value,
+                    medio_pago_id: document.getElementById('medioMovimiento').value,
+                    nota: document.getElementById('notaMovimiento').value || null,
+                    created_by: appState.currentUser?.id
+                };
+                
+                // Solo agregar categoría si no es venta de postres
+                if (movimiento.tipo !== 'venta_postres') {
+                    movimiento.categoria_id = document.getElementById('categoriaMovimiento').value;
+                }
+                
+                const { data, error } = await supabase
+                    .from('movimientos')
+                    .insert([movimiento])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Cerrar modal y limpiar formulario
+                hideModal('modalMovimiento');
+                form.reset();
+                
+                // Actualizar fecha actual
+                document.getElementById('fechaMovimiento').value = new Date().toISOString().split('T')[0];
+                
+                // Mostrar confirmación
+                showSuccess('Movimiento registrado correctamente');
+                
+                // Actualizar todas las pantallas
+                updateResumenMensual();
+                updateSaldosDisponibles();
+                updateGastosCategoria();
+                updatePostres();
+                updateHistorial();
+                
+            } catch (error) {
+                console.error('Error guardando movimiento:', error);
+                showError('Error al registrar el movimiento');
+            }
+        }
+        
+        async function saveMovimientoFondo() {
+            const form = document.getElementById('formFondo');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            try {
+                const movimientoFondo = {
+                    tipo: document.getElementById('tipoFondo').value,
+                    fondo_id: document.getElementById('fondoSeleccionado').value,
+                    monto: parseFloat(document.getElementById('montoFondo').value),
+                    fecha: document.getElementById('fechaFondo').value,
+                    persona_id: document.getElementById('personaFondo').value,
+                    medio_pago_id: document.getElementById('medioFondo').value,
+                    nota: document.getElementById('notaFondo').value || null,
+                    created_by: appState.currentUser?.id
+                };
+                
+                const { data, error } = await supabase
+                    .from('movimientos_fondos')
+                    .insert([movimientoFondo])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Cerrar modal y limpiar formulario
+                hideModal('modalFondo');
+                form.reset();
+                
+                // Actualizar fecha actual
+                document.getElementById('fechaFondo').value = new Date().toISOString().split('T')[0];
+                
+                // Mostrar confirmación
+                showSuccess('Movimiento de fondo registrado correctamente');
+                
+                // Actualizar pantallas relevantes
+                updateResumenMensual();
+                updateSaldosDisponibles();
+                updateFondos();
+                updateHistorial();
+                
+            } catch (error) {
+                console.error('Error guardando movimiento de fondo:', error);
+                showError('Error al registrar el movimiento de fondo');
+            }
+        }
+        
+        // ============================================
+        // FUNCIONES UTILITARIAS
+        // ============================================
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        function getProgressBarClass(percentage) {
+            if (percentage >= 100) return 'progress-success';
+            if (percentage >= 70) return 'progress-success';
+            if (percentage >= 40) return 'progress-warning';
+            return 'progress-danger';
+        }
+        
+        function getStatusClass(estado) {
+            switch(estado) {
+                case 'completado': return 'status-success';
+                case 'bien': return 'status-success';
+                case 'regular': return 'status-warning';
+                case 'critico': return 'status-danger';
+                default: return 'status-info';
+            }
+        }
+        
+        function getStatusText(estado) {
+            switch(estado) {
+                case 'completado': return 'Completado';
+                case 'bien': return 'Bien';
+                case 'regular': return 'Regular';
+                case 'critico': return 'Crítico';
+                default: return 'Sin objetivo';
+            }
+        }
+        
+        function rotateEmpathyMessages() {
+            if (appState.mensajesEmpatia.length === 0) return;
+            
+            let index = 0;
+            const element = document.getElementById('rotatingMessage');
+            
+            setInterval(() => {
+                if (element) {
+                    element.textContent = appState.mensajesEmpatia[index].mensaje;
+                    index = (index + 1) % appState.mensajesEmpatia.length;
+                }
+            }, 8000); // Cambiar cada 8 segundos
+        }
+        
+        function updateFiltrosActivos() {
+            const container = document.getElementById('filtrosActivos');
+            let html = '';
+            
+            Object.entries(appState.filters).forEach(([key, value]) => {
+                if (value) {
+                    let label = value;
+                    
+                    // Mejorar etiquetas para tipos
+                    if (key === 'tipo') {
+                        const tipoLabels = {
+                            'gasto': 'Gasto',
+                            'ingreso': 'Ingreso',
+                            'insumo_postres': 'Insumo Postres',
+                            'venta_postres': 'Venta Postres'
+                        };
+                        label = tipoLabels[value] || value;
+                    }
+                    
+                    html += `
+                        <span class="status-badge status-info">
+                            ${key}: ${label}
+                            <button class="ml-1" data-filter="${key}" onclick="removeFilter('${key}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    `;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function removeFilter(filterName) {
+            appState.filters[filterName] = null;
+            updateHistorial();
+        }
+        
+        async function exportarHistorial() {
+            try {
+                // Obtener datos filtrados
+                let query = supabase
+                    .from('vista_historial_completo')
+                    .select('*')
+                    .order('fecha', { ascending: false });
+                
+                // Aplicar filtros
+                if (appState.filters.fechaDesde) {
+                    query = query.gte('fecha', appState.filters.fechaDesde);
+                }
+                
+                if (appState.filters.fechaHasta) {
+                    query = query.lte('fecha', appState.filters.fechaHasta);
+                }
+                
+                const { data, error } = await query;
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    // Convertir a CSV
+                    const headers = ['Fecha', 'Tipo', 'Categoría', 'Persona', 'Medio', 'Monto', 'Nota', 'Origen', 'Fondo'];
+                    const csvData = data.map(item => [
+                        item.fecha,
+                        item.tipo,
+                        item.categoria,
+                        item.persona || '',
+                        item.medio_pago,
+                        item.monto,
+                        item.nota || '',
+                        item.origen,
+                        item.fondo_nombre || ''
+                    ]);
+                    
+                    const csvContent = [
+                        headers.join(','),
+                        ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+                    ].join('\n');
+                    
+                    // Crear y descargar archivo
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `historial_economia_familiar_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.click();
+                    
+                    showSuccess('Historial exportado correctamente');
+                } else {
+                    showError('No hay datos para exportar');
+                }
+            } catch (error) {
+                console.error('Error exportando historial:', error);
+                showError('Error al exportar el historial');
+            }
+        }
+        
+        function cargarMasHistorial() {
+            // En una versión completa, esto cargaría más registros con paginación
+            showError('Funcionalidad en desarrollo');
+        }
+        
+        function showSuccess(message) {
+            // En una versión completa, esto mostraría un toast de éxito
+            alert(`✅ ${message}`);
+        }
+        
+        function showError(message) {
+            // En una versión completa, esto mostraría un toast de error
+            alert(`❌ ${message}`);
+        }
+        
+        // ============================================
+        // UTILIDADES DE CSS (para grid)
+        // ============================================
+        
+        // Agregar clases de grid que usamos
+        const style = document.createElement('style');
+        style.textContent = `
+            .grid { display: grid; }
+            .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .gap-4 { gap: 1rem; }
+            .gap-2 { gap: 0.5rem; }
+            .space-y-3 > * + * { margin-top: 0.75rem; }
+            .flex-1 { flex: 1 1 0%; }
+            .flex-wrap { flex-wrap: wrap; }
+            .ml-auto { margin-left: auto; }
+            .ml-3 { margin-left: 0.75rem; }
+            .mr-2 { margin-right: 0.5rem; }
+            .last\\:mb-0:last-child { margin-bottom: 0; }
+            .bg-blue-50 { background-color: #EFF6FF; }
+            .bg-red-50 { background-color: #FEF2F2; }
+            .bg-purple-50 { background-color: #F5F3FF; }
+            .bg-green-50 { background-color: #F0FDF4; }
+            .text-green-600 { color: #059669; }
+            .text-red-600 { color: #DC2626; }
+            .text-purple-600 { color: #7C3AED; }
+            .text-green-700 { color: #047857; }
+            .opacity-90 { opacity: 0.9; }
+            .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
