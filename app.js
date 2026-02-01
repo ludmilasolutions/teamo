@@ -1,2104 +1,1267 @@
-// ============================================
-// CONFIGURACIÓN SUPABASE - COMPLETA
-// ============================================
+// Configuración y estado global
+let currentUser = null;
+let currentFamily = null;
+let db = null;
+let currentMonth = new Date();
+let categoryChart = null;
 
-// ¡IMPORTANTE! REEMPLAZAR CON TUS DATOS REALES
-const SUPABASE_URL = 'https://rdscdgohbrkqnuxjyalg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkc2NkZ29oYnJrcW51eGp5YWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTk0NDUsImV4cCI6MjA4NTQ3NTQ0NX0.nrjtRfGMBdq0KKxZaxG8Z6-CQArxdVB9hHkY-50AXMI';
-
-// Crear cliente Supabase globalmente
-let supabaseClient = null;
-
-// ============================================
-// ESTADO GLOBAL DE LA APLICACIÓN
-// ============================================
-const AppState = {
-    currentUser: null,
-    currentFamily: null,
-    currentMonth: new Date(),
-    familyData: {
-        persons: [],
-        paymentMethods: [],
-        categories: [],
-        funds: []
-    },
-    transactions: [],
-    emotionalMessages: [],
-    isOffline: false,
-    deferredInstallPrompt: null,
-    isLoading: false
+// Mensajes emocionales
+const emotionalMessages = {
+    positive: [
+        "¡Excelente trabajo en equipo!",
+        "Estamos construyendo tranquilidad juntos",
+        "Cada paso cuenta, juntos somos más fuertes",
+        "La comunicación es nuestro mejor aliado"
+    ],
+    neutral: [
+        "No es culpa, es equipo",
+        "Esto lo estamos ordenando juntos",
+        "La plata es un medio, la familia es lo importante",
+        "Un día a la vez, juntos podemos"
+    ],
+    warning: [
+        "Respiremos hondo y ajustemos juntos",
+        "Es momento de conversar y reorganizar",
+        "Unidos encontramos la mejor solución",
+        "La dificultad nos fortalece como equipo"
+    ]
 };
 
-// ============================================
-// INICIALIZACIÓN DE LA APLICACIÓN
-// ============================================
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Aplicación Familia Unida - Iniciando...');
-    
+// Inicialización de Firebase
+async function initializeFirebase() {
     try {
-        // Inicializar Supabase
-        await initSupabase();
+        const config = JSON.parse(localStorage.getItem('firebaseConfig'));
         
-        // Inicializar UI
-        initUI();
+        if (!config) {
+            redirectToSetup();
+            return;
+        }
         
-        // Configurar PWA
-        setupPWAInstall();
+        // Verificar si Firebase ya está inicializado
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
         
-        // Registrar Service Worker
-        await registerServiceWorker();
+        db = firebase.firestore();
+        
+        // Configurar persistencia offline
+        await firebase.firestore().enablePersistence()
+            .catch(err => {
+                if (err.code === 'failed-precondition') {
+                    console.warn('Múltiples pestañas abiertas, persistencia deshabilitada');
+                } else if (err.code === 'unimplemented') {
+                    console.warn('Navegador no compatible con persistencia');
+                }
+            });
         
         // Verificar autenticación
-        await checkAuth();
-        
-        console.log('✅ Aplicación inicializada correctamente');
-    } catch (error) {
-        console.error('❌ Error inicializando aplicación:', error);
-        showNotification('Error al iniciar la aplicación. Recarga la página.', 'error');
-    }
-});
-
-// ============================================
-// FUNCIONES DE UTILIDAD
-// ============================================
-function formatCurrency(amount) {
-    if (typeof amount !== 'number') amount = parseFloat(amount) || 0;
-    return new Intl.NumberFormat('es-AR', {
-        style: 'currency',
-        currency: 'ARS',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(amount);
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-AR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    } catch (e) {
-        return dateString;
-    }
-}
-
-function showNotification(message, type = 'info') {
-    console.log(`📢 Notificación [${type}]:`, message);
-    
-    let container = document.getElementById('notificationContainer');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'notificationContainer';
-        container.className = 'notification-container';
-        document.body.appendChild(container);
-    }
-    
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <span class="notification-icon">${getNotificationIcon(type)}</span>
-        <span class="notification-message">${message}</span>
-    `;
-    
-    container.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 5000);
-    
-    return notification;
-}
-
-function getNotificationIcon(type) {
-    switch(type) {
-        case 'success': return '✅';
-        case 'error': return '❌';
-        case 'warning': return '⚠️';
-        default: return 'ℹ️';
-    }
-}
-
-function setLoading(loading) {
-    AppState.isLoading = loading;
-    document.body.classList.toggle('loading', loading);
-}
-
-// ============================================
-// INICIALIZACIÓN DE SUPABASE
-// ============================================
-async function initSupabase() {
-    console.log('🔄 Inicializando Supabase...');
-    
-    try {
-        // Verificar que Supabase esté cargado
-        if (typeof supabase === 'undefined') {
-            throw new Error('Biblioteca Supabase no encontrada');
-        }
-        
-        // Crear cliente
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true,
-                detectSessionInUrl: true
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('userEmail').textContent = user.email;
+                await loadFamilyData();
+                await loadCurrentMonthData();
+                updateEmotionalMessage();
+                checkForNotifications();
+            } else {
+                redirectToLogin();
             }
         });
         
-        console.log('✅ Supabase inicializado correctamente');
-        return true;
     } catch (error) {
-        console.error('❌ Error inicializando Supabase:', error);
-        showNotification('Error de conexión. La aplicación funcionará en modo offline limitado.', 'error');
-        return false;
+        console.error('Error inicializando Firebase:', error);
+        showError('Error de configuración. Por favor, revisa setup.html');
     }
 }
 
-// ============================================
-// AUTENTICACIÓN Y USUARIO
-// ============================================
-async function checkAuth() {
-    console.log('🔐 Verificando autenticación...');
-    
-    if (!supabaseClient) {
-        console.log('⚠️ Supabase no disponible, mostrando login');
-        showLoginScreen();
-        return;
-    }
-    
-    try {
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        
-        if (error) {
-            console.error('❌ Error al verificar sesión:', error);
-            showLoginScreen();
-            return;
-        }
-        
-        if (session?.user) {
-            console.log('👤 Usuario autenticado:', session.user.email);
-            AppState.currentUser = session.user;
-            await loadUserProfile();
-        } else {
-            console.log('👤 No hay sesión activa');
-            showLoginScreen();
-        }
-    } catch (error) {
-        console.error('❌ Error en checkAuth:', error);
-        showLoginScreen();
+// Redirección a setup
+function redirectToSetup() {
+    if (!window.location.href.includes('setup.html')) {
+        window.location.href = 'setup.html';
     }
 }
 
-async function loadUserProfile() {
-    console.log('📋 Cargando perfil de usuario...');
-    setLoading(true);
+// Redirección a login
+function redirectToLogin() {
+    // Implementar página de login si es necesario
+    // Por ahora, usamos autenticación automática
+    const email = localStorage.getItem('lastEmail');
+    const password = localStorage.getItem('lastPassword');
     
-    try {
-        // Primero verificar si el usuario existe en la tabla users
-        const { data: userData, error: userError } = await supabaseClient
-            .from('users')
-            .select('*, families(*)')
-            .eq('id', AppState.currentUser.id)
-            .single();
-        
-        if (userError) {
-            console.log('👤 Usuario no encontrado en tabla users:', userError.message);
-            // Usuario no existe en tabla users, redirigir a creación de familia
-            await createNewFamily();
-            return;
-        }
-        
-        if (userData && userData.families) {
-            AppState.currentFamily = userData.families;
-            updateUserUI({
-                full_name: userData.full_name || AppState.currentUser.email.split('@')[0],
-                email: AppState.currentUser.email
+    if (email && password) {
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .catch(error => {
+                console.error('Error de autenticación:', error);
+                window.location.href = 'setup.html';
             });
-            await loadInitialData();
-            updateUI();
-            startEmotionalMessagesRotation();
-            console.log('✅ Perfil cargado exitosamente');
-        } else {
-            console.log('🏠 Usuario sin familia, creando nueva...');
-            await createNewFamily();
-        }
-    } catch (error) {
-        console.error('❌ Error cargando perfil:', error);
-        showNotification('Error cargando datos del usuario. Creando nueva familia...', 'warning');
-        await createNewFamily();
-    } finally {
-        setLoading(false);
+    } else {
+        window.location.href = 'setup.html';
     }
 }
 
-async function createNewFamily() {
-    const familyName = prompt('🏠 ¿Cómo quieres llamar a tu familia?', `Familia de ${AppState.currentUser.email.split('@')[0]}`);
-    if (!familyName) {
-        showNotification('Se necesita un nombre para la familia', 'warning');
-        await loadUserProfile();
-        return;
-    }
-    
-    setLoading(true);
-    
+// Cargar datos de familia
+async function loadFamilyData() {
     try {
-        // Crear familia
-        const { data: family, error: familyError } = await supabaseClient
-            .from('families')
-            .insert({ name: familyName })
-            .select()
-            .single();
+        const familyId = localStorage.getItem('familyId');
         
-        if (familyError) {
-            console.error('❌ Error creando familia:', familyError);
-            throw familyError;
+        if (!familyId) {
+            throw new Error('No se encontró familia configurada');
         }
         
-        // Crear o actualizar usuario con familia
-        const { error: userError } = await supabaseClient
-            .from('users')
-            .upsert({
-                id: AppState.currentUser.id,
-                family_id: family.id,
-                full_name: AppState.currentUser.user_metadata?.full_name || 'Usuario'
-            });
+        const familyDoc = await db.collection('families').doc(familyId).get();
         
-        if (userError) throw userError;
+        if (!familyDoc.exists) {
+            throw new Error('Familia no encontrada');
+        }
         
-        // Inicializar datos de familia
-        await initializeFamilyData(family.id);
+        currentFamily = {
+            id: familyId,
+            ...familyDoc.data()
+        };
         
-        AppState.currentFamily = family;
-        updateUserUI({
-            full_name: AppState.currentUser.user_metadata?.full_name || 'Usuario',
-            email: AppState.currentUser.email
+        // Cargar fondos
+        await loadFunds();
+        
+        // Cargar resumen del mes actual
+        await loadMonthlySummary();
+        
+    } catch (error) {
+        console.error('Error cargando familia:', error);
+        showError('Error cargando datos de familia');
+    }
+}
+
+// Cargar fondos
+async function loadFunds() {
+    try {
+        const fundsSnapshot = await db.collection('funds')
+            .where('family_id', '==', currentFamily.id)
+            .get();
+        
+        const fundsContainer = document.getElementById('fundsContainer');
+        fundsContainer.innerHTML = '';
+        
+        fundsSnapshot.forEach(doc => {
+            const fund = { id: doc.id, ...doc.data() };
+            renderFundCard(fund);
         });
         
-        await loadInitialData();
-        updateUI();
-        startEmotionalMessagesRotation();
-        
-        showNotification(`¡Familia "${familyName}" creada exitosamente!`, 'success');
-        
     } catch (error) {
-        console.error('❌ Error creando familia:', error);
-        showNotification('Error creando familia: ' + error.message, 'error');
-        
-        // Intentar modo demo
-        showNotification('Usando modo demo temporal...', 'warning');
-        initializeDemoData();
-        updateUI();
-    } finally {
-        setLoading(false);
+        console.error('Error cargando fondos:', error);
     }
 }
 
-async function initializeFamilyData(familyId) {
-    console.log('🏗️ Inicializando datos de familia...');
+// Renderizar tarjeta de fondo
+function renderFundCard(fund) {
+    const fundsContainer = document.getElementById('fundsContainer');
     
-    try {
-        // Insertar personas
-        await supabaseClient.from('persons').insert([
-            { family_id: familyId, name: 'Sebastián', avatar_color: '#4F46E5' },
-            { family_id: familyId, name: 'Ludmila', avatar_color: '#EC4899' }
-        ]);
-        
-        // Insertar medios de pago
-        await supabaseClient.from('payment_methods').insert([
-            { family_id: familyId, name: 'Efectivo', icon: '💰' },
-            { family_id: familyId, name: 'Mercado Pago', icon: '📱' }
-        ]);
-        
-        // Insertar categorías
-        const categories = [
-            // Gastos del hogar
-            { family_id: familyId, name: 'Alquiler', type: 'household_expense', color: '#EF4444', icon: '🏠' },
-            { family_id: familyId, name: 'Servicios', type: 'household_expense', color: '#3B82F6', icon: '💡' },
-            { family_id: familyId, name: 'Comida hogar', type: 'household_expense', color: '#10B981', icon: '🛒' },
-            { family_id: familyId, name: 'Transporte', type: 'household_expense', color: '#F59E0B', icon: '🚗' },
-            { family_id: familyId, name: 'Bebé', type: 'household_expense', color: '#8B5CF6', icon: '👶' },
-            { family_id: familyId, name: 'Mascotas', type: 'household_expense', color: '#F97316', icon: '🐕' },
-            { family_id: familyId, name: 'Salud', type: 'household_expense', color: '#EC4899', icon: '❤️' },
-            { family_id: familyId, name: 'Ropa', type: 'household_expense', color: '#06B6D4', icon: '👕' },
-            { family_id: familyId, name: 'Imprevistos', type: 'household_expense', color: '#71717A', icon: '🎲' },
-            // Postres
-            { family_id: familyId, name: 'Insumos postres', type: 'business_expense', color: '#8B5CF6', icon: '🧁' },
-            { family_id: familyId, name: 'Ventas postres', type: 'business_income', color: '#10B981', icon: '💰' },
-            // Ingresos
-            { family_id: familyId, name: 'Ingreso diario Sebastián', type: 'personal_income', color: '#4F46E5', icon: '💼' },
-            { family_id: familyId, name: 'Ingreso diario Ludmila', type: 'personal_income', color: '#EC4899', icon: '💼' }
-        ];
-        
-        await supabaseClient.from('categories').insert(categories);
-        
-        // Insertar fondos
-        await supabaseClient.from('funds').insert([
-            { family_id: familyId, name: 'Fondo fijo hogar', monthly_goal: 0, current_amount: 0, color: '#10B981', icon: '🏠' },
-            { family_id: familyId, name: 'Fondo fijo postres', monthly_goal: 0, current_amount: 0, color: '#8B5CF6', icon: '🧁' }
-        ]);
-        
-        console.log('✅ Datos de familia inicializados');
-        
-    } catch (error) {
-        console.error('❌ Error inicializando datos de familia:', error);
-        throw error;
-    }
-}
-
-function initializeDemoData() {
-    console.log('🎮 Inicializando datos demo...');
+    const progress = fund.monthly_target > 0 ? 
+        Math.min((fund.current_balance / fund.monthly_target) * 100, 100) : 0;
     
-    AppState.currentFamily = {
-        id: 'demo-family-' + Date.now(),
-        name: 'Familia Demo',
-        created_at: new Date().toISOString()
-    };
+    const status = progress >= 75 ? 'ok' : 
+                   progress >= 25 ? 'bajo' : 'critico';
     
-    AppState.familyData = {
-        persons: [
-            { id: 'demo-1', name: 'Sebastián', avatar_color: '#4F46E5', is_active: true },
-            { id: 'demo-2', name: 'Ludmila', avatar_color: '#EC4899', is_active: true }
-        ],
-        paymentMethods: [
-            { id: 'demo-1', name: 'Efectivo', icon: '💰', current_balance: 0 },
-            { id: 'demo-2', name: 'Mercado Pago', icon: '📱', current_balance: 0 }
-        ],
-        categories: [
-            { id: 'demo-1', name: 'Alquiler', type: 'household_expense', color: '#EF4444', icon: '🏠' },
-            { id: 'demo-2', name: 'Comida hogar', type: 'household_expense', color: '#10B981', icon: '🛒' },
-            { id: 'demo-3', name: 'Ingreso diario Sebastián', type: 'personal_income', color: '#4F46E5', icon: '💼' },
-            { id: 'demo-4', name: 'Ingreso diario Ludmila', type: 'personal_income', color: '#EC4899', icon: '💼' }
-        ],
-        funds: [
-            { id: 'demo-1', name: 'Fondo fijo hogar', monthly_goal: 0, current_amount: 0, color: '#10B981', icon: '🏠' }
-        ]
-    };
-    
-    AppState.transactions = [];
-}
-
-// ============================================
-// PANTALLA DE LOGIN/REGISTRO
-// ============================================
-function showLoginScreen() {
-    console.log('👋 Mostrando pantalla de login...');
-    
-    const mainContent = document.querySelector('.main-content');
-    if (!mainContent) {
-        console.error('❌ No se encontró .main-content');
-        return;
-    }
-    
-    mainContent.innerHTML = `
-        <div class="login-container">
-            <div class="login-header">
-                <h1>👨‍👩‍👧‍👦 Familia Unida</h1>
-                <p class="subtitle">Ordenando finanzas juntos, sin estrés</p>
-                <div class="emotional-quote">
-                    <p>"Esto lo estamos ordenando juntos"</p>
-                </div>
+    const card = document.createElement('div');
+    card.className = 'fund-card';
+    card.innerHTML = `
+        <div class="fund-header">
+            <h3>${fund.name}</h3>
+            <span class="fund-status ${status}">${status.toUpperCase()}</span>
+        </div>
+        <div class="fund-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%"></div>
             </div>
-            
-            <div class="login-forms">
-                <!-- Formulario de Login -->
-                <form id="loginForm" class="auth-form">
-                    <h2>Iniciar Sesión</h2>
-                    <div class="form-group">
-                        <label for="loginEmail">Email</label>
-                        <input type="email" id="loginEmail" required placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" required placeholder="••••••">
-                    </div>
-                    <button type="submit" class="btn-primary">
-                        Iniciar Sesión
-                    </button>
-                    <p class="switch-form">
-                        ¿No tienes cuenta? <a href="#" id="showRegister">Crear una</a>
-                    </p>
-                </form>
-                
-                <!-- Formulario de Registro -->
-                <form id="registerForm" class="auth-form" style="display: none;">
-                    <h2>Crear Cuenta</h2>
-                    <div class="form-group">
-                        <label for="registerName">Nombre Completo</label>
-                        <input type="text" id="registerName" required placeholder="Ej: Sebastián y Ludmila">
-                    </div>
-                    <div class="form-group">
-                        <label for="registerEmail">Email</label>
-                        <input type="email" id="registerEmail" required placeholder="tu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPassword">Contraseña (mínimo 6 caracteres)</label>
-                        <input type="password" id="registerPassword" required minlength="6" placeholder="••••••">
-                    </div>
-                    <button type="submit" class="btn-success">
-                        Crear Cuenta
-                    </button>
-                    <p class="switch-form">
-                        ¿Ya tienes cuenta? <a href="#" id="showLogin">Iniciar sesión</a>
-                    </p>
-                </form>
+            <div class="fund-numbers">
+                <span class="current">$${formatCurrency(fund.current_balance)}</span>
+                <span class="target">/$${formatCurrency(fund.monthly_target)}</span>
             </div>
-            
-            <div class="login-footer">
-                <p>💝 Diseñado con amor para ayudar a familias a ordenar sus finanzas juntos</p>
-            </div>
+        </div>
+        <div class="fund-actions">
+            <button class="btn-success" onclick="addToFund('${fund.id}')">➕ Agregar</button>
+            <button class="btn-warning" onclick="useFromFund('${fund.id}')">➖ Usar</button>
         </div>
     `;
     
-    // Agregar estilos inline para la pantalla de login
-    const style = document.createElement('style');
-    style.textContent = `
-        .login-container {
-            max-width: 400px;
-            margin: 3rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .login-header h1 {
-            color: #4F46E5;
-            margin-bottom: 0.5rem;
-            font-size: 2rem;
-        }
-        
-        .subtitle {
-            color: #6B7280;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-        }
-        
-        .emotional-quote {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            color: white;
-            margin-bottom: 1.5rem;
-        }
-        
-        .emotional-quote p {
-            margin: 0;
-            font-style: italic;
-            font-size: 1.2rem;
-        }
-        
-        .auth-form {
-            margin-bottom: 1.5rem;
-        }
-        
-        .auth-form h2 {
-            color: #374151;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #374151;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #E5E7EB;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus {
-            border-color: #4F46E5;
-            outline: none;
-        }
-        
-        .btn-primary, .btn-success {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-success {
-            background: #10B981;
-            color: white;
-        }
-        
-        .btn-primary:hover, .btn-success:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-        
-        .switch-form {
-            text-align: center;
-            margin-top: 1rem;
-            color: #6B7280;
-        }
-        
-        .switch-form a {
-            color: #4F46E5;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .switch-form a:hover {
-            text-decoration: underline;
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 2rem;
-            color: #6B7280;
-            font-size: 0.875rem;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Event Listeners
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleLogin();
-    });
-    
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleRegister();
-    });
-    
-    document.getElementById('showRegister').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('registerForm').style.display = 'block';
-    });
-    
-    document.getElementById('showLogin').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('registerForm').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-    });
+    fundsContainer.appendChild(card);
 }
 
-async function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!email || !password) {
-        showNotification('Por favor completa todos los campos', 'warning');
-        return;
-    }
-    
-    setLoading(true);
+// Cargar datos del mes actual
+async function loadCurrentMonthData() {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
     
     try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-        });
+        // Cargar movimientos del mes
+        const startDate = new Date(year, month, 1);
+        const endDate = new Date(year, month + 1, 0);
         
-        if (error) throw error;
+        const movementsSnapshot = await db.collection('movements')
+            .where('family_id', '==', currentFamily.id)
+            .where('date', '>=', startDate)
+            .where('date', '<=', endDate)
+            .orderBy('date', 'desc')
+            .get();
         
-        AppState.currentUser = data.user;
-        showNotification(`¡Bienvenido de vuelta, ${email}!`, 'success');
+        let totalIncome = 0;
+        let totalExpense = 0;
+        let incomeSebastian = 0;
+        let incomeLudmila = 0;
+        let cashBalance = 0;
+        let mpBalance = 0;
+        let categoryData = {};
+        let postresSales = 0;
+        let postresSupplies = 0;
         
-        // Pequeño delay para mostrar la notificación
-        setTimeout(() => {
-            location.reload();
-        }, 1500);
-        
-    } catch (error) {
-        console.error('❌ Error en login:', error);
-        
-        let errorMessage = 'Error al iniciar sesión';
-        if (error.message.includes('Invalid login credentials')) {
-            errorMessage = 'Email o contraseña incorrectos';
-        } else if (error.message.includes('Email not confirmed')) {
-            errorMessage = 'Confirma tu email antes de iniciar sesión';
-        }
-        
-        showNotification(errorMessage, 'error');
-    } finally {
-        setLoading(false);
-    }
-}
-
-async function handleRegister() {
-    const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    
-    if (!name || !email || !password) {
-        showNotification('Por favor completa todos los campos', 'warning');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showNotification('La contraseña debe tener al menos 6 caracteres', 'warning');
-        return;
-    }
-    
-    setLoading(true);
-    
-    try {
-        // Registrar usuario en Supabase Auth
-        const { data, error } = await supabaseClient.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: name
-                }
+        movementsSnapshot.forEach(doc => {
+            const movement = doc.data();
+            
+            switch (movement.type) {
+                case 'income':
+                    totalIncome += movement.amount;
+                    if (movement.person === 'sebastian') incomeSebastian += movement.amount;
+                    if (movement.person === 'ludmila') incomeLudmila += movement.amount;
+                    if (movement.medium === 'efectivo') cashBalance += movement.amount;
+                    if (movement.medium === 'mercadopago') mpBalance += movement.amount;
+                    break;
+                    
+                case 'expense':
+                    totalExpense += movement.amount;
+                    if (movement.medium === 'efectivo') cashBalance -= movement.amount;
+                    if (movement.medium === 'mercadopago') mpBalance -= movement.amount;
+                    
+                    // Acumular por categoría
+                    if (!categoryData[movement.category]) {
+                        categoryData[movement.category] = 0;
+                    }
+                    categoryData[movement.category] += movement.amount;
+                    break;
+                    
+                case 'postre_venta':
+                    postresSales += movement.amount;
+                    if (movement.medium === 'efectivo') cashBalance += movement.amount;
+                    if (movement.medium === 'mercadopago') mpBalance += movement.amount;
+                    break;
+                    
+                case 'postre_insumo':
+                    postresSupplies += movement.amount;
+                    if (movement.medium === 'efectivo') cashBalance -= movement.amount;
+                    if (movement.medium === 'mercadopago') mpBalance -= movement.amount;
+                    break;
+                    
+                case 'fund_transfer':
+                    // Los fondos no afectan el balance general
+                    break;
             }
         });
         
-        if (error) throw error;
+        // Actualizar UI
+        updateSummaryUI(totalIncome, totalExpense, incomeSebastian, incomeLudmila);
+        updateMediumUI(cashBalance, mpBalance);
+        updatePostresUI(postresSales, postresSupplies);
+        updateCategoryChart(categoryData);
         
-        if (data.user) {
-            showNotification('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.', 'success');
+        // Calcular y mostrar balance
+        const balance = totalIncome - totalExpense;
+        updateBalanceUI(balance);
+        
+        // Actualizar mes actual en UI
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        document.getElementById('currentMonth').textContent = 
+            `${monthNames[month]} ${year}`;
             
-            // Cambiar a formulario de login
-            document.getElementById('loginEmail').value = email;
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-            
-            // Limpiar formulario de registro
-            document.getElementById('registerName').value = '';
-            document.getElementById('registerEmail').value = '';
-            document.getElementById('registerPassword').value = '';
-        } else {
-            showNotification('Error al crear la cuenta', 'error');
-        }
-        
     } catch (error) {
-        console.error('❌ Error en registro:', error);
-        
-        let errorMessage = 'Error al crear cuenta';
-        if (error.message.includes('User already registered')) {
-            errorMessage = 'Este email ya está registrado';
-        } else if (error.message.includes('invalid email')) {
-            errorMessage = 'Email inválido';
-        }
-        
-        showNotification(errorMessage, 'error');
-    } finally {
-        setLoading(false);
+        console.error('Error cargando datos del mes:', error);
     }
 }
 
-async function handleLogout() {
-    try {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) throw error;
-        
-        AppState.currentUser = null;
-        AppState.currentFamily = null;
-        AppState.familyData = { persons: [], paymentMethods: [], categories: [], funds: [] };
-        AppState.transactions = [];
-        
-        showNotification('Sesión cerrada exitosamente', 'success');
-        
-        // Pequeño delay antes de mostrar login
-        setTimeout(() => {
-            showLoginScreen();
-        }, 500);
-        
-    } catch (error) {
-        console.error('❌ Error al cerrar sesión:', error);
-        showNotification('Error al cerrar sesión', 'error');
-    }
+// Actualizar resumen en UI
+function updateSummaryUI(totalIncome, totalExpense, incomeSebastian, incomeLudmila) {
+    document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+    document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+    document.getElementById('incomeSebastian').textContent = formatCurrency(incomeSebastian);
+    document.getElementById('incomeLudmila').textContent = formatCurrency(incomeLudmila);
+    
+    // Mostrar categorías principales
+    // (Implementar lógica para mostrar top 3 categorías)
 }
 
-// ============================================
-// CARGA DE DATOS
-// ============================================
-async function loadInitialData() {
-    if (!AppState.currentFamily) return;
-    
-    console.log('📊 Cargando datos iniciales...');
-    setLoading(true);
-    
-    try {
-        await Promise.all([
-            loadFamilyData(),
-            loadTransactions(),
-            loadEmotionalMessages()
-        ]);
-        console.log('✅ Datos iniciales cargados correctamente');
-    } catch (error) {
-        console.error('❌ Error cargando datos iniciales:', error);
-        showNotification('Error cargando datos', 'warning');
-    } finally {
-        setLoading(false);
-    }
+// Actualizar medios en UI
+function updateMediumUI(cashBalance, mpBalance) {
+    document.getElementById('cashBalance').textContent = formatCurrency(cashBalance);
+    document.getElementById('mpBalance').textContent = formatCurrency(mpBalance);
 }
 
-async function loadFamilyData() {
-    if (!AppState.currentFamily) return;
+// Actualizar postres en UI
+function updatePostresUI(sales, supplies) {
+    const result = sales - supplies;
     
-    console.log('🔍 Cargando datos familiares...');
+    document.getElementById('postresSales').textContent = formatCurrency(sales);
+    document.getElementById('postresSupplies').textContent = formatCurrency(supplies);
+    document.getElementById('postresResult').textContent = formatCurrency(result);
     
-    try {
-        const [personsRes, paymentsRes, categoriesRes, fundsRes] = await Promise.all([
-            supabaseClient.from('persons').select('*').eq('family_id', AppState.currentFamily.id),
-            supabaseClient.from('payment_methods').select('*').eq('family_id', AppState.currentFamily.id),
-            supabaseClient.from('categories').select('*').eq('family_id', AppState.currentFamily.id),
-            supabaseClient.from('funds').select('*').eq('family_id', AppState.currentFamily.id)
-        ]);
-        
-        console.log('✅ Resultados de carga:');
-        console.log('- Personas:', personsRes.data?.length || 0);
-        console.log('- Métodos de pago:', paymentsRes.data?.length || 0);
-        console.log('- Categorías:', categoriesRes.data?.length || 0);
-        console.log('- Fondos:', fundsRes.data?.length || 0);
-        
-        AppState.familyData.persons = personsRes.data || [];
-        AppState.familyData.paymentMethods = paymentsRes.data || [];
-        AppState.familyData.categories = categoriesRes.data || [];
-        AppState.familyData.funds = fundsRes.data || [];
-        
-        // Si no hay métodos de pago, crear unos por defecto
-        if (AppState.familyData.paymentMethods.length === 0 && AppState.currentFamily) {
-            console.log('⚠️ No hay métodos de pago, creando por defecto...');
-            await createDefaultPaymentMethods();
-        }
-        
-        console.log(`📋 Datos familiares cargados: ${AppState.familyData.persons.length} personas, ${AppState.familyData.categories.length} categorías`);
-        
-    } catch (error) {
-        console.error('❌ Error cargando datos familiares:', error);
-    }
+    // Actualizar pantalla de postres
+    document.getElementById('totalInsumos').textContent = formatCurrency(supplies);
+    document.getElementById('totalVentas').textContent = formatCurrency(sales);
+    document.getElementById('gananciaNeta').textContent = formatCurrency(result);
+    
+    const margin = sales > 0 ? ((result / sales) * 100).toFixed(1) : 0;
+    document.getElementById('margen').textContent = `${margin}%`;
 }
 
-async function createDefaultPaymentMethods() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('payment_methods')
-            .insert([
-                { family_id: AppState.currentFamily.id, name: 'Efectivo', icon: '💰' },
-                { family_id: AppState.currentFamily.id, name: 'Mercado Pago', icon: '📱' },
-                { family_id: AppState.currentFamily.id, name: 'Tarjeta de crédito', icon: '💳' }
-            ])
-            .select();
-        
-        if (error) throw error;
-        
-        AppState.familyData.paymentMethods = data || [];
-        console.log('✅ Métodos de pago por defecto creados');
-        
-    } catch (error) {
-        console.error('❌ Error creando métodos de pago por defecto:', error);
-    }
-}
-
-async function loadTransactions() {
-    if (!AppState.currentFamily) return;
+// Actualizar gráfico de categorías
+function updateCategoryChart(categoryData) {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
     
-    try {
-        const startOfMonth = new Date(AppState.currentMonth.getFullYear(), AppState.currentMonth.getMonth(), 1);
-        const endOfMonth = new Date(AppState.currentMonth.getFullYear(), AppState.currentMonth.getMonth() + 1, 0);
-        
-        const { data, error } = await supabaseClient
-            .from('transactions')
-            .select(`
-                *,
-                category:categories(*),
-                person:persons(*),
-                payment_method:payment_methods(*),
-                fund:funds(*)
-            `)
-            .eq('family_id', AppState.currentFamily.id)
-            .gte('date', startOfMonth.toISOString().split('T')[0])
-            .lte('date', endOfMonth.toISOString().split('T')[0])
-            .order('date', { ascending: false });
-        
-        if (error) throw error;
-        
-        AppState.transactions = data || [];
-        console.log(`💰 ${AppState.transactions.length} transacciones cargadas`);
-        
-    } catch (error) {
-        console.error('❌ Error cargando transacciones:', error);
-        AppState.transactions = [];
-    }
-}
-
-async function loadEmotionalMessages() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('emotional_messages')
-            .select('*')
-            .eq('is_active', true);
-        
-        if (error) throw error;
-        
-        AppState.emotionalMessages = data || [
-            { message: 'Esto lo estamos ordenando juntos' },
-            { message: 'No es culpa, es equipo' },
-            { message: 'Estamos construyendo tranquilidad' },
-            { message: 'Sebastián y Ludmila están del mismo lado' },
-            { message: 'La plata es un medio, la familia es lo importante' }
-        ];
-        
-    } catch (error) {
-        console.error('❌ Error cargando mensajes:', error);
-        AppState.emotionalMessages = [
-            { message: 'Esto lo estamos ordenando juntos' },
-            { message: 'No es culpa, es equipo' },
-            { message: 'Estamos construyendo tranquilidad' }
-        ];
-    }
-}
-
-// ============================================
-// INTERFAZ DE USUARIO - NAVEGACIÓN
-// ============================================
-function initUI() {
-    console.log('🎨 Inicializando interfaz de usuario...');
-    
-    // Menú lateral
-    const menuButton = document.getElementById('menuButton');
-    const closeMenu = document.getElementById('closeMenu');
-    const menuOverlay = document.getElementById('menuOverlay');
-    const sideMenu = document.querySelector('.side-menu');
-    
-    if (menuButton && sideMenu && menuOverlay) {
-        menuButton.addEventListener('click', () => {
-            sideMenu.classList.add('open');
-            menuOverlay.classList.add('show');
-        });
+    // Destruir gráfico anterior si existe
+    if (categoryChart) {
+        categoryChart.destroy();
     }
     
-    if (closeMenu && sideMenu && menuOverlay) {
-        closeMenu.addEventListener('click', () => {
-            sideMenu.classList.remove('open');
-            menuOverlay.classList.remove('show');
-        });
-    }
-    
-    if (menuOverlay && sideMenu) {
-        menuOverlay.addEventListener('click', () => {
-            sideMenu.classList.remove('open');
-            menuOverlay.classList.remove('show');
-        });
-    }
-    
-    // Navegación por pestañas
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const tab = item.dataset.tab;
-            switchTab(tab);
-            
-            // Cerrar menú en móvil
-            if (window.innerWidth < 768) {
-                sideMenu?.classList.remove('open');
-                menuOverlay?.classList.remove('show');
-            }
-        });
-    });
-    
-    // Botones de cancelar
-    document.querySelectorAll('.cancel-button[data-tab]').forEach(button => {
-        button.addEventListener('click', () => {
-            switchTab(button.dataset.tab);
-        });
-    });
-    
-    // Navegación de meses
-    const prevMonthBtn = document.getElementById('prevMonth');
-    const nextMonthBtn = document.getElementById('nextMonth');
-    
-    if (prevMonthBtn) {
-        prevMonthBtn.addEventListener('click', () => {
-            AppState.currentMonth.setMonth(AppState.currentMonth.getMonth() - 1);
-            updateMonthUI();
-            loadTransactions().then(updateUI);
-        });
-    }
-    
-    if (nextMonthBtn) {
-        nextMonthBtn.addEventListener('click', () => {
-            AppState.currentMonth.setMonth(AppState.currentMonth.getMonth() + 1);
-            updateMonthUI();
-            loadTransactions().then(updateUI);
-        });
-    }
-    
-    // Formulario de transacción
-    const transactionForm = document.getElementById('transactionForm');
-    const transactionType = document.getElementById('transactionType');
-    
-    if (transactionForm) {
-        transactionForm.addEventListener('submit', handleTransactionSubmit);
-    }
-    
-    if (transactionType) {
-        transactionType.addEventListener('change', updateTransactionForm);
-    }
-    
-    // Logout
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
-    }
-    
-    // Botón de instalación PWA
-    const installButton = document.getElementById('installButton');
-    if (installButton) {
-        installButton.addEventListener('click', installPWA);
-    }
-    
-    // Configurar fecha actual en formulario
-    const transactionDate = document.getElementById('transactionDate');
-    if (transactionDate) {
-        const today = new Date().toISOString().split('T')[0];
-        transactionDate.value = today;
-        transactionDate.max = today; // No permitir fechas futuras
-    }
-    
-    // Filtros de historial
-    document.getElementById('filterType')?.addEventListener('change', updateHistory);
-    document.getElementById('filterPerson')?.addEventListener('change', updateHistory);
-    document.getElementById('filterPayment')?.addEventListener('change', updateHistory);
-    document.getElementById('filterDate')?.addEventListener('change', updateHistory);
-    
-    // Botón para recargar datos
-    const reloadDataBtn = document.getElementById('reloadDataBtn');
-    if (reloadDataBtn) {
-        reloadDataBtn.addEventListener('click', async () => {
-            setLoading(true);
-            await loadFamilyData();
-            await loadTransactions();
-            updateUI();
-            showNotification('Datos recargados', 'success');
-            setLoading(false);
-        });
-    }
-    
-    // Botón para seleccionar persona
-    const selectPersonBtn = document.getElementById('selectPersonBtn');
-    if (selectPersonBtn) {
-        selectPersonBtn.addEventListener('click', linkUserToPerson);
-    }
-    
-    console.log('✅ Interfaz de usuario inicializada');
-}
-
-function updateUserUI(userData) {
-    const avatar = document.getElementById('userAvatar');
-    const name = document.getElementById('userName');
-    const email = document.getElementById('userEmail');
-    
-    if (avatar) {
-        const initials = userData.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'FU';
-        avatar.textContent = initials.substring(0, 2);
-        avatar.style.backgroundColor = '#4F46E5';
-    }
-    if (name) name.textContent = userData.full_name || 'Familia';
-    if (email) email.textContent = userData.email || '';
-}
-
-function switchTab(tabName) {
-    console.log(`🔄 Cambiando a pestaña: ${tabName}`);
-    
-    // Actualizar menú activo
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.tab === tabName);
-    });
-    
-    // Mostrar pestaña activa
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.toggle('active', tab.id === tabName);
-    });
-    
-    // Cargar datos específicos si es necesario
-    if (tabName === 'history') {
-        updateHistory();
-    } else if (tabName === 'add-transaction') {
-        setupTransactionForm();
-    } else if (tabName === 'settings') {
-        updateSettings();
-    }
-}
-
-// ============================================
-// ACTUALIZACIÓN DE INTERFAZ
-// ============================================
-function updateMonthUI() {
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const month = monthNames[AppState.currentMonth.getMonth()];
-    const year = AppState.currentMonth.getFullYear();
-    const currentMonthEl = document.getElementById('currentMonth');
-    if (currentMonthEl) {
-        currentMonthEl.textContent = `${month} ${year}`;
-    }
-}
-
-function updateUI() {
-    updateMonthUI();
-    updateDashboard();
-    updateBalance();
-    updateExpenses();
-    updateBusiness();
-    updateFunds();
-    updateFundsPreview();
-}
-
-function updateDashboard() {
-    const transactions = AppState.transactions;
-    
-    // Ingresos totales
-    const totalIncome = transactions
-        .filter(t => t.transaction_type === 'personal_income')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const totalIncomeEl = document.getElementById('totalIncome');
-    if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(totalIncome);
-    
-    // Gastos del hogar
-    const totalExpenses = transactions
-        .filter(t => t.transaction_type === 'household_expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const totalExpensesEl = document.getElementById('totalExpenses');
-    if (totalExpensesEl) totalExpensesEl.textContent = formatCurrency(totalExpenses);
-    
-    // Resultado postres
-    const sales = transactions
-        .filter(t => t.transaction_type === 'business_income')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const supplies = transactions
-        .filter(t => t.transaction_type === 'business_expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const businessResult = sales - supplies;
-    const businessResultEl = document.getElementById('businessResult');
-    if (businessResultEl) businessResultEl.textContent = formatCurrency(businessResult);
-    
-    // Ahorro del mes
-    const monthlySavings = transactions
-        .filter(t => t.transaction_type === 'fund_deposit')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const monthlySavingsEl = document.getElementById('monthlySavings');
-    if (monthlySavingsEl) monthlySavingsEl.textContent = formatCurrency(monthlySavings);
-    
-    // Balance final
-    const finalBalance = totalIncome - totalExpenses + businessResult - monthlySavings;
-    const balanceEl = document.getElementById('finalBalance');
-    if (balanceEl) {
-        balanceEl.textContent = formatCurrency(finalBalance);
-        balanceEl.className = `balance-value ${finalBalance >= 0 ? 'positive' : 'negative'}`;
-    }
-    
-    // Mensaje de balance
-    const messageEl = document.getElementById('balanceMessage');
-    if (messageEl) {
-        if (finalBalance >= 0) {
-            messageEl.textContent = '¡Excelente trabajo en equipo! Sigan así.';
-            messageEl.style.color = 'var(--color-success)';
-        } else {
-            messageEl.textContent = 'Es momento de revisar juntos los gastos. No es culpa, es equipo.';
-            messageEl.style.color = 'var(--color-danger)';
-        }
-    }
-}
-
-function updateBalance() {
-    const balanceCards = document.getElementById('balanceCards');
-    if (!balanceCards) return;
-    
-    balanceCards.innerHTML = '';
-    
-    // Calcular saldos de métodos de pago basados en transacciones
-    AppState.familyData.paymentMethods.forEach(method => {
-        // Calcular saldo basado en transacciones
-        const income = AppState.transactions
-            .filter(t => t.payment_method_id === method.id && 
-                        (t.transaction_type === 'personal_income' || 
-                         t.transaction_type === 'business_income' ||
-                         t.transaction_type === 'fund_withdrawal'))
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const expenses = AppState.transactions
-            .filter(t => t.payment_method_id === method.id && 
-                        (t.transaction_type === 'household_expense' || 
-                         t.transaction_type === 'business_expense' ||
-                         t.transaction_type === 'fund_deposit'))
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const balance = income - expenses;
-        
-        const card = document.createElement('div');
-        card.className = 'summary-card';
-        card.innerHTML = `
-            <div class="card-header">
-                <span class="card-icon">${method.icon}</span>
-                <h3>${method.name}</h3>
-            </div>
-            <div class="card-value ${balance >= 0 ? 'positive' : 'negative'}">${formatCurrency(balance)}</div>
-        `;
-        balanceCards.appendChild(card);
-    });
-    
-    // Total combinado
-    const total = AppState.familyData.paymentMethods.reduce((sum, method) => {
-        const income = AppState.transactions
-            .filter(t => t.payment_method_id === method.id && 
-                        (t.transaction_type === 'personal_income' || 
-                         t.transaction_type === 'business_income' ||
-                         t.transaction_type === 'fund_withdrawal'))
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const expenses = AppState.transactions
-            .filter(t => t.payment_method_id === method.id && 
-                        (t.transaction_type === 'household_expense' || 
-                         t.transaction_type === 'business_expense' ||
-                         t.transaction_type === 'fund_deposit'))
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        return sum + (income - expenses);
-    }, 0);
-    
-    const totalBalanceEl = document.getElementById('totalBalance');
-    if (totalBalanceEl) {
-        totalBalanceEl.textContent = formatCurrency(total);
-        totalBalanceEl.className = total >= 0 ? 'positive' : 'negative';
-    }
-}
-
-function updateExpenses() {
-    const categoryChart = document.getElementById('categoryChart');
-    const categoryRanking = document.getElementById('categoryRanking');
-    
-    if (!categoryChart || !categoryRanking) return;
-    
-    const transactions = AppState.transactions.filter(t => t.transaction_type === 'household_expense');
-    
-    // Agrupar por categoría
-    const categories = {};
-    transactions.forEach(t => {
-        if (!t.category) return;
-        const catName = t.category.name;
-        categories[catName] = (categories[catName] || 0) + parseFloat(t.amount || 0);
-    });
-    
-    // Crear gráfico simple
-    categoryChart.innerHTML = '<h3>Distribución de gastos</h3>';
-    
-    if (Object.keys(categories).length === 0) {
-        categoryChart.innerHTML += '<p class="empty-state">No hay gastos este mes</p>';
-    } else {
-        Object.entries(categories).forEach(([name, amount]) => {
-            const maxAmount = Math.max(...Object.values(categories), 1);
-            const percentage = (amount / maxAmount) * 100;
-            
-            const bar = document.createElement('div');
-            bar.className = 'category-bar';
-            bar.innerHTML = `
-                <div class="bar-label">${name}</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: ${percentage}%"></div>
-                    <div class="bar-amount">${formatCurrency(amount)}</div>
-                </div>
-            `;
-            categoryChart.appendChild(bar);
-        });
-    }
-    
-    // Ranking
-    categoryRanking.innerHTML = '<h3>Ranking de categorías</h3>';
-    
-    if (Object.keys(categories).length === 0) {
-        categoryRanking.innerHTML += '<p class="empty-state">No hay gastos este mes</p>';
-    } else {
-        const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
-        sorted.forEach(([name, amount], index) => {
-            const item = document.createElement('div');
-            item.className = 'category-item';
-            item.innerHTML = `
-                <span class="category-rank">${index + 1}</span>
-                <span class="category-name">${name}</span>
-                <span class="category-amount">${formatCurrency(amount)}</span>
-            `;
-            categoryRanking.appendChild(item);
-        });
-    }
-}
-
-function updateBusiness() {
-    const transactions = AppState.transactions;
-    
-    const sales = transactions
-        .filter(t => t.transaction_type === 'business_income')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const supplies = transactions
-        .filter(t => t.transaction_type === 'business_expense')
-        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    
-    const profit = sales - supplies;
-    
-    const totalSalesEl = document.getElementById('totalSales');
-    const totalSuppliesEl = document.getElementById('totalSupplies');
-    const businessProfitEl = document.getElementById('businessProfit');
-    
-    if (totalSalesEl) totalSalesEl.textContent = formatCurrency(sales);
-    if (totalSuppliesEl) totalSuppliesEl.textContent = formatCurrency(supplies);
-    if (businessProfitEl) businessProfitEl.textContent = formatCurrency(profit);
-    
-    // Fondo postres
-    const dessertFund = AppState.familyData.funds.find(f => f.name === 'Fondo fijo postres');
-    if (dessertFund) {
-        const deposits = transactions
-            .filter(t => t.fund_id === dessertFund.id && t.transaction_type === 'fund_deposit')
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const withdrawals = transactions
-            .filter(t => t.fund_id === dessertFund.id && t.transaction_type === 'fund_withdrawal')
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const current = parseFloat(dessertFund.current_amount) || 0 + deposits - withdrawals;
-        const goal = parseFloat(dessertFund.monthly_goal) || 0;
-        const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
-        const missing = Math.max(goal - current, 0);
-        
-        const dessertFundCurrentEl = document.getElementById('dessertFundCurrent');
-        const dessertFundGoalEl = document.getElementById('dessertFundGoal');
-        const dessertFundProgressEl = document.getElementById('dessertFundProgress');
-        const dessertFundMissingEl = document.getElementById('dessertFundMissing');
-        
-        if (dessertFundCurrentEl) dessertFundCurrentEl.textContent = formatCurrency(current);
-        if (dessertFundGoalEl) dessertFundGoalEl.textContent = formatCurrency(goal);
-        if (dessertFundProgressEl) dessertFundProgressEl.style.width = `${percentage}%`;
-        if (dessertFundMissingEl) {
-            dessertFundMissingEl.textContent = `Faltan ${formatCurrency(missing)} para el objetivo`;
-        }
-    }
-}
-
-function updateFundsPreview() {
-    const fundsList = document.getElementById('fundsList');
-    if (!fundsList) return;
-    
-    fundsList.innerHTML = '';
-    
-    if (AppState.familyData.funds.length === 0) {
-        fundsList.innerHTML = '<p class="empty-state">No hay fondos configurados</p>';
-        return;
-    }
-    
-    AppState.familyData.funds.forEach(fund => {
-        // Calcular saldo actual basado en transacciones
-        const deposits = AppState.transactions
-            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_deposit')
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const withdrawals = AppState.transactions
-            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_withdrawal')
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const current = parseFloat(fund.current_amount) || 0 + deposits - withdrawals;
-        const goal = parseFloat(fund.monthly_goal) || 0;
-        const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
-        
-        let status = 'ok';
-        if (percentage < 50) status = 'low';
-        if (percentage < 25) status = 'critical';
-        
-        const fundEl = document.createElement('div');
-        fundEl.className = `fund-item ${status}`;
-        fundEl.innerHTML = `
-            <div class="fund-header">
-                <div class="fund-name">${fund.icon} ${fund.name}</div>
-                <div class="fund-amount">${formatCurrency(current)}</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${percentage}%"></div>
-            </div>
-            <div class="fund-stats">
-                <span>${percentage.toFixed(0)}% de ${formatCurrency(goal)}</span>
-            </div>
-        `;
-        
-        fundsList.appendChild(fundEl);
-    });
-}
-
-function updateFunds() {
-    const fullFundsList = document.getElementById('fullFundsList');
-    if (!fullFundsList) return;
-    
-    fullFundsList.innerHTML = '';
-    
-    if (AppState.familyData.funds.length === 0) {
-        fullFundsList.innerHTML = '<div class="empty-state">No hay fondos configurados. Ve a Configuración para agregarlos.</div>';
-        return;
-    }
-    
-    AppState.familyData.funds.forEach(fund => {
-        // Calcular saldo actual basado en transacciones
-        const deposits = AppState.transactions
-            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_deposit')
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const withdrawals = AppState.transactions
-            .filter(t => t.fund_id === fund.id && t.transaction_type === 'fund_withdrawal')
-            .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-        
-        const current = parseFloat(fund.current_amount) || 0 + deposits - withdrawals;
-        const goal = parseFloat(fund.monthly_goal) || 0;
-        const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
-        const missing = Math.max(goal - current, 0);
-        
-        let status = 'ok';
-        if (percentage < 50) status = 'low';
-        if (percentage < 25) status = 'critical';
-        
-        const fundEl = document.createElement('div');
-        fundEl.className = `fund-item ${status}`;
-        fundEl.innerHTML = `
-            <div class="fund-header">
-                <div class="fund-name">
-                    <span class="fund-status-indicator fund-status-${status}"></span>
-                    <span>${fund.icon} ${fund.name}</span>
-                </div>
-                <div class="fund-amount">${formatCurrency(current)}</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${percentage}%"></div>
-            </div>
-            <div class="fund-stats">
-                <span>Objetivo: ${formatCurrency(goal)}</span>
-                <span>${percentage.toFixed(1)}%</span>
-            </div>
-            <div class="fund-missing">Faltan ${formatCurrency(missing)}</div>
-            <div class="fund-actions">
-                <button class="edit-fund" data-fund-id="${fund.id}">Editar objetivo</button>
-            </div>
-        `;
-        
-        fullFundsList.appendChild(fundEl);
-    });
-    
-    // Event listeners para editar fondos
-    document.querySelectorAll('.edit-fund').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const fundId = e.target.dataset.fundId;
-            editFundGoal(fundId);
-        });
-    });
-}
-
-// ============================================
-// HISTORIAL
-// ============================================
-function updateHistory() {
-    const historyList = document.getElementById('historyList');
-    if (!historyList) return;
-    
-    let filtered = [...AppState.transactions];
-    
-    // Aplicar filtros
-    const typeFilter = document.getElementById('filterType')?.value;
-    const personFilter = document.getElementById('filterPerson')?.value;
-    const paymentFilter = document.getElementById('filterPayment')?.value;
-    const dateFilter = document.getElementById('filterDate')?.value;
-    
-    if (typeFilter && typeFilter !== 'all') {
-        if (typeFilter === 'business') {
-            filtered = filtered.filter(t => 
-                t.transaction_type === 'business_expense' || 
-                t.transaction_type === 'business_income'
-            );
-        } else if (typeFilter === 'fund') {
-            filtered = filtered.filter(t => 
-                t.transaction_type === 'fund_deposit' || 
-                t.transaction_type === 'fund_withdrawal'
-            );
-        } else {
-            filtered = filtered.filter(t => t.transaction_type === typeFilter);
-        }
-    }
-    
-    if (personFilter && personFilter !== 'all') {
-        filtered = filtered.filter(t => t.person_id === personFilter);
-    }
-    
-    if (paymentFilter && paymentFilter !== 'all') {
-        filtered = filtered.filter(t => t.payment_method_id === paymentFilter);
-    }
-    
-    if (dateFilter) {
-        filtered = filtered.filter(t => t.date === dateFilter);
-    }
-    
-    // Renderizar historial
-    historyList.innerHTML = '';
-    
-    if (filtered.length === 0) {
-        historyList.innerHTML = '<div class="empty-state">No hay movimientos para mostrar con estos filtros</div>';
-        return;
-    }
-    
-    filtered.forEach(transaction => {
-        const item = document.createElement('div');
-        item.className = `history-item ${getTransactionTypeClass(transaction.transaction_type)}`;
-        
-        const person = AppState.familyData.persons.find(p => p.id === transaction.person_id);
-        const category = AppState.familyData.categories.find(c => c.id === transaction.category_id);
-        const payment = AppState.familyData.paymentMethods.find(p => p.id === transaction.payment_method_id);
-        const fund = AppState.familyData.funds.find(f => f.id === transaction.fund_id);
-        
-        let description = getTransactionDescription(transaction, category, fund);
-        let details = [];
-        
-        if (person) details.push(`<span class="person-${person.name.toLowerCase()}">${person.name}</span>`);
-        if (payment) details.push(payment.name);
-        
-        item.innerHTML = `
-            <div class="history-info">
-                <div class="history-date">${formatDate(transaction.date)}</div>
-                <div class="history-description">${description}</div>
-                <div class="history-details">${details.join(' • ')}</div>
-                ${transaction.description ? `<div class="history-note">"${transaction.description}"</div>` : ''}
-            </div>
-            <div class="history-amount ${transaction.transaction_type.includes('income') || transaction.transaction_type === 'fund_withdrawal' ? 'positive' : 'negative'}">
-                ${transaction.transaction_type.includes('income') || transaction.transaction_type === 'fund_withdrawal' ? '+' : '-'}${formatCurrency(transaction.amount)}
-            </div>
-        `;
-        
-        historyList.appendChild(item);
-    });
-    
-    // Poblar filtros
-    populateHistoryFilters();
-}
-
-function populateHistoryFilters() {
-    const personFilter = document.getElementById('filterPerson');
-    const paymentFilter = document.getElementById('filterPayment');
-    
-    if (personFilter && personFilter.children.length <= 1) {
-        personFilter.innerHTML = '<option value="all">Todas las personas</option>';
-        AppState.familyData.persons.forEach(person => {
-            const option = document.createElement('option');
-            option.value = person.id;
-            option.textContent = person.name;
-            personFilter.appendChild(option);
-        });
-    }
-    
-    if (paymentFilter && paymentFilter.children.length <= 1) {
-        paymentFilter.innerHTML = '<option value="all">Todos los medios</option>';
-        AppState.familyData.paymentMethods.forEach(method => {
-            const option = document.createElement('option');
-            option.value = method.id;
-            option.textContent = method.name;
-            paymentFilter.appendChild(option);
-        });
-    }
-}
-
-function getTransactionTypeClass(type) {
-    if (type.includes('income')) return 'income';
-    if (type.includes('expense')) return 'expense';
-    if (type.includes('fund')) return 'fund';
-    if (type.includes('business')) return 'business';
-    return '';
-}
-
-function getTransactionDescription(transaction, category, fund) {
-    switch(transaction.transaction_type) {
-        case 'household_expense':
-            return `🏠 ${category?.name || 'Gasto del hogar'}`;
-        case 'personal_income':
-            return `💼 ${category?.name || 'Ingreso diario'}`;
-        case 'business_expense':
-            return `🧁 ${category?.name || 'Insumos postres'}`;
-        case 'business_income':
-            return `💰 ${category?.name || 'Ventas postres'}`;
-        case 'fund_deposit':
-            return `🏦 Ingreso a ${fund?.name || 'fondo'}`;
-        case 'fund_withdrawal':
-            return `🏦 Uso de ${fund?.name || 'fondo'}`;
-        default:
-            return 'Movimiento';
-    }
-}
-
-// ============================================
-// CONFIGURACIÓN
-// ============================================
-function updateSettings() {
-    const familyMembers = document.getElementById('familyMembers');
-    const goalSettings = document.getElementById('goalSettings');
-    
-    // Configurar lista de personas
-    if (familyMembers) {
-        familyMembers.innerHTML = '';
-        
-        if (AppState.familyData.persons.length === 0) {
-            familyMembers.innerHTML = '<p class="empty-state">No hay miembros en la familia</p>';
-        } else {
-            AppState.familyData.persons.forEach(person => {
-                const memberEl = document.createElement('div');
-                memberEl.className = 'family-member';
-                memberEl.innerHTML = `
-                    <div class="member-info">
-                        <div class="member-avatar" style="background: ${person.avatar_color}">
-                            ${person.name.charAt(0)}
-                        </div>
-                        <div class="member-name ${person.name === 'Sebastián' ? 'person-sebastian' : 'person-ludmila'}">
-                            ${person.name}
-                        </div>
-                    </div>
-                    <div class="member-status">
-                        ${person.is_active ? '✅ Activo' : '⏸️ Inactivo'}
-                    </div>
-                `;
-                familyMembers.appendChild(memberEl);
-            });
-        }
-    }
-    
-    // Configurar objetivos de fondos
-    if (goalSettings) {
-        goalSettings.innerHTML = '';
-        
-        if (AppState.familyData.funds.length === 0) {
-            goalSettings.innerHTML = '<p class="empty-state">No hay fondos configurados</p>';
-        } else {
-            AppState.familyData.funds.forEach(fund => {
-                const settingEl = document.createElement('div');
-                settingEl.className = 'goal-setting';
-                settingEl.innerHTML = `
-                    <div class="goal-info">
-                        <div class="goal-name">${fund.icon} ${fund.name}</div>
-                        <div class="goal-current">Actual: ${formatCurrency(fund.current_amount)}</div>
-                    </div>
-                    <div class="goal-input">
-                        <input type="number" 
-                               min="0" 
-                               step="0.01" 
-                               value="${fund.monthly_goal || 0}" 
-                               data-fund-id="${fund.id}"
-                               class="goal-input-field"
-                               placeholder="Objetivo mensual">
-                    </div>
-                    <button class="save-goal" data-fund-id="${fund.id}">💾 Guardar</button>
-                `;
-                goalSettings.appendChild(settingEl);
-            });
-            
-            // Event listeners para guardar objetivos
-            document.querySelectorAll('.save-goal').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const fundId = e.target.dataset.fundId;
-                    const input = document.querySelector(`.goal-input-field[data-fund-id="${fundId}"]`);
-                    const goal = parseFloat(input.value);
-                    
-                    if (isNaN(goal) || goal < 0) {
-                        showNotification('Por favor ingresa un objetivo válido', 'warning');
-                        return;
-                    }
-                    
-                    try {
-                        const { error } = await supabaseClient
-                            .from('funds')
-                            .update({ monthly_goal: goal })
-                            .eq('id', fundId);
-                        
-                        if (error) throw error;
-                        
-                        showNotification('Objetivo actualizado correctamente', 'success');
-                        
-                        // Actualizar datos locales
-                        const fund = AppState.familyData.funds.find(f => f.id === fundId);
-                        if (fund) fund.monthly_goal = goal;
-                        
-                        updateFunds();
-                        updateFundsPreview();
-                        
-                    } catch (error) {
-                        console.error('Error actualizando objetivo:', error);
-                        showNotification('Error actualizando objetivo', 'error');
-                    }
-                });
-            });
-        }
-    }
-    
-    // Configurar botón de instalación PWA
-    const installButton = document.getElementById('installButton');
-    if (installButton && AppState.deferredInstallPrompt) {
-        installButton.style.display = 'flex';
-    } else if (installButton) {
-        // Verificar si ya está instalado
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            window.navigator.standalone === true) {
-            installButton.textContent = '📱 Ya instalada';
-            installButton.disabled = true;
-        } else {
-            installButton.style.display = 'none';
-        }
-    }
-}
-
-// ============================================
-// FUNCIONES DE ASIGNACIÓN DE PERSONA
-// ============================================
-async function linkUserToPerson() {
-    if (!AppState.currentFamily || !AppState.currentUser) return;
-    
-    const personas = AppState.familyData.persons;
-    if (personas.length === 0) {
-        showNotification('No hay personas configuradas en la familia', 'warning');
-        return;
-    }
-    
-    const options = personas.map(p => p.name).join(', ');
-    const personaElegida = prompt(`¿A qué persona te correspondes? Opciones: ${options}`, personas[0].name);
-    
-    if (!personaElegida) return;
-    
-    const persona = personas.find(p => p.name.toLowerCase() === personaElegida.toLowerCase());
-    if (!persona) {
-        showNotification('Persona no encontrada', 'error');
-        return;
-    }
-    
-    // Guardar preferencia en localStorage
-    localStorage.setItem(`user_person_${AppState.currentUser.id}`, persona.id);
-    showNotification(`Asociado a: ${persona.name}`, 'success');
-}
-
-function getAssignedPersonId() {
-    if (!AppState.currentUser) return null;
-    
-    // 1. Intentar obtener de localStorage
-    const storedPersonId = localStorage.getItem(`user_person_${AppState.currentUser.id}`);
-    if (storedPersonId) {
-        return storedPersonId;
-    }
-    
-    // 2. Si no hay en localStorage, buscar por nombre de usuario
-    const userName = AppState.currentUser.email?.split('@')[0] || '';
-    const userPerson = AppState.familyData.persons.find(person => 
-        person.name.toLowerCase().includes(userName.toLowerCase()) ||
-        userName.toLowerCase().includes(person.name.toLowerCase())
-    );
-    
-    if (userPerson) {
-        // Guardar para futuro uso
-        localStorage.setItem(`user_person_${AppState.currentUser.id}`, userPerson.id);
-        return userPerson.id;
-    }
-    
-    // 3. Si aún no hay, usar la primera persona
-    if (AppState.familyData.persons.length > 0) {
-        const firstPersonId = AppState.familyData.persons[0].id;
-        localStorage.setItem(`user_person_${AppState.currentUser.id}`, firstPersonId);
-        return firstPersonId;
-    }
-    
-    return null;
-}
-
-// ============================================
-// FORMULARIO DE TRANSACCIONES
-// ============================================
-function setupTransactionForm() {
-    // Ocultar selector de persona (no se usa más)
-    const personField = document.getElementById('personField');
-    if (personField) {
-        personField.style.display = 'none';
-    }
-    
-    const personSelect = document.getElementById('transactionPerson');
-    if (personSelect) {
-        personSelect.style.display = 'none';
-        personSelect.removeAttribute('required');
-    }
-    
-    // Medios de pago
-    const paymentSelect = document.getElementById('transactionPayment');
-    if (paymentSelect) {
-        console.log('Cargando métodos de pago:', AppState.familyData.paymentMethods);
-        paymentSelect.innerHTML = '<option value="">Seleccionar medio</option>';
-        
-        if (AppState.familyData.paymentMethods.length === 0) {
-            console.log('No hay métodos de pago cargados, intentando recargar...');
-            loadFamilyData().then(() => {
-                // Llenar después de cargar
-                AppState.familyData.paymentMethods.forEach(method => {
-                    const option = document.createElement('option');
-                    option.value = method.id;
-                    option.textContent = `${method.icon} ${method.name}`;
-                    paymentSelect.appendChild(option);
-                });
-                
-                // Si aún no hay, mostrar mensaje
-                if (AppState.familyData.paymentMethods.length === 0) {
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'No hay métodos de pago configurados';
-                    option.disabled = true;
-                    paymentSelect.appendChild(option);
-                }
-            });
-        } else {
-            AppState.familyData.paymentMethods.forEach(method => {
-                const option = document.createElement('option');
-                option.value = method.id;
-                option.textContent = `${method.icon} ${method.name}`;
-                paymentSelect.appendChild(option);
-            });
-        }
-    }
-    
-    // Fondos
-    const fundSelect = document.getElementById('transactionFund');
-    if (fundSelect) {
-        fundSelect.innerHTML = '<option value="">Seleccionar fondo</option>';
-        AppState.familyData.funds.forEach(fund => {
-            const option = document.createElement('option');
-            option.value = fund.id;
-            option.textContent = `${fund.icon} ${fund.name}`;
-            fundSelect.appendChild(option);
-        });
-    }
-    
-    // Fecha actual por defecto
-    const transactionDate = document.getElementById('transactionDate');
-    if (transactionDate) {
-        const today = new Date().toISOString().split('T')[0];
-        transactionDate.value = today;
-    }
-    
-    updateTransactionForm();
-}
-
-function updateTransactionForm() {
-    const type = document.getElementById('transactionType')?.value;
-    const categoryField = document.getElementById('categoryField');
-    const fundField = document.getElementById('fundField');
-    
-    if (!type) return;
-    
-    // Actualizar categorías según tipo
-    const categorySelect = document.getElementById('transactionCategory');
-    if (categorySelect) {
-        categorySelect.innerHTML = '<option value="">Seleccionar categoría</option>';
-        
-        let categoryType = '';
-        switch(type) {
-            case 'household_expense': categoryType = 'household_expense'; break;
-            case 'personal_income': categoryType = 'personal_income'; break;
-            case 'business_expense': categoryType = 'business_expense'; break;
-            case 'business_income': categoryType = 'business_income'; break;
-            case 'fund_deposit': 
-            case 'fund_withdrawal': 
-                // No mostrar categorías para transacciones de fondo
-                if (categoryField) categoryField.style.display = 'none';
-                if (fundField) fundField.style.display = 'block';
-                return;
-        }
-        
-        const categories = AppState.familyData.categories.filter(c => c.type === categoryType);
-        categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.id;
-            option.textContent = cat.name;
-            categorySelect.appendChild(option);
-        });
-        
-        if (categoryField) {
-            categoryField.style.display = categories.length > 0 ? 'block' : 'none';
-        }
-    }
-    
-    if (fundField) {
-        fundField.style.display = type.includes('fund') ? 'block' : 'none';
-    }
-}
-
-async function handleTransactionSubmit(e) {
-    e.preventDefault();
-    
-    if (!AppState.currentFamily) {
-        showNotification('No hay familia seleccionada', 'error');
-        return;
-    }
-    
-    const type = document.getElementById('transactionType').value;
-    const amount = parseFloat(document.getElementById('transactionAmount').value);
-    const date = document.getElementById('transactionDate').value;
-    const categoryId = document.getElementById('transactionCategory').value;
-    const paymentMethodId = document.getElementById('transactionPayment').value;
-    const fundId = document.getElementById('transactionFund').value;
-    const note = document.getElementById('transactionNote').value;
-    
-    // Validaciones
-    if (!type || !amount || !date || !paymentMethodId) {
-        showNotification('Por favor completa todos los campos requeridos', 'warning');
-        return;
-    }
-    
-    if (amount <= 0) {
-        showNotification('El monto debe ser mayor a 0', 'warning');
-        return;
-    }
-    
-    if (type.includes('fund') && !fundId) {
-        showNotification('Por favor selecciona un fondo', 'warning');
-        return;
-    }
-    
-    if ((type === 'household_expense' || type === 'business_expense' || type === 'business_income' || type === 'personal_income') && !categoryId) {
-        showNotification('Por favor selecciona una categoría', 'warning');
-        return;
-    }
-    
-    // ASIGNAR PERSONA AUTOMÁTICAMENTE
-    const personId = getAssignedPersonId();
-    if (!personId) {
-        showNotification('No se pudo determinar la persona asociada. Por favor selecciona tu persona en Configuración.', 'error');
-        return;
-    }
-    
-    const transactionData = {
-        family_id: AppState.currentFamily.id,
-        transaction_type: type,
-        amount: amount,
-        date: date,
-        person_id: personId, // Usamos el ID asignado automáticamente
-        payment_method_id: paymentMethodId,
-        description: note || null
+    const labels = [];
+    const data = [];
+    const backgroundColors = [];
+    
+    // Traducir categorías
+    const categoryNames = {
+        'alquiler': 'Alquiler',
+        'servicios': 'Servicios',
+        'comida_hogar': 'Comida Hogar',
+        'transporte': 'Transporte',
+        'bebe': 'Bebé',
+        'mascotas': 'Mascotas',
+        'salud': 'Salud',
+        'ropa': 'Ropa',
+        'imprevistos': 'Imprevistos'
     };
     
-    if (categoryId) transactionData.category_id = categoryId;
-    if (fundId) transactionData.fund_id = fundId;
+    // Colores para cada categoría
+    const categoryColors = {
+        'alquiler': '#FF6B6B',
+        'servicios': '#4ECDC4',
+        'comida_hogar': '#FFD166',
+        'transporte': '#06D6A0',
+        'bebe': '#118AB2',
+        'mascotas': '#073B4C',
+        'salud': '#EF476F',
+        'ropa': '#7209B7',
+        'imprevistos': '#8AC926'
+    };
     
-    setLoading(true);
-    
-    try {
-        const { data, error } = await supabaseClient
-            .from('transactions')
-            .insert(transactionData)
-            .select()
-            .single();
-        
-        if (error) throw error;
-        
-        showNotification('✅ Movimiento registrado correctamente', 'success');
-        
-        // Resetear formulario
-        e.target.reset();
-        const transactionDateEl = document.getElementById('transactionDate');
-        if (transactionDateEl) transactionDateEl.value = new Date().toISOString().split('T')[0];
-        
-        // Actualizar datos
-        await Promise.all([
-            loadTransactions(),
-            loadFamilyData()
-        ]);
-        
-        updateUI();
-        switchTab('dashboard');
-        
-    } catch (error) {
-        console.error('❌ Error guardando transacción:', error);
-        showNotification('Error al guardar el movimiento: ' + error.message, 'error');
-    } finally {
-        setLoading(false);
-    }
-}
-
-async function editFundGoal(fundId) {
-    const fund = AppState.familyData.funds.find(f => f.id === fundId);
-    if (!fund) return;
-    
-    const newGoal = prompt(`Nuevo objetivo mensual para ${fund.name}:`, fund.monthly_goal);
-    if (newGoal === null) return;
-    
-    const goalValue = parseFloat(newGoal);
-    if (isNaN(goalValue) || goalValue < 0) {
-        showNotification('Por favor ingresa un valor válido', 'warning');
-        return;
-    }
-    
-    try {
-        const { error } = await supabaseClient
-            .from('funds')
-            .update({ monthly_goal: goalValue })
-            .eq('id', fundId);
-        
-        if (error) throw error;
-        
-        fund.monthly_goal = goalValue;
-        updateFunds();
-        updateFundsPreview();
-        showNotification('✅ Objetivo actualizado correctamente', 'success');
-        
-    } catch (error) {
-        console.error('❌ Error actualizando objetivo:', error);
-        showNotification('Error actualizando objetivo', 'error');
-    }
-}
-
-// ============================================
-// PWA Y SERVICE WORKER
-// ============================================
-function setupPWAInstall() {
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('📱 Evento de instalación PWA capturado');
-        e.preventDefault();
-        AppState.deferredInstallPrompt = e;
-        
-        // Mostrar botón de instalación después de un tiempo
-        setTimeout(() => {
-            const installButton = document.getElementById('installButton');
-            if (installButton) {
-                installButton.style.display = 'flex';
-                installButton.addEventListener('click', installPWA);
-            }
-        }, 5000);
+    // Preparar datos para el gráfico
+    Object.entries(categoryData).forEach(([category, amount]) => {
+        if (categoryNames[category]) {
+            labels.push(categoryNames[category]);
+            data.push(amount);
+            backgroundColors.push(categoryColors[category] || '#999999');
+        }
     });
     
-    // Verificar si ya está instalado
-    window.addEventListener('appinstalled', () => {
-        console.log('📱 PWA instalada');
-        AppState.deferredInstallPrompt = null;
-        const installButton = document.getElementById('installButton');
-        if (installButton) {
-            installButton.textContent = '📱 Ya instalada';
-            installButton.disabled = true;
+    categoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += formatCurrency(context.raw);
+                            return label;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
         }
     });
 }
 
-function installPWA() {
-    if (!AppState.deferredInstallPrompt) {
-        showNotification('La aplicación ya está instalada o no está disponible para instalación', 'info');
-        return;
-    }
+// Actualizar balance en UI
+function updateBalanceUI(balance) {
+    const balanceElement = document.getElementById('balanceAmount');
+    const monthBalanceElement = document.getElementById('monthBalance');
     
-    AppState.deferredInstallPrompt.prompt();
+    balanceElement.textContent = formatCurrency(balance);
+    monthBalanceElement.textContent = formatCurrency(balance);
     
-    AppState.deferredInstallPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-            showNotification('¡App instalada! Ahora está disponible en tu pantalla principal.', 'success');
-            console.log('📱 Usuario aceptó la instalación');
-        } else {
-            console.log('📱 Usuario rechazó la instalación');
-        }
-        AppState.deferredInstallPrompt = null;
-    });
-}
-
-async function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        try {
-            const registration = await navigator.serviceWorker.register('/service-worker.js');
-            console.log('✅ Service Worker registrado correctamente:', registration.scope);
-            
-            // Verificar actualizaciones
-            registration.addEventListener('updatefound', () => {
-                console.log('🔄 Nueva versión del Service Worker encontrada');
-            });
-            
-        } catch (error) {
-            console.warn('⚠️ Service Worker no registrado:', error);
-        }
+    // Actualizar mensaje emocional basado en balance
+    updateEmotionalMessage(balance);
+    
+    // Cambiar color según balance
+    if (balance >= 0) {
+        balanceElement.className = 'balance-amount positive';
+        monthBalanceElement.className = 'amount positive';
     } else {
-        console.warn('⚠️ Service Worker no soportado en este navegador');
+        balanceElement.className = 'balance-amount negative';
+        monthBalanceElement.className = 'amount negative';
     }
 }
 
-// ============================================
-// FUNCIONES ADICIONALES
-// ============================================
-function startEmotionalMessagesRotation() {
-    const messageEl = document.getElementById('emotionalMessage');
-    if (!messageEl || AppState.emotionalMessages.length === 0) return;
+// Actualizar mensaje emocional
+function updateEmotionalMessage(balance = 0) {
+    const banner = document.getElementById('emotionalBanner');
+    const balanceMessage = document.getElementById('balanceMessage');
     
-    let index = Math.floor(Math.random() * AppState.emotionalMessages.length);
-    messageEl.textContent = AppState.emotionalMessages[index].message;
+    let messageType = 'neutral';
+    let message = '';
     
-    // Rotar cada 15 segundos
-    setInterval(() => {
-        index = (index + 1) % AppState.emotionalMessages.length;
-        messageEl.style.opacity = '0';
-        
-        setTimeout(() => {
-            messageEl.textContent = AppState.emotionalMessages[index].message;
-            messageEl.style.opacity = '1';
-        }, 300);
-    }, 15000);
+    if (balance > 10000) {
+        messageType = 'positive';
+        message = emotionalMessages.positive[
+            Math.floor(Math.random() * emotionalMessages.positive.length)
+        ];
+    } else if (balance < 0) {
+        messageType = 'warning';
+        message = emotionalMessages.warning[
+            Math.floor(Math.random() * emotionalMessages.warning.length)
+        ];
+    } else {
+        messageType = 'neutral';
+        message = emotionalMessages.neutral[
+            Math.floor(Math.random() * emotionalMessages.neutral.length)
+        ];
+    }
+    
+    // Actualizar banner principal
+    banner.innerHTML = `<p>"${message}"</p>`;
+    
+    // Actualizar color del banner
+    banner.style.background = messageType === 'positive' ? 
+        'linear-gradient(135deg, var(--emotional-positive), #22c55e)' :
+        messageType === 'warning' ?
+        'linear-gradient(135deg, var(--emotional-warning), #f59e0b)' :
+        'linear-gradient(135deg, var(--emotional-calm), var(--primary-light))';
+    
+    // Actualizar mensaje en balance
+    if (balanceMessage) {
+        balanceMessage.textContent = message;
+    }
 }
 
-// ============================================
-// MANEJO DE CONEXIÓN
-// ============================================
-window.addEventListener('online', () => {
-    AppState.isOffline = false;
-    console.log('🌐 Conexión restablecida');
-    showNotification('Conexión restablecida. Sincronizando datos...', 'success');
+// Formatear moneda
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// Cambiar mes
+function changeMonth(delta) {
+    currentMonth.setMonth(currentMonth.getMonth() + delta);
+    loadCurrentMonthData();
+}
+
+// Navegación entre pantallas
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+        // Remover activo de todos
+        document.querySelectorAll('.nav-item').forEach(i => {
+            i.classList.remove('active');
+        });
+        
+        // Agregar activo al clickeado
+        this.classList.add('active');
+        
+        // Ocultar todas las pantallas
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        
+        // Mostrar pantalla seleccionada
+        const screenId = this.getAttribute('data-screen');
+        document.getElementById(screenId).classList.add('active');
+        
+        // Cargar datos específicos si es necesario
+        if (screenId === 'historial') {
+            loadHistory();
+        } else if (screenId === 'postres') {
+            loadPostresHistory();
+        } else if (screenId === 'fondos') {
+            loadFundHistory();
+        }
+    });
+});
+
+// Selector de tipo de movimiento
+document.querySelectorAll('.movement-type-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remover activo de todos
+        document.querySelectorAll('.movement-type-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+        
+        // Agregar activo al clickeado
+        this.classList.add('active');
+        
+        // Ocultar todos los formularios
+        document.querySelectorAll('.movement-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        
+        // Mostrar formulario correspondiente
+        const type = this.getAttribute('data-type');
+        document.getElementById(`${type}Form`).classList.add('active');
+    });
+});
+
+// Guardar gasto
+async function saveExpense() {
+    try {
+        const amount = parseFloat(document.getElementById('expenseAmount').value);
+        const category = document.getElementById('expenseCategory').value;
+        const person = document.getElementById('expensePerson').value;
+        const medium = document.getElementById('expenseMedium').value;
+        const note = document.getElementById('expenseNote').value;
+        
+        let date = document.getElementById('expenseDate').value;
+        if (!date) {
+            date = new Date().toISOString().split('T')[0];
+        }
+        
+        // Validaciones
+        if (!amount || amount <= 0) {
+            throw new Error('El monto debe ser mayor a 0');
+        }
+        
+        if (!category) {
+            throw new Error('Selecciona una categoría');
+        }
+        
+        const movement = {
+            family_id: currentFamily.id,
+            type: 'expense',
+            amount: amount,
+            category: category,
+            person: person,
+            medium: medium,
+            date: new Date(date),
+            description: note || '',
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        await db.collection('movements').add(movement);
+        
+        // Actualizar balance de medio si es efectivo o MP
+        updateMediumBalanceAfterMovement(movement);
+        
+        // Mostrar confirmación
+        showSuccess('Gasto registrado correctamente');
+        
+        // Limpiar formulario
+        document.getElementById('expenseForm').reset();
+        
+        // Recargar datos
+        await loadCurrentMonthData();
+        
+    } catch (error) {
+        console.error('Error guardando gasto:', error);
+        showError(error.message);
+    }
+}
+
+// Guardar ingreso
+async function saveIncome() {
+    try {
+        const amount = parseFloat(document.getElementById('incomeAmount').value);
+        const category = document.getElementById('incomeCategory').value;
+        const medium = document.getElementById('incomeMedium').value;
+        const note = document.getElementById('incomeNote').value;
+        
+        let date = document.getElementById('incomeDate').value;
+        if (!date) {
+            date = new Date().toISOString().split('T')[0];
+        }
+        
+        // Determinar persona basado en categoría
+        let person = 'joint';
+        if (category === 'ingreso_diario_sebastian') {
+            person = 'sebastian';
+        } else if (category === 'ingreso_diario_ludmila') {
+            person = 'ludmila';
+        }
+        
+        if (!amount || amount <= 0) {
+            throw new Error('El monto debe ser mayor a 0');
+        }
+        
+        const movement = {
+            family_id: currentFamily.id,
+            type: 'income',
+            amount: amount,
+            category: category,
+            person: person,
+            medium: medium,
+            date: new Date(date),
+            description: note || '',
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        await db.collection('movements').add(movement);
+        
+        // Actualizar balance de medio
+        updateMediumBalanceAfterMovement(movement);
+        
+        showSuccess('Ingreso registrado correctamente');
+        document.getElementById('incomeForm').reset();
+        await loadCurrentMonthData();
+        
+    } catch (error) {
+        console.error('Error guardando ingreso:', error);
+        showError(error.message);
+    }
+}
+
+// Guardar movimiento de fondo
+async function saveFundMovement() {
+    try {
+        const fundId = document.getElementById('fundSelect').value;
+        const operation = document.getElementById('fundOperation').value;
+        const amount = parseFloat(document.getElementById('fundAmount').value);
+        const person = document.getElementById('fundPerson').value;
+        const medium = document.getElementById('fundMedium').value;
+        
+        if (!amount || amount <= 0) {
+            throw new Error('El monto debe ser mayor a 0');
+        }
+        
+        if (!fundId) {
+            throw new Error('Selecciona un fondo');
+        }
+        
+        // Obtener datos del fondo
+        const fundDoc = await db.collection('funds').doc(fundId).get();
+        const fund = fundDoc.data();
+        
+        let newBalance = fund.current_balance;
+        
+        if (operation === 'ingreso') {
+            newBalance += amount;
+        } else {
+            newBalance -= amount;
+            
+            if (newBalance < 0) {
+                throw new Error('Saldo insuficiente en el fondo');
+            }
+        }
+        
+        // Actualizar fondo
+        await db.collection('funds').doc(fundId).update({
+            current_balance: newBalance,
+            last_updated: firebase.firestore.FieldValue.serverTimestamp(),
+            status: calculateFundStatus(newBalance, fund.monthly_target)
+        });
+        
+        // Registrar movimiento
+        const movement = {
+            family_id: currentFamily.id,
+            type: 'fund_transfer',
+            amount: amount,
+            fund_id: fundId,
+            fund_operation: operation,
+            person: person,
+            medium: medium,
+            date: new Date(),
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        await db.collection('movements').add(movement);
+        
+        // Agregar al historial del fondo
+        await addToFundHistory(fundId, {
+            type: operation,
+            amount: amount,
+            date: new Date(),
+            person: person
+        });
+        
+        showSuccess(`Fondo actualizado: $${formatCurrency(newBalance)}`);
+        document.getElementById('fundForm').reset();
+        
+        // Recargar fondos
+        await loadFunds();
+        await loadFundHistory();
+        
+    } catch (error) {
+        console.error('Error en movimiento de fondo:', error);
+        showError(error.message);
+    }
+}
+
+// Guardar movimiento de postres
+async function savePostreMovement() {
+    try {
+        const type = document.getElementById('postreType').value;
+        const amount = parseFloat(document.getElementById('postreAmount').value);
+        const medium = document.getElementById('postreMedium').value;
+        const description = document.getElementById('postreDescription').value;
+        
+        let date = document.getElementById('postreDate').value;
+        if (!date) {
+            date = new Date().toISOString().split('T')[0];
+        }
+        
+        if (!amount || amount <= 0) {
+            throw new Error('El monto debe ser mayor a 0');
+        }
+        
+        const movement = {
+            family_id: currentFamily.id,
+            type: type === 'insumo' ? 'postre_insumo' : 'postre_venta',
+            amount: amount,
+            category: type === 'insumo' ? 'insumos_postres' : 'ventas_postres',
+            medium: medium,
+            date: new Date(date),
+            description: description || '',
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        await db.collection('movements').add(movement);
+        
+        // Actualizar balance de medio
+        updateMediumBalanceAfterMovement(movement);
+        
+        showSuccess(`Movimiento de postres registrado: $${formatCurrency(amount)}`);
+        document.getElementById('postreForm').reset();
+        
+        // Recargar datos
+        await loadCurrentMonthData();
+        await loadPostresHistory();
+        
+    } catch (error) {
+        console.error('Error guardando movimiento de postres:', error);
+        showError(error.message);
+    }
+}
+
+// Transferir entre medios
+async function makeTransfer() {
+    try {
+        const from = document.getElementById('transferFrom').value;
+        const to = document.getElementById('transferTo').value;
+        const amount = parseFloat(document.getElementById('transferAmount').value);
+        
+        if (from === to) {
+            throw new Error('No puedes transferir al mismo medio');
+        }
+        
+        if (!amount || amount <= 0) {
+            throw new Error('El monto debe ser mayor a 0');
+        }
+        
+        // Registrar como gasto en origen e ingreso en destino
+        const date = new Date();
+        
+        const expenseMovement = {
+            family_id: currentFamily.id,
+            type: 'expense',
+            amount: amount,
+            category: 'transferencia',
+            person: 'joint',
+            medium: from,
+            date: date,
+            description: `Transferencia a ${to}`,
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        const incomeMovement = {
+            family_id: currentFamily.id,
+            type: 'income',
+            amount: amount,
+            category: 'transferencia',
+            person: 'joint',
+            medium: to,
+            date: date,
+            description: `Transferencia de ${from}`,
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        await db.collection('movements').add(expenseMovement);
+        await db.collection('movements').add(incomeMovement);
+        
+        showSuccess(`Transferencia realizada: $${formatCurrency(amount)}`);
+        document.getElementById('transferAmount').value = '';
+        
+        await loadCurrentMonthData();
+        
+    } catch (error) {
+        console.error('Error en transferencia:', error);
+        showError(error.message);
+    }
+}
+
+// Agregar a fondo
+async function addToFund(fundId) {
+    showModal('fondo');
+    document.getElementById('fundSelect').value = fundId;
+    document.getElementById('fundOperation').value = 'ingreso';
+}
+
+// Usar de fondo
+async function useFromFund(fundId) {
+    showModal('fondo');
+    document.getElementById('fundSelect').value = fundId;
+    document.getElementById('fundOperation').value = 'uso';
+}
+
+// Cargar historial
+async function loadHistory() {
+    try {
+        const typeFilter = document.getElementById('filterType').value;
+        const personFilter = document.getElementById('filterPerson').value;
+        const dateFrom = document.getElementById('filterDateFrom').value;
+        const dateTo = document.getElementById('filterDateTo').value;
+        
+        let query = db.collection('movements')
+            .where('family_id', '==', currentFamily.id)
+            .orderBy('date', 'desc')
+            .limit(50);
+        
+        // Aplicar filtros
+        if (typeFilter) {
+            if (typeFilter === 'postre') {
+                query = query.where('type', 'in', ['postre_insumo', 'postre_venta']);
+            } else {
+                query = query.where('type', '==', typeFilter);
+            }
+        }
+        
+        if (personFilter) {
+            query = query.where('person', '==', personFilter);
+        }
+        
+        if (dateFrom) {
+            query = query.where('date', '>=', new Date(dateFrom));
+        }
+        
+        if (dateTo) {
+            const toDate = new Date(dateTo);
+            toDate.setHours(23, 59, 59, 999);
+            query = query.where('date', '<=', toDate);
+        }
+        
+        const snapshot = await query.get();
+        const tbody = document.getElementById('historyBody');
+        tbody.innerHTML = '';
+        
+        if (snapshot.empty) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        No hay movimientos con los filtros seleccionados
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        snapshot.forEach(doc => {
+            const movement = doc.data();
+            const row = createHistoryRow(movement, doc.id);
+            tbody.appendChild(row);
+        });
+        
+    } catch (error) {
+        console.error('Error cargando historial:', error);
+        showError('Error cargando historial');
+    }
+}
+
+// Crear fila de historial
+function createHistoryRow(movement, id) {
+    const row = document.createElement('tr');
     
-    // Intentar sincronizar datos pendientes
-    setTimeout(() => {
-        loadInitialData().then(updateUI);
-    }, 1000);
+    // Formatear fecha
+    const date = movement.date.toDate();
+    const dateStr = date.toLocaleDateString('es-AR');
+    
+    // Determinar icono y clase según tipo
+    let icon = '';
+    let typeClass = '';
+    let description = movement.description || '';
+    
+    switch (movement.type) {
+        case 'income':
+            icon = '💰';
+            typeClass = 'income';
+            description = description || 'Ingreso';
+            break;
+        case 'expense':
+            icon = '💸';
+            typeClass = 'expense';
+            description = description || 'Gasto';
+            break;
+        case 'postre_insumo':
+            icon = '🍰';
+            typeClass = 'postre-insumo';
+            description = description || 'Insumo postres';
+            break;
+        case 'postre_venta':
+            icon = '💰';
+            typeClass = 'postre-venta';
+            description = description || 'Venta postres';
+            break;
+        case 'fund_transfer':
+            icon = '🏦';
+            typeClass = 'fund';
+            description = description || (movement.fund_operation === 'ingreso' ? 
+                'Ahorro en fondo' : 'Uso de fondo');
+            break;
+    }
+    
+    // Traducir persona
+    const personNames = {
+        'sebastian': 'Sebastián',
+        'ludmila': 'Ludmila',
+        'joint': 'Ambos'
+    };
+    
+    // Traducir medio
+    const mediumNames = {
+        'efectivo': 'Efectivo',
+        'mercadopago': 'Mercado Pago'
+    };
+    
+    row.innerHTML = `
+        <td>${dateStr}</td>
+        <td><span class="movement-type ${typeClass}">${icon} ${movement.type}</span></td>
+        <td>${description}</td>
+        <td>${personNames[movement.person] || movement.person}</td>
+        <td>${mediumNames[movement.medium] || movement.medium}</td>
+        <td class="${movement.type === 'expense' || movement.type === 'postre_insumo' ? 'negative' : 'positive'}">
+            ${movement.type === 'expense' || movement.type === 'postre_insumo' ? '-' : '+'}${formatCurrency(movement.amount)}
+        </td>
+        <td>
+            <button class="btn-icon small" onclick="deleteMovement('${id}')" title="Eliminar">
+                🗑️
+            </button>
+        </td>
+    `;
+    
+    return row;
+}
+
+// Aplicar filtros
+async function applyFilters() {
+    await loadHistory();
+}
+
+// Cargar historial de postres
+async function loadPostresHistory() {
+    try {
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 3); // Últimos 3 meses
+        
+        const snapshot = await db.collection('movements')
+            .where('family_id', '==', currentFamily.id)
+            .where('type', 'in', ['postre_insumo', 'postre_venta'])
+            .where('date', '>=', startDate)
+            .orderBy('date', 'desc')
+            .limit(20)
+            .get();
+        
+        const container = document.getElementById('postresHistory');
+        container.innerHTML = '';
+        
+        if (snapshot.empty) {
+            container.innerHTML = '<p class="empty-state">No hay movimientos de postres</p>';
+            return;
+        }
+        
+        snapshot.forEach(doc => {
+            const movement = doc.data();
+            const element = createPostreHistoryElement(movement);
+            container.appendChild(element);
+        });
+        
+    } catch (error) {
+        console.error('Error cargando historial de postres:', error);
+    }
+}
+
+// Cargar historial de fondos
+async function loadFundHistory() {
+    try {
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 6); // Últimos 6 meses
+        
+        const snapshot = await db.collection('movements')
+            .where('family_id', '==', currentFamily.id)
+            .where('type', '==', 'fund_transfer')
+            .where('date', '>=', startDate)
+            .orderBy('date', 'desc')
+            .limit(20)
+            .get();
+        
+        const container = document.getElementById('fundHistory');
+        container.innerHTML = '';
+        
+        if (snapshot.empty) {
+            container.innerHTML = '<p class="empty-state">No hay movimientos en fondos</p>';
+            return;
+        }
+        
+        snapshot.forEach(doc => {
+            const movement = doc.data();
+            const element = createFundHistoryElement(movement);
+            container.appendChild(element);
+        });
+        
+    } catch (error) {
+        console.error('Error cargando historial de fondos:', error);
+    }
+}
+
+// Mostrar modal
+function showModal(type) {
+    const overlay = document.getElementById('modalOverlay');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    
+    overlay.classList.add('active');
+    
+    switch (type) {
+        case 'insumo':
+            title.textContent = 'Agregar Insumo de Postres';
+            body.innerHTML = `
+                <form onsubmit="event.preventDefault(); saveQuickPostre('insumo')">
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="quickInsumoAmount" required min="0" step="0.01" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="quickInsumoMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción (opcional)</label>
+                        <input type="text" id="quickInsumoDesc" placeholder="Ej: Harina, huevos...">
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar Insumo</button>
+                </form>
+            `;
+            break;
+            
+        case 'venta':
+            title.textContent = 'Registrar Venta de Postres';
+            body.innerHTML = `
+                <form onsubmit="event.preventDefault(); saveQuickPostre('venta')">
+                    <div class="form-group">
+                        <label>Monto *</label>
+                        <input type="number" id="quickVentaAmount" required min="0" step="0.01" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label>Medio *</label>
+                        <select id="quickVentaMedium" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="mercadopago">Mercado Pago</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción (opcional)</label>
+                        <input type="text" id="quickVentaDesc" placeholder="Ej: Torta chocolate, 6 cupcakes...">
+                    </div>
+                    <button type="submit" class="btn-success">Registrar Venta</button>
+                </form>
+            `;
+            break;
+    }
+}
+
+// Cerrar modal
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+// Guardar movimiento rápido de postres
+async function saveQuickPostre(type) {
+    try {
+        const amount = type === 'insumo' ? 
+            parseFloat(document.getElementById('quickInsumoAmount').value) :
+            parseFloat(document.getElementById('quickVentaAmount').value);
+            
+        const medium = type === 'insumo' ?
+            document.getElementById('quickInsumoMedium').value :
+            document.getElementById('quickVentaMedium').value;
+            
+        const description = type === 'insumo' ?
+            document.getElementById('quickInsumoDesc').value :
+            document.getElementById('quickVentaDesc').value;
+        
+        if (!amount || amount <= 0) {
+            throw new Error('El monto debe ser mayor a 0');
+        }
+        
+        const movement = {
+            family_id: currentFamily.id,
+            type: type === 'insumo' ? 'postre_insumo' : 'postre_venta',
+            amount: amount,
+            category: type === 'insumo' ? 'insumos_postres' : 'ventas_postres',
+            medium: medium,
+            date: new Date(),
+            description: description || '',
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            created_by: currentUser.uid
+        };
+        
+        await db.collection('movements').add(movement);
+        
+        showSuccess(type === 'insumo' ? 
+            'Insumo registrado' : 
+            'Venta registrada');
+        
+        closeModal();
+        await loadCurrentMonthData();
+        await loadPostresHistory();
+        
+    } catch (error) {
+        console.error('Error guardando movimiento rápido:', error);
+        showError(error.message);
+    }
+}
+
+// Eliminar movimiento
+async function deleteMovement(movementId) {
+    if (!confirm('¿Estás seguro de eliminar este movimiento? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    try {
+        await db.collection('movements').doc(movementId).delete();
+        showSuccess('Movimiento eliminado');
+        await loadCurrentMonthData();
+        await loadHistory();
+    } catch (error) {
+        console.error('Error eliminando movimiento:', error);
+        showError('Error eliminando movimiento');
+    }
+}
+
+// Logout
+function logout() {
+    firebase.auth().signOut()
+        .then(() => {
+            localStorage.removeItem('lastEmail');
+            localStorage.removeItem('lastPassword');
+            window.location.href = 'setup.html';
+        })
+        .catch(error => {
+            console.error('Error en logout:', error);
+        });
+}
+
+// Mostrar notificaciones
+function checkForNotifications() {
+    // Verificar si hay fondos en estado crítico
+    // (Implementar lógica de notificaciones)
+}
+
+// Helper: Calcular estado de fondo
+function calculateFundStatus(balance, target) {
+    const percentage = target > 0 ? (balance / target) * 100 : 0;
+    
+    if (percentage >= 75) return 'ok';
+    if (percentage >= 25) return 'bajo';
+    return 'critico';
+}
+
+// Helper: Actualizar balance de medio
+function updateMediumBalanceAfterMovement(movement) {
+    // Esta función podría actualizar un documento separado
+    // que lleve el balance actual de cada medio
+    // Por ahora se calcula en tiempo real
+}
+
+// Helper: Mostrar error
+function showError(message) {
+    // Implementar toast o alert estilizado
+    alert(`❌ ${message}`);
+}
+
+// Helper: Mostrar éxito
+function showSuccess(message) {
+    // Implementar toast o alert estilizado
+    alert(`✅ ${message}`);
+}
+
+// Helper: Cargar resumen mensual
+async function loadMonthlySummary() {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth() + 1;
+    const summaryId = `${year}_${month}`;
+    
+    try {
+        const summaryDoc = await db.collection('monthly_summaries')
+            .doc(summaryId)
+            .get();
+        
+        if (summaryDoc.exists) {
+            // Usar datos precalculados
+            const summary = summaryDoc.data();
+            // Actualizar UI con datos del resumen
+        } else {
+            // Calcular en tiempo real (ya lo hace loadCurrentMonthData)
+        }
+    } catch (error) {
+        console.error('Error cargando resumen mensual:', error);
+    }
+}
+
+// Inicializar aplicación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFirebase();
+    
+    // Configurar fecha actual en formularios
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+        if (!input.value) {
+            input.value = today;
+        }
+    });
+    
+    // Configurar filtros de fecha
+    const firstDay = new Date();
+    firstDay.setDate(1);
+    const lastDay = new Date();
+    lastDay.setMonth(lastDay.getMonth() + 1);
+    lastDay.setDate(0);
+    
+    document.getElementById('filterDateFrom').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('filterDateTo').value = lastDay.toISOString().split('T')[0];
 });
-
-window.addEventListener('offline', () => {
-    AppState.isOffline = true;
-    console.log('⚠️ Sin conexión a internet');
-    showNotification('Modo offline. Los cambios se guardarán localmente.', 'warning');
-});
-
-// ============================================
-// EXPORTAR PARA DEBUGGING
-// ============================================
-window.AppState = AppState;
-window.supabaseClient = supabaseClient;
-
-console.log('🎉 app.js cargado completamente');
